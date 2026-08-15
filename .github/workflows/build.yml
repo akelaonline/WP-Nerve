@@ -1,0 +1,29 @@
+name: Build plugin archive
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Build deterministic WordPress archive
+        run: git archive --format=zip --prefix=wp-nerve/ --output="wp-nerve-${GITHUB_REF_NAME}.zip" HEAD
+
+      - name: Upload plugin archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: wp-nerve-${{ github.ref_name }}
+          path: wp-nerve-${{ github.ref_name }}.zip
+          if-no-files-found: error
+
