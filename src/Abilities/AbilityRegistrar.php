@@ -80,7 +80,7 @@ final class AbilityRegistrar
                 'rest_base'    => is_string($type->rest_base) && '' !== $type->rest_base ? $type->rest_base : $type->name,
                 'hierarchical' => $type->hierarchical,
                 'show_in_rest' => $type->show_in_rest,
-                'supports'     => is_array($type->supports) ? array_values($type->supports) : array(),
+                'supports'     => array_keys(get_all_post_type_supports($type->name)),
             );
         }
 
@@ -331,12 +331,9 @@ final class AbilityRegistrar
                     'id' => array('type' => 'integer', 'minimum' => 1),
                 ),
             ),
-            array(
-                '$schema'              => 'https://json-schema.org/draft/2020-12/schema',
-                'type'                 => 'object',
-                'additionalProperties' => false,
-                'required'             => array('id', 'title', 'type', 'status', 'date', 'modified', 'author', 'link', 'excerpt', 'content'),
-                'properties'           => $this->contentItemSchema(true),
+            array_merge(
+                array('$schema' => 'https://json-schema.org/draft/2020-12/schema'),
+                $this->contentItemSchema(true)
             ),
             array($this, 'getContent')
         );

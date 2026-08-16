@@ -97,6 +97,24 @@ final class AbilityRegistrarTest extends TestCase
         self::assertSame(1, $get->get_input_schema()['properties']['id']['minimum']);
     }
 
+    public function testGetContentOutputSchemaDescribesDataFields(): void
+    {
+        // Regression: real WordPress validates ability output against the
+        // output schema. A schema nested inside itself (instead of describing
+        // the result fields) makes every execution fail validation.
+        $this->registrar->registerAbilities();
+
+        $get        = $this->ability('wp-nerve/get-content');
+        $properties = $get->get_output_schema()['properties'];
+
+        foreach (array('id', 'title', 'type', 'status', 'date', 'modified', 'author', 'link', 'excerpt', 'content') as $field) {
+            self::assertArrayHasKey($field, $properties);
+        }
+
+        self::assertArrayNotHasKey('required', $properties);
+        self::assertArrayNotHasKey('properties', $properties);
+    }
+
     public function testCanReadSiteStatusRequiresTransportCapability(): void
     {
         WPState::$userCan = false;
