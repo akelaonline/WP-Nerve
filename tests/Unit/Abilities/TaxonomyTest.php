@@ -39,7 +39,8 @@ final class TaxonomyTest extends TestCase
         $names = array();
 
         foreach (WPState::$registeredAbilities as $ability) {
-            if (str_starts_with($ability->get_name(), 'wp-nerve/list-taxonomies')
+            if (
+                str_starts_with($ability->get_name(), 'wp-nerve/list-taxonomies')
                 || str_starts_with($ability->get_name(), 'wp-nerve/list-terms')
                 || str_starts_with($ability->get_name(), 'wp-nerve/create-term')
                 || str_starts_with($ability->get_name(), 'wp-nerve/assign-terms')
