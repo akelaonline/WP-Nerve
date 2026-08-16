@@ -34,6 +34,10 @@ msgstr ""
 msgid "Authentication is required to access WPNerve."
 msgstr ""
 
+#: src/Abilities/CommentAbilities.php:350
+msgid "Changes a comment status to approve, hold, spam, or trash. The previous status is returned for recovery."
+msgstr ""
+
 #: src/Admin/AdminPage.php:70
 msgid "Configure the MCP client with the endpoint, username, and generated Application Password."
 msgstr ""
@@ -44,6 +48,10 @@ msgstr ""
 
 #: src/Admin/AdminPage.php:66
 msgid "Create a dedicated Application Password named WPNerve."
+msgstr ""
+
+#: src/Abilities/CommentAbilities.php:291
+msgid "Create comment"
 msgstr ""
 
 #: src/Abilities/ContentLifecycleAbilities.php:293
@@ -62,28 +70,80 @@ msgstr ""
 msgid "Creates a term in a taxonomy. Requires manage_categories. Undo by deleting the created term."
 msgstr ""
 
+#: src/Abilities/CommentAbilities.php:292
+msgid "Creates an approved comment on a post. Requires moderate_comments."
+msgstr ""
+
+#: src/Abilities/CommentAbilities.php:321
+msgid "Creates an approved reply to an existing comment. Requires moderate_comments."
+msgstr ""
+
+#: src/Abilities/CommentAbilities.php:107
+msgid "Creating comments requires the moderate_comments capability."
+msgstr ""
+
 #: src/Admin/AdminPage.php:54
 msgid "Default access"
+msgstr ""
+
+#: src/Abilities/CommentAbilities.php:384
+msgid "Delete comment"
+msgstr ""
+
+#: src/Abilities/MediaAbilities.php:362
+msgid "Delete media item"
+msgstr ""
+
+#: src/Abilities/MediaAbilities.php:149
+msgid "Delete the created attachment to undo this upload."
+msgstr ""
+
+#: src/Abilities/CommentAbilities.php:385
+msgid "Deletes a comment. Trash by default; permanent deletion with force=true."
+msgstr ""
+
+#: src/Abilities/MediaAbilities.php:363
+msgid "Deletes a media item. Trash by default; permanent deletion requires delete_others_posts."
+msgstr ""
+
+#: src/Abilities/CommentAbilities.php:221
+msgid "Deleting comments requires the moderate_comments capability."
 msgstr ""
 
 #: src/Abilities/ContentLifecycleAbilities.php:49
 msgid "Draft status must be draft or pending."
 msgstr ""
 
-#: src/Abilities/AbilityRegistrar.php:324
+#: src/Abilities/CommentAbilities.php:276
+msgid "Get comment"
+msgstr ""
+
+#: src/Abilities/AbilityRegistrar.php:326
 msgid "Get content"
+msgstr ""
+
+#: src/Abilities/MediaAbilities.php:281
+msgid "Get media item"
 msgstr ""
 
 #: src/Abilities/ContentLifecycleAbilities.php:393
 msgid "Get revision"
 msgstr ""
 
-#: src/Abilities/AbilityRegistrar.php:173
+#: src/Abilities/AbilityRegistrar.php:175
 msgid "Get site status"
 msgstr ""
 
-#: src/Abilities/AbilityRegistrar.php:215
+#: src/Abilities/CommentAbilities.php:246
+msgid "List comments"
+msgstr ""
+
+#: src/Abilities/AbilityRegistrar.php:217
 msgid "List content types"
+msgstr ""
+
+#: src/Abilities/MediaAbilities.php:250
+msgid "List media"
 msgstr ""
 
 #: src/Abilities/ContentLifecycleAbilities.php:348
@@ -98,6 +158,18 @@ msgstr ""
 msgid "List terms"
 msgstr ""
 
+#: src/Abilities/CommentAbilities.php:39
+msgid "Listing non-approved comments requires the moderate_comments capability."
+msgstr ""
+
+#: src/Abilities/CommentAbilities.php:247
+msgid "Lists approved comments, or any status with the moderate_comments capability."
+msgstr ""
+
+#: src/Abilities/MediaAbilities.php:251
+msgid "Lists media library items with optional mime and search filters."
+msgstr ""
+
 #: src/Abilities/ContentLifecycleAbilities.php:349
 msgid "Lists the revisions of a post, most recent first."
 msgstr ""
@@ -108,6 +180,14 @@ msgstr ""
 
 #: src/Admin/AdminPage.php:42
 msgid "MCP endpoint"
+msgstr ""
+
+#: src/Abilities/CommentAbilities.php:349
+msgid "Moderate comment"
+msgstr ""
+
+#: src/Abilities/CommentAbilities.php:182
+msgid "Moderating comments requires the moderate_comments capability."
 msgstr ""
 
 #: src/Abilities/ContentLifecycleAbilities.php:428
@@ -124,6 +204,15 @@ msgstr ""
 
 #: src/Admin/AdminPage.php:64
 msgid "Open the WordPress profile for the user the agent will act as."
+msgstr ""
+
+#: src/Abilities/CommentAbilities.php:237
+#: src/Abilities/MediaAbilities.php:241
+msgid "Permanent deletion cannot be undone."
+msgstr ""
+
+#: src/Abilities/MediaAbilities.php:227
+msgid "Permanent deletion requires the delete_others_posts capability."
 msgstr ""
 
 #: src/Infrastructure/Activator.php:23
@@ -143,6 +232,14 @@ msgstr ""
 msgid "Publishes a post or page. The previous status and a revision are kept for recovery."
 msgstr ""
 
+#: src/Abilities/CommentAbilities.php:320
+msgid "Reply to comment"
+msgstr ""
+
+#: src/Abilities/CommentAbilities.php:144
+msgid "Replying to comments requires the moderate_comments capability."
+msgstr ""
+
 #: src/Abilities/ContentLifecycleAbilities.php:450
 msgid "Restore content"
 msgstr ""
@@ -159,7 +256,15 @@ msgstr ""
 msgid "Restores trashed content to its previous status."
 msgstr ""
 
-#: src/Abilities/AbilityRegistrar.php:325
+#: src/Abilities/CommentAbilities.php:277
+msgid "Returns a single comment."
+msgstr ""
+
+#: src/Abilities/MediaAbilities.php:282
+msgid "Returns a single media library item with metadata."
+msgstr ""
+
+#: src/Abilities/AbilityRegistrar.php:327
 msgid "Returns a single post with full content when the user may read it."
 msgstr ""
 
@@ -167,11 +272,11 @@ msgstr ""
 msgid "Returns a single revision with its full content."
 msgstr ""
 
-#: src/Abilities/AbilityRegistrar.php:174
+#: src/Abilities/AbilityRegistrar.php:176
 msgid "Returns non-sensitive WordPress and WPNerve runtime information for connection diagnostics."
 msgstr ""
 
-#: src/Abilities/AbilityRegistrar.php:216
+#: src/Abilities/AbilityRegistrar.php:218
 msgid "Returns the public content types registered in the site."
 msgstr ""
 
@@ -187,15 +292,15 @@ msgstr ""
 msgid "Safe site information abilities exposed by WPNerve."
 msgstr ""
 
-#: src/Abilities/AbilityRegistrar.php:260
+#: src/Abilities/AbilityRegistrar.php:262
 msgid "Search content"
 msgstr ""
 
-#: src/Abilities/AbilityRegistrar.php:261
+#: src/Abilities/AbilityRegistrar.php:263
 msgid "Searches published content and returns matching posts with metadata."
 msgstr ""
 
-#: src/Abilities/AbilityRegistrar.php:109
+#: src/Abilities/AbilityRegistrar.php:111
 msgid "Searching non-public content requires the read_private_posts capability."
 msgstr ""
 
@@ -207,8 +312,29 @@ msgstr ""
 msgid "Secure setup"
 msgstr ""
 
+#: src/Abilities/CommentAbilities.php:200
+msgid "Set the comment back to its previous status to undo."
+msgstr ""
+
+#: src/Abilities/CommentAbilities.php:172
+msgid "Status must be approve, hold, spam, or trash."
+msgstr ""
+
+#: src/Abilities/MediaAbilities.php:143
+msgid "The attachment could not be registered."
+msgstr ""
+
 #: src/Transport/HttpTransport.php:75
 msgid "The authenticated user cannot access WPNerve."
+msgstr ""
+
+#: src/Abilities/CommentAbilities.php:422
+#: src/Abilities/CommentAbilities.php:428
+msgid "The comment could not be created."
+msgstr ""
+
+#: src/Abilities/CommentAbilities.php:229
+msgid "The comment could not be deleted."
 msgstr ""
 
 #: src/Abilities/ContentLifecycleAbilities.php:196
@@ -219,19 +345,40 @@ msgstr ""
 msgid "The content could not be updated."
 msgstr ""
 
+#: src/Abilities/CommentAbilities.php:103
+#: src/Abilities/CommentAbilities.php:140
+msgid "The content parameter must be a non-empty string."
+msgstr ""
+
+#: src/Abilities/MediaAbilities.php:110
+msgid "The content parameter must be valid base64."
+msgstr ""
+
 #: src/Abilities/ContentLifecycleAbilities.php:70
 msgid "The draft could not be created."
 msgstr ""
 
-#: src/Abilities/AbilityRegistrar.php:153
+#: src/Abilities/AbilityRegistrar.php:155
 msgid "The id parameter must be a positive integer."
+msgstr ""
+
+#: src/Abilities/MediaAbilities.php:233
+msgid "The media item could not be deleted."
+msgstr ""
+
+#: src/Abilities/MediaAbilities.php:200
+msgid "The media item could not be updated."
 msgstr ""
 
 #: src/Abilities/TaxonomyAbilities.php:104
 msgid "The name parameter must be a non-empty string."
 msgstr ""
 
-#: src/Abilities/AbilityRegistrar.php:101
+#: src/Abilities/CommentAbilities.php:134
+msgid "The parent comment does not exist."
+msgstr ""
+
+#: src/Abilities/AbilityRegistrar.php:103
 msgid "The query parameter must be a non-empty string."
 msgstr ""
 
@@ -243,7 +390,20 @@ msgstr ""
 msgid "The requested MCP tool does not exist or is not available."
 msgstr ""
 
-#: src/Abilities/AbilityRegistrar.php:159
+#: src/Abilities/CommentAbilities.php:76
+#: src/Abilities/CommentAbilities.php:178
+#: src/Abilities/CommentAbilities.php:217
+msgid "The requested comment does not exist."
+msgstr ""
+
+#: src/Abilities/MediaAbilities.php:76
+#: src/Abilities/MediaAbilities.php:166
+#: src/Abilities/MediaAbilities.php:217
+msgid "The requested media item does not exist."
+msgstr ""
+
+#: src/Abilities/AbilityRegistrar.php:161
+#: src/Abilities/CommentAbilities.php:97
 #: src/Abilities/ContentLifecycleAbilities.php:131
 #: src/Abilities/ContentLifecycleAbilities.php:186
 #: src/Abilities/ContentLifecycleAbilities.php:215
@@ -272,16 +432,44 @@ msgstr ""
 msgid "The term could not be created."
 msgstr ""
 
+#: src/Abilities/MediaAbilities.php:104
+msgid "The uploaded file exceeds the configured size limit."
+msgstr ""
+
 #: src/Abilities/ContentLifecycleAbilities.php:427
 msgid "Trash content"
+msgstr ""
+
+#: src/Abilities/CommentAbilities.php:238
+msgid "Trashed comments can be restored from the WordPress trash."
+msgstr ""
+
+#: src/Abilities/MediaAbilities.php:242
+msgid "Trashed media can be restored from the WordPress trash."
 msgstr ""
 
 #: src/Abilities/ContentLifecycleAbilities.php:321
 msgid "Update content"
 msgstr ""
 
+#: src/Abilities/MediaAbilities.php:334
+msgid "Update media item"
+msgstr ""
+
+#: src/Abilities/MediaAbilities.php:335
+msgid "Updates the title, caption, description, or alt text of a media item."
+msgstr ""
+
 #: src/Abilities/ContentLifecycleAbilities.php:322
 msgid "Updates the title, content, or excerpt of an existing post. A WordPress revision is kept for recovery."
+msgstr ""
+
+#: src/Abilities/MediaAbilities.php:296
+msgid "Upload media"
+msgstr ""
+
+#: src/Abilities/MediaAbilities.php:297
+msgid "Uploads a base64-encoded file to the media library. Requires upload_files. Undo by deleting the attachment."
 msgstr ""
 
 #: src/Admin/AdminPage.php:18
@@ -322,9 +510,17 @@ msgstr ""
 msgid "You are not allowed to create terms."
 msgstr ""
 
+#: src/Abilities/MediaAbilities.php:221
+msgid "You are not allowed to delete this media item."
+msgstr ""
+
 #: src/Abilities/ContentLifecycleAbilities.php:535
 #: src/Abilities/TaxonomyAbilities.php:157
 msgid "You are not allowed to edit this content."
+msgstr ""
+
+#: src/Abilities/MediaAbilities.php:170
+msgid "You are not allowed to edit this media item."
 msgstr ""
 
 #: src/Abilities/ContentLifecycleAbilities.php:250
@@ -335,7 +531,11 @@ msgstr ""
 msgid "You are not allowed to read revisions for this content."
 msgstr ""
 
-#: src/Abilities/AbilityRegistrar.php:163
+#: src/Abilities/CommentAbilities.php:80
+msgid "You are not allowed to read this comment."
+msgstr ""
+
+#: src/Abilities/AbilityRegistrar.php:165
 msgid "You are not allowed to read this content."
 msgstr ""
 
@@ -353,5 +553,13 @@ msgstr ""
 
 #: src/Abilities/ContentLifecycleAbilities.php:190
 msgid "You are not allowed to trash this content."
+msgstr ""
+
+#: src/Abilities/MediaAbilities.php:98
+msgid "You are not allowed to upload media."
+msgstr ""
+
+#: src/Abilities/MediaAbilities.php:94
+msgid "filename and base64 content are required."
 msgstr ""
 
