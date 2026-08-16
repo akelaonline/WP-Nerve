@@ -2,6 +2,23 @@
 
 All notable changes to WPNerve will be documented here.
 
+## [Unreleased]
+
+### Added
+
+- Risk class opt-in mechanism: `read` and `write` classes enabled by default,
+  `destructive` and `privileged` denied unless the site opts in via the
+  `wp_nerve_enabled_risk_classes` option or filter. Per-ability enablement via
+  the `wp_nerve_ability_is_enabled` filter.
+- Content lifecycle abilities: `create-draft`, `update-content`,
+  `list-revisions`, `get-revision`, `trash-content`, `restore-content`,
+  `publish-content`, and `restore-revision`, each with recovery semantics and
+  capability gates. Destructive operations are opt-in.
+- Taxonomy abilities: `list-taxonomies`, `list-terms`, `create-term` (opt-in),
+  and `assign-terms` with previous-assignment recovery data.
+- Ability registration refactored into per-domain registrars sharing a common
+  base (`AbstractAbilityRegistrar`).
+
 ## [0.1.0-alpha.2] - 2026-08-16
 
 ### Added

@@ -85,7 +85,7 @@ final class PolicyEngineTest extends TestCase
         self::assertSame('ability_not_exposed', $decision->code);
     }
 
-    public function testAuthorizeDeniesDestructiveRisk(): void
+    public function testAuthorizeHidesDestructiveRiskByDefault(): void
     {
         $ability = $this->makeAbility('wp-nerve/site-status', array(
             'meta' => $this->wpNerveMeta(array('risk' => RiskLevel::Destructive->value)),
@@ -94,10 +94,10 @@ final class PolicyEngineTest extends TestCase
         $decision = $this->engine->authorize($ability);
 
         self::assertFalse($decision->allowed);
-        self::assertSame('confirmation_required', $decision->code);
+        self::assertSame('ability_not_exposed', $decision->code);
     }
 
-    public function testAuthorizeDeniesPrivilegedRisk(): void
+    public function testAuthorizeHidesPrivilegedRiskByDefault(): void
     {
         $ability = $this->makeAbility('wp-nerve/site-status', array(
             'meta' => $this->wpNerveMeta(array('risk' => RiskLevel::Privileged->value)),
@@ -106,7 +106,47 @@ final class PolicyEngineTest extends TestCase
         $decision = $this->engine->authorize($ability);
 
         self::assertFalse($decision->allowed);
-        self::assertSame('confirmation_required', $decision->code);
+        self::assertSame('ability_not_exposed', $decision->code);
+    }
+
+    public function testDestructiveAuthorizedWhenRiskClassEnabled(): void
+    {
+        WPState::$options['wp_nerve_enabled_risk_classes'] = array('read', 'write', 'destructive');
+
+        $ability = $this->makeAbility('wp-nerve/site-status', array(
+            'meta' => $this->wpNerveMeta(array('risk' => RiskLevel::Destructive->value)),
+        ));
+
+        $decision = $this->engine->authorize($ability);
+
+        self::assertTrue($decision->allowed);
+        self::assertTrue($this->engine->isDiscoverable($ability));
+    }
+
+    public function testPrivilegedAuthorizedWhenRiskClassEnabledViaFilter(): void
+    {
+        add_filter('wp_nerve_enabled_risk_classes', static fn (array $classes): array => array_merge($classes, array('privileged')));
+
+        $ability = $this->makeAbility('wp-nerve/site-status', array(
+            'meta' => $this->wpNerveMeta(array('risk' => RiskLevel::Privileged->value)),
+        ));
+
+        $decision = $this->engine->authorize($ability);
+
+        self::assertTrue($decision->allowed);
+    }
+
+    public function testDisabledAbilityCanBeEnabledViaFilter(): void
+    {
+        $ability = $this->makeAbility('wp-nerve/site-status', array(
+            'meta' => $this->wpNerveMeta(array('enabled_by_default' => false)),
+        ));
+
+        self::assertFalse($this->engine->isDiscoverable($ability));
+
+        add_filter('wp_nerve_ability_is_enabled', static fn (): bool => true, 10, 2);
+
+        self::assertTrue($this->engine->isDiscoverable($ability));
     }
 
     public function testAuthorizeAllowsReadRisk(): void

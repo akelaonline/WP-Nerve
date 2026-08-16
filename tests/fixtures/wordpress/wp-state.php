@@ -98,6 +98,38 @@ final class WPState
 
     public static int $queryCount = 0;
 
+    public static int $nextPostId = 100;
+
+    /** @var array<string, mixed> */
+    public static array $lastInsertedPost = array();
+
+    /** @var array<string, mixed> */
+    public static array $lastUpdatedPost = array();
+
+    /** @var array<int, int> */
+    public static array $trashedPostIds = array();
+
+    /** @var array<int, int> */
+    public static array $untrashedPostIds = array();
+
+    /** @var array<int, int> */
+    public static array $publishedPostIds = array();
+
+    /** @var array<int, int> */
+    public static array $restoredRevisionIds = array();
+
+    /** @var array<int, WP_Post> Revision ID => object. */
+    public static array $revisions = array();
+
+    /** @var array<string, WP_Taxonomy> Taxonomy name => object. */
+    public static array $taxonomies = array();
+
+    /** @var array<int, WP_Term> Term ID => object. */
+    public static array $terms = array();
+
+    /** @var array<int, array<string, array<int, int>>> Post ID => taxonomy => term IDs. */
+    public static array $objectTerms = array();
+
     public static function reset(): void
     {
         self::$abilities = array();
@@ -134,6 +166,17 @@ final class WPState
         self::$queryResults = array();
         self::$lastQueryArgs = array();
         self::$queryCount = 0;
+        self::$nextPostId = 100;
+        self::$lastInsertedPost = array();
+        self::$lastUpdatedPost = array();
+        self::$trashedPostIds = array();
+        self::$untrashedPostIds = array();
+        self::$publishedPostIds = array();
+        self::$restoredRevisionIds = array();
+        self::$revisions = array();
+        self::$taxonomies = array();
+        self::$terms = array();
+        self::$objectTerms = array();
 
         $GLOBALS['wpdb'] = self::$wpdb;
         $GLOBALS['wp_version'] = self::$wpVersion;

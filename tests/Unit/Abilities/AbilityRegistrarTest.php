@@ -34,7 +34,7 @@ final class AbilityRegistrarTest extends TestCase
         self::assertSame('WPNerve: Site', WPState::$registeredCategories[0]['args']['label']);
     }
 
-    public function testRegisterAbilitiesRegistersAllReadAbilities(): void
+    public function testRegisterAbilitiesRegistersCoreReadAbilities(): void
     {
         $this->registrar->registerAbilities();
 
@@ -43,24 +43,23 @@ final class AbilityRegistrarTest extends TestCase
             WPState::$registeredAbilities
         );
 
-        self::assertSame(
-            array('wp-nerve/site-status', 'wp-nerve/list-content-types', 'wp-nerve/search-content', 'wp-nerve/get-content'),
-            $names
-        );
+        foreach (array('wp-nerve/site-status', 'wp-nerve/list-content-types', 'wp-nerve/search-content', 'wp-nerve/get-content') as $expected) {
+            self::assertContains($expected, $names);
+        }
     }
 
-    public function testRegisteredAbilitiesCarrySafePolicyMetadata(): void
+    public function testRegisteredCoreReadAbilitiesCarrySafePolicyMetadata(): void
     {
         $this->registrar->registerAbilities();
 
-        foreach (WPState::$registeredAbilities as $ability) {
-            $meta = $ability->get_meta_item('wp_nerve', array());
+        foreach (array('wp-nerve/site-status', 'wp-nerve/list-content-types', 'wp-nerve/search-content', 'wp-nerve/get-content') as $name) {
+            $meta = $this->ability($name)->get_meta_item('wp_nerve', array());
 
             self::assertSame('read', $meta['risk']);
             self::assertSame('edit_posts', $meta['capability']);
             self::assertTrue($meta['enabled_by_default']);
 
-            $annotations = $ability->get_meta_item('annotations', array());
+            $annotations = $this->ability($name)->get_meta_item('annotations', array());
             self::assertTrue($annotations['readonly']);
             self::assertFalse($annotations['destructive']);
         }

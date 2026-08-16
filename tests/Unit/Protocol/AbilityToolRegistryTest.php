@@ -118,7 +118,7 @@ final class AbilityToolRegistryTest extends TestCase
         self::assertSame('wp_nerve_tool_not_found', $result->get_error_code());
     }
 
-    public function testExecuteDeniesDestructiveRisk(): void
+    public function testExecuteHidesDestructiveRiskByDefault(): void
     {
         $ability = $this->makeAbility('wp-nerve/site-status', array(
             'meta' => $this->makeAbilityMeta('destructive'),
@@ -128,7 +128,7 @@ final class AbilityToolRegistryTest extends TestCase
         $result = $this->registry->execute('wp_nerve_site_status', array());
 
         self::assertInstanceOf(WP_Error::class, $result);
-        self::assertSame('confirmation_required', $result->get_error_code());
+        self::assertSame('wp_nerve_tool_not_found', $result->get_error_code());
     }
 
     /**
