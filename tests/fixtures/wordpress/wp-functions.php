@@ -477,6 +477,22 @@ if (! function_exists('post_type_exists')) {
     }
 }
 
+if (! function_exists('get_all_post_type_supports')) {
+    /**
+     * @return array<string, bool>
+     */
+    function get_all_post_type_supports(string $post_type): array
+    {
+        $type = get_post_type_object($post_type);
+
+        if (null === $type) {
+            return array();
+        }
+
+        return array_fill_keys($type->supports, true);
+    }
+}
+
 if (! function_exists('get_post')) {
     /**
      * @param int|WP_Post|null $post
