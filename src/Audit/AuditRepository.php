@@ -10,7 +10,7 @@ declare(strict_types=1);
 
 namespace WPNerve\Audit;
 
-final class AuditRepository
+final class AuditRepository implements AuditRecorder
 {
     public static function installSchema(): void
     {

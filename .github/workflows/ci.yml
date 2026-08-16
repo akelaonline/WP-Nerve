@@ -30,7 +30,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
-          coverage: none
+          coverage: pcov
           tools: composer:v2
 
       - name: Validate Composer metadata
@@ -41,3 +41,56 @@ jobs:
 
       - name: Run quality suite
         run: composer check
+
+  consistency:
+    name: Version and repository consistency
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Plugin header version matches constant
+        run: |
+          header=$(grep -m1 '^\s*\* Version:' wp-nerve.php | sed 's/.*: *//' | tr -d ' ')
+          const=$(grep -m1 "define('WP_NERVE_VERSION'" wp-nerve.php | sed "s/.*'\([^']*\)'.*/\1/")
+          echo "Plugin header:  $header"
+          echo "WP_NERVE_VERSION: $const"
+          test -n "$header" -a -n "$const" || { echo 'ERROR: version not found'; exit 1; }
+          test "$header" = "$const" || { echo 'ERROR: version mismatch'; exit 1; }
+          echo 'OK'
+
+      - name: Stable tag matches readme.txt
+        run: |
+          stable=$(grep -m1 '^Stable tag:' readme.txt | sed 's/.*: *//' | tr -d ' ')
+          header=$(grep -m1 '^\s*\* Version:' wp-nerve.php | sed 's/.*: *//' | tr -d ' ')
+          test "$stable" = "$header" || { echo "ERROR: readme.txt stable tag ($stable) != header version ($header)"; exit 1; }
+          echo 'OK'
+
+      - name: No conflict markers
+        run: |
+          if grep -rn '^<<<<<<< \|^>>>>>>> \|^=======$' src/ wp-nerve.php uninstall.php README.md CHANGELOG.md 2>/dev/null; then
+            echo 'ERROR: conflict markers found'; exit 1
+          fi
+          echo 'OK'
+
+  coverage:
+    name: Coverage report
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          coverage: pcov
+          tools: composer:v2
+
+      - name: Install development dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Run tests with coverage
+        run: vendor/bin/phpunit --configuration=phpunit.xml.dist --coverage-text

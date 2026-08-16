@@ -1,0 +1,155 @@
+# Copyright (C) 2026 Akela (@akelaonline)
+# This file is distributed under the GPL-2.0-or-later license.
+msgid ""
+msgstr ""
+"Project-Id-Version: WPNerve 0.1.0-alpha.2\n"
+"Report-Msgid-Bugs-To: https://github.com/akelaonline/WP-Nerve/issues\n"
+"POT-Creation-Date: 2026-08-16 12:00+0000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"X-Generator: WPNerve pot generator\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: src/Admin/AdminPage.php:56
+msgid "Authenticated users with the edit_posts capability"
+msgstr ""
+
+#: src/Admin/AdminPage.php:46
+msgid "Authentication"
+msgstr ""
+
+#: src/Admin/AdminPage.php:70
+msgid "Configure the MCP client with the endpoint, username, and generated Application Password."
+msgstr ""
+
+#: src/Admin/AdminPage.php:38
+msgid "Connection"
+msgstr ""
+
+#: src/Admin/AdminPage.php:66
+msgid "Create a dedicated Application Password named WPNerve."
+msgstr ""
+
+#: src/Admin/AdminPage.php:54
+msgid "Default access"
+msgstr ""
+
+#: src/Abilities/AbilityRegistrar.php:323
+msgid "Get content"
+msgstr ""
+
+#: src/Abilities/AbilityRegistrar.php:172
+msgid "Get site status"
+msgstr ""
+
+#: src/Abilities/AbilityRegistrar.php:214
+msgid "List content types"
+msgstr ""
+
+#: src/Admin/AdminPage.php:42
+msgid "MCP endpoint"
+msgstr ""
+
+#: src/Admin/AdminPage.php:64
+msgid "Open the WordPress profile for the user the agent will act as."
+msgstr ""
+
+#: src/Infrastructure/Activator.php:23
+#: src/Infrastructure/Activator.php:34
+msgid "Plugin activation failed"
+msgstr ""
+
+#: src/Admin/AdminPage.php:50
+msgid "Protocol versions"
+msgstr ""
+
+#: src/Abilities/AbilityRegistrar.php:324
+msgid "Returns a single post with full content when the user may read it."
+msgstr ""
+
+#: src/Abilities/AbilityRegistrar.php:173
+msgid "Returns non-sensitive WordPress and WPNerve runtime information for connection diagnostics."
+msgstr ""
+
+#: src/Abilities/AbilityRegistrar.php:215
+msgid "Returns the public content types registered in the site."
+msgstr ""
+
+#: src/Admin/AdminPage.php:78
+msgid "Revoke that Application Password immediately if the client or device is lost."
+msgstr ""
+
+#: src/Abilities/AbilityRegistrar.php:26
+msgid "Safe site information abilities exposed by WPNerve."
+msgstr ""
+
+#: src/Abilities/AbilityRegistrar.php:259
+msgid "Search content"
+msgstr ""
+
+#: src/Abilities/AbilityRegistrar.php:260
+msgid "Searches published content and returns matching posts with metadata."
+msgstr ""
+
+#: src/Abilities/AbilityRegistrar.php:108
+msgid "Searching non-public content requires the read_private_posts capability."
+msgstr ""
+
+#: src/Admin/AdminPage.php:36
+msgid "Secure MCP access to the native WordPress Abilities API."
+msgstr ""
+
+#: src/Admin/AdminPage.php:62
+msgid "Secure setup"
+msgstr ""
+
+#: src/Abilities/AbilityRegistrar.php:152
+msgid "The id parameter must be a positive integer."
+msgstr ""
+
+#: src/Abilities/AbilityRegistrar.php:100
+msgid "The query parameter must be a non-empty string."
+msgstr ""
+
+#: src/Abilities/AbilityRegistrar.php:158
+msgid "The requested post does not exist."
+msgstr ""
+
+#: src/Admin/AdminPage.php:18
+#: src/Admin/AdminPage.php:19
+#: src/Admin/AdminPage.php:35
+msgid "WPNerve"
+msgstr ""
+
+#: src/Admin/AdminPage.php:88
+msgid "WPNerve never displays or stores the Application Password. Tool arguments and credentials are excluded from the audit log."
+msgstr ""
+
+#: src/Infrastructure/Activator.php:22
+msgid "WPNerve requires PHP 8.1 or newer."
+msgstr ""
+
+#: src/Plugin.php:84
+msgid "WPNerve requires WordPress 6.9 or newer with the native Abilities API available."
+msgstr ""
+
+#: src/Infrastructure/Activator.php:33
+msgid "WPNerve requires WordPress 6.9 or newer."
+msgstr ""
+
+#: src/Abilities/AbilityRegistrar.php:25
+msgid "WPNerve: Site"
+msgstr ""
+
+#: src/Admin/AdminPage.php:47
+msgid "WordPress Application Password over HTTPS"
+msgstr ""
+
+#: src/Abilities/AbilityRegistrar.php:162
+msgid "You are not allowed to read this content."
+msgstr ""
+

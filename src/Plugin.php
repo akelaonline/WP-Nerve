@@ -60,11 +60,17 @@ final class Plugin
         $transport = new HttpTransport(new RequestValidator(), $handler);
         $admin     = new AdminPage();
 
+        add_action('init', array($this, 'loadTextdomain'));
         add_action('wp_abilities_api_categories_init', array($abilities, 'registerCategory'));
         add_action('wp_abilities_api_init', array($abilities, 'registerAbilities'));
         add_action('rest_api_init', array($transport, 'registerRoutes'));
         add_action('admin_menu', array($admin, 'registerMenu'));
         add_filter('rest_allowed_cors_headers', array($transport, 'allowedCorsHeaders'), 10, 2);
+    }
+
+    public function loadTextdomain(): void
+    {
+        load_plugin_textdomain('wp-nerve', false, dirname(plugin_basename(WP_NERVE_FILE)) . '/languages');
     }
 
     public function renderRequirementsNotice(): void

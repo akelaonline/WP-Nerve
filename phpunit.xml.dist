@@ -14,7 +14,14 @@
     <source>
         <include>
             <directory>src</directory>
+            <file>wp-nerve.php</file>
+            <file>uninstall.php</file>
         </include>
     </source>
+    <coverage includeUncoveredFiles="true">
+        <report>
+            <html outputDirectory="coverage" lowUpperBound="60" highLowerBound="90"/>
+            <text outputFile="php://stdout" showOnlySummary="true" showUncoveredFiles="true"/>
+        </report>
+    </coverage>
 </phpunit>
-
