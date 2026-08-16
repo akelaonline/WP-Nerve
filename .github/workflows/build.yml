@@ -21,7 +21,7 @@ jobs:
         run: git archive --format=zip --prefix=wp-nerve/ --output="wp-nerve-${GITHUB_REF_NAME}.zip" HEAD
 
       - name: Upload plugin archive
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: wp-nerve-${{ github.ref_name }}
           path: wp-nerve-${{ github.ref_name }}.zip
