@@ -15,7 +15,7 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Build deterministic WordPress archive
         run: git archive --format=zip --prefix=wp-nerve/ --output="wp-nerve-${GITHUB_REF_NAME}.zip" HEAD
