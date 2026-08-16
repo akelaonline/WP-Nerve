@@ -24,7 +24,7 @@ require_once $fixtures . '/class-wp-posts.php';
 require_once $fixtures . '/wp-functions.php';
 
 defined('ABSPATH') || define('ABSPATH', $fixtures . '/');
-defined('WP_NERVE_VERSION') || define('WP_NERVE_VERSION', '0.1.0-alpha.2');
+defined('WP_NERVE_VERSION') || define('WP_NERVE_VERSION', '0.1.0-alpha.3');
 defined('WP_NERVE_FILE') || define('WP_NERVE_FILE', dirname(__DIR__) . '/wp-nerve.php');
 defined('WP_NERVE_PATH') || define('WP_NERVE_PATH', dirname(__DIR__) . '/');
 defined('WP_NERVE_URL') || define('WP_NERVE_URL', 'https://example.test/wp-content/plugins/wp-nerve/');

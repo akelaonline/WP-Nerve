@@ -2,7 +2,7 @@
 
 All notable changes to WPNerve will be documented here.
 
-## [Unreleased]
+## [0.1.0-alpha.3] - 2026-08-16
 
 ### Added
 
