@@ -76,16 +76,16 @@ re-checks all three conditions before every execution.
 
 | Ability | Risk | Default | Status | Recovery requirement |
 |---|---:|---:|---|---|
-| `menus/list` | Read | On | Planned | None |
-| `menus/get-items` | Read | On | Planned | None |
-| `menus/create` | Write | On | Planned | Delete created menu |
-| `menus/add-item` | Write | On | Planned | Remove added item |
-| `menus/update-item` | Write | On | Planned | Previous item state |
-| `menus/delete-item` | Write | On | Planned | Restore from trash |
-| `menus/assign-location` | Write | On | Planned | Previous location map |
-| `widgets/list-sidebars` | Read | On | Planned | None |
-| `widgets/get-sidebar` | Read | On | Planned | None |
-| `widgets/list-available` | Read | On | Planned | None |
+| `menus/list` | Read | On | **Implemented** | None |
+| `menus/get-items` | Read | On | **Implemented** | None |
+| `menus/create` | Write | On | **Implemented** | Delete created menu |
+| `menus/add-item` | Write | On | **Implemented** | Remove added item |
+| `menus/update-item` | Write | On | **Implemented** | Previous item state |
+| `menus/delete-item` | Write | On | **Implemented** | Restore from trash |
+| `menus/assign-location` | Write | On | **Implemented** | Previous location map |
+| `widgets/list-sidebars` | Read | On | **Implemented** | None |
+| `widgets/get-sidebar` | Read | On | **Implemented** | None |
+| `widgets/list-available` | Read | On | **Implemented** | None |
 
 ## Users
 

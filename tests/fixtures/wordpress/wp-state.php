@@ -158,6 +158,39 @@ final class WPState
     /** @var array<int, int> */
     public static array $deletedCommentIds = array();
 
+    /** @var array<int, WP_Term> Nav menu ID => term object. */
+    public static array $navMenus = array();
+
+    /** @var array<int, WP_Post> Nav menu item ID => post object. */
+    public static array $navMenuItems = array();
+
+    /** @var array<int, int> Nav menu item ID => menu ID. */
+    public static array $menuItemMenu = array();
+
+    /** @var array<int, array<string, mixed>> Nav menu item ID => meta. */
+    public static array $menuItemMeta = array();
+
+    /** @var array<string, int> Location => menu ID. */
+    public static array $menuLocations = array();
+
+    /** @var array<string, mixed> */
+    public static array $themeMods = array();
+
+    /** @var array<int, array<string, string>> */
+    public static array $sidebars = array();
+
+    /** @var array<string, array<int, string>> Sidebar ID => widget IDs. */
+    public static array $sidebarWidgets = array();
+
+    /** @var object{widgets: array<string, object>} */
+    public static object $widgetFactory;
+
+    /** @var array<int, int> */
+    public static array $deletedPostIds = array();
+
+    /** @var array<int, array<int, int>> Post ID => taxonomy => term IDs (nav_menu). */
+    public static array $postTerms = array();
+
     public static function reset(): void
     {
         self::$abilities = array();
@@ -215,8 +248,21 @@ final class WPState
         self::$deletedAttachmentIds = array();
         self::$commentStatusChanges = array();
         self::$deletedCommentIds = array();
+        self::$navMenus = array();
+        self::$navMenuItems = array();
+        self::$menuItemMenu = array();
+        self::$menuItemMeta = array();
+        self::$menuLocations = array();
+        self::$themeMods = array();
+        self::$sidebars = array();
+        self::$sidebarWidgets = array();
+        self::$widgetFactory = (object) array('widgets' => array());
+        self::$deletedPostIds = array();
+        self::$postTerms = array();
 
         $GLOBALS['wpdb'] = self::$wpdb;
+        $GLOBALS['wp_widget_factory'] = self::$widgetFactory;
+        $GLOBALS['wp_registered_sidebars'] = self::$sidebars;
         $GLOBALS['wp_version'] = self::$wpVersion;
     }
 }
