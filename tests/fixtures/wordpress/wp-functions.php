@@ -553,6 +553,361 @@ if (! function_exists('wp_trim_words')) {
     }
 }
 
+if (! function_exists('wp_insert_post')) {
+    /**
+     * @param array<string, mixed> $postarr
+     */
+    function wp_insert_post(array $postarr, bool $wp_error = false): int|WP_Error
+    {
+        unset($wp_error);
+
+        $id = WPState::$nextPostId++;
+
+        $post = new WP_Post($id);
+        $post->post_title   = (string) ($postarr['post_title'] ?? '');
+        $post->post_content = (string) ($postarr['post_content'] ?? '');
+        $post->post_excerpt = (string) ($postarr['post_excerpt'] ?? '');
+        $post->post_status  = (string) ($postarr['post_status'] ?? 'draft');
+        $post->post_type    = (string) ($postarr['post_type'] ?? 'post');
+        $post->post_author  = WPState::$currentUserId;
+
+        WPState::$posts[$id]      = $post;
+        WPState::$lastInsertedPost = $postarr;
+
+        return $id;
+    }
+}
+
+if (! function_exists('wp_update_post')) {
+    /**
+     * @param array<string, mixed> $postarr
+     */
+    function wp_update_post(array $postarr, bool $wp_error = false): int|WP_Error
+    {
+        unset($wp_error);
+
+        $id = (int) ($postarr['ID'] ?? 0);
+
+        if (! isset(WPState::$posts[$id])) {
+            return new WP_Error('wp_nerve_missing_post', 'Post not found.');
+        }
+
+        $post = WPState::$posts[$id];
+
+        foreach (array('post_title', 'post_content', 'post_excerpt', 'post_status', 'post_type') as $field) {
+            if (array_key_exists($field, $postarr)) {
+                $post->{$field} = (string) $postarr[$field];
+            }
+        }
+
+        WPState::$lastUpdatedPost = $postarr;
+
+        return $id;
+    }
+}
+
+if (! function_exists('wp_trash_post')) {
+    function wp_trash_post(int $post_id = 0): ?WP_Post
+    {
+        $post = get_post($post_id);
+
+        if (null === $post) {
+            return null;
+        }
+
+        $post->post_status = 'trash';
+        WPState::$trashedPostIds[] = $post_id;
+
+        return $post;
+    }
+}
+
+if (! function_exists('wp_untrash_post')) {
+    function wp_untrash_post(int $post_id = 0): ?WP_Post
+    {
+        $post = get_post($post_id);
+
+        if (null === $post) {
+            return null;
+        }
+
+        $post->post_status = 'publish';
+        WPState::$untrashedPostIds[] = $post_id;
+
+        return $post;
+    }
+}
+
+if (! function_exists('wp_publish_post')) {
+    function wp_publish_post(int|WP_Post $post = null): ?WP_Post
+    {
+        $id = $post instanceof WP_Post ? $post->ID : (int) $post;
+
+        $post = get_post($id);
+
+        if (null === $post) {
+            return null;
+        }
+
+        $post->post_status = 'publish';
+        WPState::$publishedPostIds[] = $id;
+
+        return $post;
+    }
+}
+
+if (! function_exists('wp_get_post_revisions')) {
+    /**
+     * @param array<string, mixed> $args
+     * @return array<int, WP_Post>
+     */
+    function wp_get_post_revisions(int $post_id = 0, array $args = null): array
+    {
+        unset($args);
+
+        $items = array();
+
+        foreach (WPState::$revisions as $revision) {
+            if ((int) $revision->post_parent === $post_id) {
+                $items[$revision->ID] = $revision;
+            }
+        }
+
+        krsort($items);
+
+        return $items;
+    }
+}
+
+if (! function_exists('wp_get_post_revision')) {
+    function wp_get_post_revision(int|WP_Post $post = null): ?WP_Post
+    {
+        $id = $post instanceof WP_Post ? $post->ID : (int) $post;
+
+        return WPState::$revisions[$id] ?? null;
+    }
+}
+
+if (! function_exists('wp_restore_post_revision')) {
+    function wp_restore_post_revision(int|WP_Post $revision_id, array $fields = null): int|false
+    {
+        unset($fields);
+
+        $id = $revision_id instanceof WP_Post ? $revision_id->ID : (int) $revision_id;
+        $revision = WPState::$revisions[$id] ?? null;
+
+        if (null === $revision) {
+            return false;
+        }
+
+        WPState::$restoredRevisionIds[] = $id;
+
+        $parent = WPState::$posts[(int) $revision->post_parent] ?? null;
+
+        if (null === $parent) {
+            return false;
+        }
+
+        $parent->post_title   = $revision->post_title;
+        $parent->post_content = $revision->post_content;
+        $parent->post_excerpt = $revision->post_excerpt;
+
+        return (int) $revision->post_parent;
+    }
+}
+
+if (! function_exists('get_taxonomies')) {
+    /**
+     * @param array<string, mixed> $args
+     * @return array<int, string>|array<int, WP_Taxonomy>
+     */
+    function get_taxonomies(array $args = array(), string $output = 'names', string $operator = 'and'): array
+    {
+        unset($operator);
+
+        $names = array();
+
+        foreach (WPState::$taxonomies as $name => $taxonomy) {
+            if (isset($args['public']) && (bool) $taxonomy->public !== (bool) $args['public']) {
+                continue;
+            }
+
+            $names[] = $name;
+        }
+
+        if ('objects' === $output) {
+            return array_values(array_map(static fn (string $name): object => WPState::$taxonomies[$name], $names));
+        }
+
+        return $names;
+    }
+}
+
+if (! function_exists('taxonomy_exists')) {
+    function taxonomy_exists(string $taxonomy): bool
+    {
+        return isset(WPState::$taxonomies[$taxonomy]);
+    }
+}
+
+if (! function_exists('get_taxonomy')) {
+    function get_taxonomy(string $taxonomy): ?WP_Taxonomy
+    {
+        return WPState::$taxonomies[$taxonomy] ?? null;
+    }
+}
+
+if (! function_exists('get_terms')) {
+    /**
+     * @param array<string, mixed> $args
+     * @return array<int, WP_Term>|WP_Error
+     */
+    function get_terms(array $args = array()): array|WP_Error
+    {
+        $taxonomy = (string) ($args['taxonomy'] ?? '');
+
+        if ('' === $taxonomy || ! taxonomy_exists($taxonomy)) {
+            return new WP_Error('invalid_taxonomy', 'Invalid taxonomy.');
+        }
+
+        $items = array();
+
+        foreach (WPState::$terms as $term) {
+            if ($term->taxonomy !== $taxonomy) {
+                continue;
+            }
+
+            if (! empty($args['hide_empty']) && 0 === $term->count) {
+                continue;
+            }
+
+            if (! empty($args['search']) && false === strpos($term->name, (string) $args['search'])) {
+                continue;
+            }
+
+            $items[] = $term;
+        }
+
+        if (isset($args['number']) && count($items) > (int) $args['number']) {
+            $items = array_slice($items, 0, (int) $args['number']);
+        }
+
+        return $items;
+    }
+}
+
+if (! function_exists('get_term')) {
+    function get_term(int|object $term, string $taxonomy = '', string $output = OBJECT, string $filter = 'raw'): WP_Term|WP_Error|null
+    {
+        unset($taxonomy, $output, $filter);
+
+        $id = $term instanceof WP_Term ? $term->term_id : (int) $term;
+
+        return WPState::$terms[$id] ?? null;
+    }
+}
+
+if (! function_exists('wp_insert_term')) {
+    /**
+     * @param array<string, mixed> $args
+     * @return array{term_id: int, term_taxonomy_id: int}|WP_Error
+     */
+    function wp_insert_term(string $term, string $taxonomy, array $args = array()): array|WP_Error
+    {
+        if (! taxonomy_exists($taxonomy)) {
+            return new WP_Error('invalid_taxonomy', 'Invalid taxonomy.');
+        }
+
+        $id = count(WPState::$terms) + 1000;
+
+        $object = new WP_Term($id);
+        $object->name     = $term;
+        $object->slug     = (string) ($args['slug'] ?? sanitize_title($term));
+        $object->taxonomy = $taxonomy;
+        $object->parent   = (int) ($args['parent'] ?? 0);
+
+        WPState::$terms[$id] = $object;
+
+        return array('term_id' => $id, 'term_taxonomy_id' => $id);
+    }
+}
+
+if (! function_exists('wp_delete_term')) {
+    function wp_delete_term(int $term_id, string $taxonomy): bool
+    {
+        unset($taxonomy);
+
+        unset(WPState::$terms[$term_id]);
+
+        return true;
+    }
+}
+
+if (! function_exists('wp_set_object_terms')) {
+    /**
+     * @param array<int, int|string> $terms
+     * @return array<int, int>|WP_Error
+     */
+    function wp_set_object_terms(int $object_id, array $terms, string $taxonomy, bool $append = false): array|WP_Error
+    {
+        if (! taxonomy_exists($taxonomy)) {
+            return new WP_Error('invalid_taxonomy', 'Invalid taxonomy.');
+        }
+
+        $ids = array_values(array_map('intval', $terms));
+
+        if (! $append) {
+            WPState::$objectTerms[$object_id][$taxonomy] = array();
+        }
+
+        WPState::$objectTerms[$object_id][$taxonomy] = array_values(array_unique(array_merge(
+            WPState::$objectTerms[$object_id][$taxonomy] ?? array(),
+            $ids
+        )));
+
+        return WPState::$objectTerms[$object_id][$taxonomy];
+    }
+}
+
+if (! function_exists('wp_get_object_terms')) {
+    /**
+     * @param array<string, mixed> $args
+     * @return array<int, int>|array<int, WP_Term>|WP_Error
+     */
+    function wp_get_object_terms(int $object_id, string|array $taxonomies, array $args = array()): array|WP_Error
+    {
+        $names = is_array($taxonomies) ? $taxonomies : array($taxonomies);
+        $fields = $args['fields'] ?? 'all';
+
+        $items = array();
+
+        foreach ($names as $taxonomy) {
+            $items = array_merge($items, WPState::$objectTerms[$object_id][$taxonomy] ?? array());
+        }
+
+        $items = array_values(array_unique($items));
+
+        if ('ids' === $fields) {
+            return $items;
+        }
+
+        return array_values(array_map(
+            static fn (int $id): WP_Term => WPState::$terms[$id],
+            $items
+        ));
+    }
+}
+
+if (! function_exists('sanitize_title')) {
+    function sanitize_title(string $title): string
+    {
+        $title = strtolower(trim($title));
+        $title = (string) preg_replace('/[^a-z0-9\-_]+/', '-', $title);
+
+        return trim($title, '-');
+    }
+}
+
 if (! function_exists('wp_reset_postdata')) {
     function wp_reset_postdata(): void
     {

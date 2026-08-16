@@ -15,7 +15,7 @@ use WP_Post;
 use WP_Post_Type;
 use WP_Query;
 
-final class AbilityRegistrar
+final class AbilityRegistrar extends AbstractAbilityRegistrar
 {
     public function registerCategory(): void
     {
@@ -34,13 +34,14 @@ final class AbilityRegistrar
         $this->registerListContentTypes();
         $this->registerSearchContent();
         $this->registerGetContent();
+
+        (new ContentLifecycleAbilities())->register();
+        (new TaxonomyAbilities())->register();
     }
 
     public function canReadSiteStatus(mixed $input = null): bool
     {
-        unset($input);
-
-        return current_user_can($this->transportCapability());
+        return $this->canAccess($input);
     }
 
     /** @return array<string, mixed> */
@@ -339,125 +340,6 @@ final class AbilityRegistrar
         );
     }
 
-    /**
-     * @param lowercase-string&non-falsy-string $name
-     * @param array<string, mixed>              $inputSchema
-     * @param array<string, mixed>              $outputSchema
-     * @param callable                          $execute
-     */
-    private function registerReadAbility(
-        string $name,
-        string $label,
-        string $description,
-        array $inputSchema,
-        array $outputSchema,
-        callable $execute
-    ): void {
-        wp_register_ability(
-            $name,
-            array(
-                'label'               => $label,
-                'description'         => $description,
-                'category'            => 'wp-nerve-site',
-                'input_schema'        => $inputSchema,
-                'output_schema'       => $outputSchema,
-                'execute_callback'    => $execute,
-                'permission_callback' => array($this, 'canReadSiteStatus'),
-                'meta'                => array(
-                    'public'       => true,
-                    'show_in_rest' => false,
-                    'annotations'  => array(
-                        'readonly'    => true,
-                        'destructive' => false,
-                        'idempotent'  => true,
-                    ),
-                    'wp_nerve'     => array(
-                        'risk'               => 'read',
-                        'capability'         => $this->transportCapability(),
-                        'enabled_by_default' => true,
-                    ),
-                ),
-            )
-        );
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    private function emptyInputSchema(): array
-    {
-        return array(
-            '$schema'              => 'https://json-schema.org/draft/2020-12/schema',
-            'type'                 => 'object',
-            'properties'           => array(),
-            'additionalProperties' => false,
-        );
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    private function contentItemSchema(bool $withContent): array
-    {
-        $schema = array(
-            'type'                 => 'object',
-            'additionalProperties' => false,
-            'required'             => array(
-                'id',
-                'title',
-                'type',
-                'status',
-                'date',
-                'modified',
-                'author',
-                'link',
-                'excerpt',
-            ),
-            'properties'           => array(
-                'id'       => array('type' => 'integer'),
-                'title'    => array('type' => 'string'),
-                'type'     => array('type' => 'string'),
-                'status'   => array('type' => 'string'),
-                'date'     => array('type' => 'string'),
-                'modified' => array('type' => 'string'),
-                'author'   => array('type' => 'integer'),
-                'link'     => array('type' => 'string', 'format' => 'uri'),
-                'excerpt'  => array('type' => 'string'),
-            ),
-        );
-
-        if ($withContent) {
-            $schema['required'][]   = 'content';
-            $schema['properties']['content'] = array('type' => 'string');
-        }
-
-        return $schema;
-    }
-
-    /** @return array<string, mixed> */
-    private function contentItem(WP_Post $post, bool $withContent): array
-    {
-        $item = array(
-            'id'       => $post->ID,
-            'title'    => $post->post_title,
-            'type'     => $post->post_type,
-            'status'   => $post->post_status,
-            'date'     => $post->post_date,
-            'modified' => $post->post_modified,
-            'author'   => (int) $post->post_author,
-            'link'     => (string) get_permalink($post),
-            'excerpt'  => '' !== $post->post_excerpt
-                ? $post->post_excerpt
-                : wp_trim_words($post->post_content, 30),
-        );
-
-        if ($withContent) {
-            $item['content'] = $post->post_content;
-        }
-
-        return $item;
-    }
-
     private function canReadPost(WP_Post $post): bool
     {
         if ('publish' === $post->post_status) {
@@ -474,22 +356,5 @@ final class AbilityRegistrar
     private function searchOrderBy(string $orderby): string
     {
         return in_array($orderby, array('relevance', 'date', 'modified', 'title'), true) ? $orderby : 'relevance';
-    }
-
-    private function clamp(int $value, int $min, int $max): int
-    {
-        return max($min, min($max, $value));
-    }
-
-    private function transportCapability(): string
-    {
-        /**
-         * Filters the minimum capability required to access WPNerve.
-         *
-         * @param string $capability WordPress capability name.
-         */
-        $capability = apply_filters('wp_nerve_transport_capability', 'edit_posts');
-
-        return is_string($capability) && '' !== $capability ? $capability : 'do_not_allow';
     }
 }

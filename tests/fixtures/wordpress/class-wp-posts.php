@@ -31,6 +31,8 @@ if (! class_exists('WP_Post')) {
 
         public int $post_author = 0;
 
+        public int $post_parent = 0;
+
         public function __construct(public readonly int $ID)
         {
         }
@@ -62,6 +64,54 @@ if (! class_exists('WP_Post_Type')) {
             $this->hierarchical = (bool) ($args['hierarchical'] ?? false);
             $this->show_in_rest = (bool) ($args['show_in_rest'] ?? false);
             $this->supports     = (array) ($args['supports'] ?? array());
+        }
+    }
+}
+
+if (! class_exists('WP_Term')) {
+    class WP_Term
+    {
+        public string $name = '';
+
+        public string $slug = '';
+
+        public string $taxonomy = '';
+
+        public int $parent = 0;
+
+        public int $count = 0;
+
+        public function __construct(public readonly int $term_id)
+        {
+        }
+    }
+}
+
+if (! class_exists('WP_Taxonomy')) {
+    class WP_Taxonomy
+    {
+        public string $label = '';
+
+        /** @var array<int, string> */
+        public array $object_type = array();
+
+        public bool $hierarchical = false;
+
+        public bool $show_in_rest = false;
+
+        public ?string $rest_base = null;
+
+        public bool $public = true;
+
+        /** @param array<string, mixed> $args */
+        public function __construct(public readonly string $name, array $args = array())
+        {
+            $this->label        = (string) ($args['label'] ?? $name);
+            $this->object_type  = array_map('strval', (array) ($args['object_type'] ?? array()));
+            $this->hierarchical = (bool) ($args['hierarchical'] ?? false);
+            $this->show_in_rest = (bool) ($args['show_in_rest'] ?? false);
+            $this->rest_base    = isset($args['rest_base']) ? (string) $args['rest_base'] : null;
+            $this->public       = (bool) ($args['public'] ?? true);
         }
     }
 }

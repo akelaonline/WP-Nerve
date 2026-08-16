@@ -14,12 +14,24 @@ msgstr ""
 "X-Generator: WPNerve pot generator\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
+#: src/Abilities/TaxonomyAbilities.php:286
+msgid "Assign terms"
+msgstr ""
+
+#: src/Abilities/TaxonomyAbilities.php:287
+msgid "Assigns terms to a post. The previous assignments are returned so they can be restored."
+msgstr ""
+
 #: src/Admin/AdminPage.php:56
 msgid "Authenticated users with the edit_posts capability"
 msgstr ""
 
 #: src/Admin/AdminPage.php:46
 msgid "Authentication"
+msgstr ""
+
+#: src/Transport/HttpTransport.php:67
+msgid "Authentication is required to access WPNerve."
 msgstr ""
 
 #: src/Admin/AdminPage.php:70
@@ -34,24 +46,80 @@ msgstr ""
 msgid "Create a dedicated Application Password named WPNerve."
 msgstr ""
 
+#: src/Abilities/ContentLifecycleAbilities.php:293
+msgid "Create draft"
+msgstr ""
+
+#: src/Abilities/TaxonomyAbilities.php:257
+msgid "Create term"
+msgstr ""
+
+#: src/Abilities/ContentLifecycleAbilities.php:294
+msgid "Creates a new draft post or page. Undo by trashing the draft."
+msgstr ""
+
+#: src/Abilities/TaxonomyAbilities.php:258
+msgid "Creates a term in a taxonomy. Requires manage_categories. Undo by deleting the created term."
+msgstr ""
+
 #: src/Admin/AdminPage.php:54
 msgid "Default access"
 msgstr ""
 
-#: src/Abilities/AbilityRegistrar.php:323
+#: src/Abilities/ContentLifecycleAbilities.php:49
+msgid "Draft status must be draft or pending."
+msgstr ""
+
+#: src/Abilities/AbilityRegistrar.php:324
 msgid "Get content"
 msgstr ""
 
-#: src/Abilities/AbilityRegistrar.php:172
+#: src/Abilities/ContentLifecycleAbilities.php:393
+msgid "Get revision"
+msgstr ""
+
+#: src/Abilities/AbilityRegistrar.php:173
 msgid "Get site status"
 msgstr ""
 
-#: src/Abilities/AbilityRegistrar.php:214
+#: src/Abilities/AbilityRegistrar.php:215
 msgid "List content types"
+msgstr ""
+
+#: src/Abilities/ContentLifecycleAbilities.php:348
+msgid "List revisions"
+msgstr ""
+
+#: src/Abilities/TaxonomyAbilities.php:187
+msgid "List taxonomies"
+msgstr ""
+
+#: src/Abilities/TaxonomyAbilities.php:222
+msgid "List terms"
+msgstr ""
+
+#: src/Abilities/ContentLifecycleAbilities.php:349
+msgid "Lists the revisions of a post, most recent first."
+msgstr ""
+
+#: src/Abilities/TaxonomyAbilities.php:223
+msgid "Lists the terms of a taxonomy with optional search."
 msgstr ""
 
 #: src/Admin/AdminPage.php:42
 msgid "MCP endpoint"
+msgstr ""
+
+#: src/Abilities/ContentLifecycleAbilities.php:428
+msgid "Moves content to the trash. Undo with restore-content."
+msgstr ""
+
+#: src/Abilities/ContentLifecycleAbilities.php:41
+msgid "Only post and page drafts are supported."
+msgstr ""
+
+#: src/Abilities/ContentLifecycleAbilities.php:219
+msgid "Only trashed content can be restored."
 msgstr ""
 
 #: src/Admin/AdminPage.php:64
@@ -67,16 +135,48 @@ msgstr ""
 msgid "Protocol versions"
 msgstr ""
 
-#: src/Abilities/AbilityRegistrar.php:324
+#: src/Abilities/ContentLifecycleAbilities.php:466
+msgid "Publish content"
+msgstr ""
+
+#: src/Abilities/ContentLifecycleAbilities.php:467
+msgid "Publishes a post or page. The previous status and a revision are kept for recovery."
+msgstr ""
+
+#: src/Abilities/ContentLifecycleAbilities.php:450
+msgid "Restore content"
+msgstr ""
+
+#: src/Abilities/ContentLifecycleAbilities.php:483
+msgid "Restore revision"
+msgstr ""
+
+#: src/Abilities/ContentLifecycleAbilities.php:484
+msgid "Restores a post from one of its revisions. A new revision is created before restoring."
+msgstr ""
+
+#: src/Abilities/ContentLifecycleAbilities.php:451
+msgid "Restores trashed content to its previous status."
+msgstr ""
+
+#: src/Abilities/AbilityRegistrar.php:325
 msgid "Returns a single post with full content when the user may read it."
 msgstr ""
 
-#: src/Abilities/AbilityRegistrar.php:173
+#: src/Abilities/ContentLifecycleAbilities.php:394
+msgid "Returns a single revision with its full content."
+msgstr ""
+
+#: src/Abilities/AbilityRegistrar.php:174
 msgid "Returns non-sensitive WordPress and WPNerve runtime information for connection diagnostics."
 msgstr ""
 
-#: src/Abilities/AbilityRegistrar.php:215
+#: src/Abilities/AbilityRegistrar.php:216
 msgid "Returns the public content types registered in the site."
+msgstr ""
+
+#: src/Abilities/TaxonomyAbilities.php:188
+msgid "Returns the public taxonomies registered in the site."
 msgstr ""
 
 #: src/Admin/AdminPage.php:78
@@ -87,15 +187,15 @@ msgstr ""
 msgid "Safe site information abilities exposed by WPNerve."
 msgstr ""
 
-#: src/Abilities/AbilityRegistrar.php:259
+#: src/Abilities/AbilityRegistrar.php:260
 msgid "Search content"
 msgstr ""
 
-#: src/Abilities/AbilityRegistrar.php:260
+#: src/Abilities/AbilityRegistrar.php:261
 msgid "Searches published content and returns matching posts with metadata."
 msgstr ""
 
-#: src/Abilities/AbilityRegistrar.php:108
+#: src/Abilities/AbilityRegistrar.php:109
 msgid "Searching non-public content requires the read_private_posts capability."
 msgstr ""
 
@@ -107,16 +207,81 @@ msgstr ""
 msgid "Secure setup"
 msgstr ""
 
-#: src/Abilities/AbilityRegistrar.php:152
+#: src/Transport/HttpTransport.php:75
+msgid "The authenticated user cannot access WPNerve."
+msgstr ""
+
+#: src/Abilities/ContentLifecycleAbilities.php:196
+msgid "The content could not be trashed."
+msgstr ""
+
+#: src/Abilities/ContentLifecycleAbilities.php:114
+msgid "The content could not be updated."
+msgstr ""
+
+#: src/Abilities/ContentLifecycleAbilities.php:70
+msgid "The draft could not be created."
+msgstr ""
+
+#: src/Abilities/AbilityRegistrar.php:153
 msgid "The id parameter must be a positive integer."
 msgstr ""
 
-#: src/Abilities/AbilityRegistrar.php:100
+#: src/Abilities/TaxonomyAbilities.php:104
+msgid "The name parameter must be a non-empty string."
+msgstr ""
+
+#: src/Abilities/AbilityRegistrar.php:101
 msgid "The query parameter must be a non-empty string."
 msgstr ""
 
-#: src/Abilities/AbilityRegistrar.php:158
+#: src/Transport/HttpTransport.php:59
+msgid "The request Origin is not allowed to access WPNerve."
+msgstr ""
+
+#: src/Protocol/AbilityToolRegistry.php:49
+msgid "The requested MCP tool does not exist or is not available."
+msgstr ""
+
+#: src/Abilities/AbilityRegistrar.php:159
+#: src/Abilities/ContentLifecycleAbilities.php:131
+#: src/Abilities/ContentLifecycleAbilities.php:186
+#: src/Abilities/ContentLifecycleAbilities.php:215
+#: src/Abilities/ContentLifecycleAbilities.php:244
+#: src/Abilities/ContentLifecycleAbilities.php:531
+#: src/Abilities/TaxonomyAbilities.php:153
 msgid "The requested post does not exist."
+msgstr ""
+
+#: src/Abilities/ContentLifecycleAbilities.php:162
+#: src/Abilities/ContentLifecycleAbilities.php:271
+msgid "The requested revision does not exist."
+msgstr ""
+
+#: src/Abilities/ContentLifecycleAbilities.php:283
+msgid "The revision could not be restored."
+msgstr ""
+
+#: src/Abilities/TaxonomyAbilities.php:63
+#: src/Abilities/TaxonomyAbilities.php:108
+#: src/Abilities/TaxonomyAbilities.php:161
+msgid "The taxonomy does not exist."
+msgstr ""
+
+#: src/Abilities/TaxonomyAbilities.php:134
+msgid "The term could not be created."
+msgstr ""
+
+#: src/Abilities/ContentLifecycleAbilities.php:427
+msgid "Trash content"
+msgstr ""
+
+#: src/Abilities/ContentLifecycleAbilities.php:321
+msgid "Update content"
+msgstr ""
+
+#: src/Abilities/ContentLifecycleAbilities.php:322
+msgid "Updates the title, content, or excerpt of an existing post. A WordPress revision is kept for recovery."
 msgstr ""
 
 #: src/Admin/AdminPage.php:18
@@ -129,12 +294,12 @@ msgstr ""
 msgid "WPNerve never displays or stores the Application Password. Tool arguments and credentials are excluded from the audit log."
 msgstr ""
 
-#: src/Infrastructure/Activator.php:22
-msgid "WPNerve requires PHP 8.1 or newer."
+#: src/Transport/HttpTransport.php:83
+msgid "WPNerve requires HTTPS in production."
 msgstr ""
 
-#: src/Plugin.php:84
-msgid "WPNerve requires WordPress 6.9 or newer with the native Abilities API available."
+#: src/Infrastructure/Activator.php:22
+msgid "WPNerve requires PHP 8.1 or newer."
 msgstr ""
 
 #: src/Infrastructure/Activator.php:33
@@ -149,7 +314,44 @@ msgstr ""
 msgid "WordPress Application Password over HTTPS"
 msgstr ""
 
-#: src/Abilities/AbilityRegistrar.php:162
+#: src/Abilities/ContentLifecycleAbilities.php:45
+msgid "You are not allowed to create pages."
+msgstr ""
+
+#: src/Abilities/TaxonomyAbilities.php:112
+msgid "You are not allowed to create terms."
+msgstr ""
+
+#: src/Abilities/ContentLifecycleAbilities.php:535
+#: src/Abilities/TaxonomyAbilities.php:157
+msgid "You are not allowed to edit this content."
+msgstr ""
+
+#: src/Abilities/ContentLifecycleAbilities.php:250
+msgid "You are not allowed to publish this content."
+msgstr ""
+
+#: src/Abilities/ContentLifecycleAbilities.php:135
+msgid "You are not allowed to read revisions for this content."
+msgstr ""
+
+#: src/Abilities/AbilityRegistrar.php:163
 msgid "You are not allowed to read this content."
+msgstr ""
+
+#: src/Abilities/ContentLifecycleAbilities.php:166
+msgid "You are not allowed to read this revision."
+msgstr ""
+
+#: src/Abilities/ContentLifecycleAbilities.php:223
+msgid "You are not allowed to restore this content."
+msgstr ""
+
+#: src/Abilities/ContentLifecycleAbilities.php:275
+msgid "You are not allowed to restore this revision."
+msgstr ""
+
+#: src/Abilities/ContentLifecycleAbilities.php:190
+msgid "You are not allowed to trash this content."
 msgstr ""
 

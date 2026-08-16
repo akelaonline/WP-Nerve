@@ -21,14 +21,15 @@ final class PolicyEngine
         }
 
         $configuration = $this->configuration($ability);
-        $enabled       = true === ($configuration['enabled_by_default'] ?? false);
         $capability    = $configuration['capability'] ?? 'do_not_allow';
 
         if (! is_string($capability) || '' === $capability) {
             return false;
         }
 
-        $discoverable = $enabled && current_user_can($capability);
+        $discoverable = $this->isEnabled($configuration, $ability)
+            && $this->isRiskClassEnabled($this->risk($ability))
+            && current_user_can($capability);
 
         /**
          * Filters whether an ability is exposed as an MCP tool.
@@ -46,15 +47,6 @@ final class PolicyEngine
     {
         if (! $this->isDiscoverable($ability)) {
             return PolicyDecision::deny('ability_not_exposed', 'This ability is not exposed to the current user.');
-        }
-
-        $risk = $this->risk($ability);
-
-        if (in_array($risk, array(RiskLevel::Destructive, RiskLevel::Privileged), true)) {
-            return PolicyDecision::deny(
-                'confirmation_required',
-                'This ability requires an explicit WPNerve confirmation token.'
-            );
         }
 
         /**
@@ -78,6 +70,45 @@ final class PolicyEngine
         return is_string($value)
             ? (RiskLevel::tryFrom($value) ?? RiskLevel::Privileged)
             : RiskLevel::Privileged;
+    }
+
+    /**
+     * Whether the ability's risk class is enabled on this site.
+     *
+     * Read and write classes are enabled by default. Destructive and privileged
+     * classes require an explicit opt-in via the wp_nerve_enabled_risk_classes
+     * option or filter.
+     */
+    public function isRiskClassEnabled(RiskLevel $risk): bool
+    {
+        $defaults = array(RiskLevel::Read->value, RiskLevel::Write->value);
+        $option   = get_option('wp_nerve_enabled_risk_classes', null);
+        $classes  = is_array($option) ? $option : $defaults;
+
+        /**
+         * Filters the risk classes enabled on this site.
+         *
+         * @param array<int, string> $classes Enabled risk class values.
+         */
+        $classes = apply_filters('wp_nerve_enabled_risk_classes', $classes);
+
+        return is_array($classes) && in_array($risk->value, $classes, true);
+    }
+
+    /**
+     * @param array<string, mixed> $configuration
+     */
+    private function isEnabled(array $configuration, WP_Ability $ability): bool
+    {
+        $enabled = true === ($configuration['enabled_by_default'] ?? false);
+
+        /**
+         * Filters whether an ability is enabled regardless of its default flag.
+         *
+         * @param bool       $enabled Whether the ability is enabled.
+         * @param WP_Ability $ability Ability under evaluation.
+         */
+        return (bool) apply_filters('wp_nerve_ability_is_enabled', $enabled, $ability);
     }
 
     /** @return array<string, mixed> */

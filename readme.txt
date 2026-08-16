@@ -17,8 +17,9 @@ over the Model Context Protocol. It runs entirely inside WordPress and does not
 require an external relay, SaaS account, or additional database.
 
 Read-only abilities ship enabled by default: site status, content type listing,
-content search, and full content reads. Destructive and privileged operations
-are denied by the policy engine.
+content search, and full content reads. Recoverable writes are available for
+drafts, content updates, revisions, and taxonomy assignment. Destructive and
+privileged operations are denied until the site owner opts in.
 
 This version is an early alpha for development and security review.
 
@@ -48,6 +49,13 @@ The modern stateless HTTP protocol `2026-07-28` plus legacy clients using
 `2025-11-25` and `2025-06-18`.
 
 == Changelog ==
+
+= Unreleased =
+* Added content lifecycle abilities: create-draft, update-content,
+  list/get-revisions, trash/restore/publish-content, and restore-revision.
+* Added taxonomy abilities: list-taxonomies, list-terms, create-term, assign-terms.
+* Added risk class opt-in: destructive and privileged operations are denied
+  until the site owner enables them.
 
 = 0.1.0-alpha.2 =
 * Added list-content-types, search-content, and get-content read abilities.
