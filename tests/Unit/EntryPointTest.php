@@ -46,7 +46,7 @@ final class EntryPointTest extends PHPUnitTestCase
 
     public function testLoadingEntryPointBootsThePlugin(): void
     {
-        self::assertSame('0.1.0-alpha.2', WP_NERVE_VERSION);
+        self::assertSame('0.1.0-alpha.3', WP_NERVE_VERSION);
 
         self::assertCount(1, WPState::$activationHooks);
         self::assertSame(array(Activator::class, 'activate'), WPState::$activationHooks[0]['callback']);
