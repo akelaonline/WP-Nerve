@@ -33,6 +33,8 @@ if (! class_exists('WP_Post')) {
 
         public int $post_author = 0;
 
+        public int $menu_order = 0;
+
         public int $post_parent = 0;
 
         public function __construct(public readonly int $ID)

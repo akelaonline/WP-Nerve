@@ -1181,6 +1181,227 @@ if (! function_exists('wp_delete_comment')) {
     }
 }
 
+if (! function_exists('wp_get_nav_menus')) {
+    /**
+     * @param array<string, mixed> $args
+     * @return array<int, WP_Term>
+     */
+    function wp_get_nav_menus(array $args = array()): array
+    {
+        unset($args);
+
+        $menus = array();
+
+        foreach (WPState::$navMenus as $menu) {
+            $menus[] = $menu;
+        }
+
+        return $menus;
+    }
+}
+
+if (! function_exists('wp_get_nav_menu_items')) {
+    /**
+     * @param int|string|WP_Term $menu
+     * @param array<string, mixed> $args
+     * @return array<int, WP_Post>|false
+     */
+    function wp_get_nav_menu_items($menu, array $args = array()): array|false
+    {
+        unset($args);
+
+        $menuId = $menu instanceof WP_Term ? $menu->term_id : (int) $menu;
+
+        $items = array();
+
+        foreach (WPState::$navMenuItems as $id => $item) {
+            if ((WPState::$menuItemMenu[$id] ?? 0) === $menuId) {
+                $items[] = $item;
+            }
+        }
+
+        usort(
+            $items,
+            static fn (WP_Post $a, WP_Post $b): int => $a->menu_order <=> $b->menu_order
+        );
+
+        return $items;
+    }
+}
+
+if (! function_exists('wp_create_nav_menu')) {
+    function wp_create_nav_menu(string $menu_name): int|WP_Error
+    {
+        $id = count(WPState::$navMenus) + 2000;
+
+        $menu = new WP_Term($id);
+        $menu->name     = $menu_name;
+        $menu->slug     = sanitize_title($menu_name);
+        $menu->taxonomy = 'nav_menu';
+
+        WPState::$navMenus[$id] = $menu;
+
+        return $id;
+    }
+}
+
+if (! function_exists('wp_update_nav_menu_item')) {
+    /**
+     * @param array<string, mixed> $menu_item_data
+     */
+    function wp_update_nav_menu_item(int $menu_id, int $menu_item_db_id = 0, array $menu_item_data = array()): int|WP_Error
+    {
+        if (! isset(WPState::$navMenus[$menu_id])) {
+            return new WP_Error('invalid_menu', 'Invalid menu.');
+        }
+
+        $id = $menu_item_db_id;
+
+        if (0 === $id) {
+            $id = WPState::$nextPostId++;
+        }
+
+        if (! isset(WPState::$navMenuItems[$id])) {
+            $post = new WP_Post($id);
+            $post->post_type   = 'nav_menu_item';
+            $post->post_status = 'publish';
+
+            WPState::$navMenuItems[$id] = $post;
+            WPState::$posts[$id]        = $post;
+        }
+
+        $post = WPState::$navMenuItems[$id];
+
+        $post->post_title  = (string) ($menu_item_data['menu-item-title'] ?? $post->post_title);
+        $post->post_parent = (int) ($menu_item_data['menu-item-parent-id'] ?? $post->post_parent);
+        $post->menu_order  = (int) ($menu_item_data['menu-item-position'] ?? $post->menu_order);
+
+        WPState::$menuItemMenu[$id]     = $menu_id;
+        WPState::$postTerms[$id]['nav_menu'] = array($menu_id);
+
+        foreach (array('type', 'object', 'object_id', 'url', 'target') as $metaKey) {
+            $default = 'object_id' === $metaKey ? 0 : '';
+            $value   = $menu_item_data['menu-item-' . $metaKey] ?? $default;
+
+            WPState::$postMeta[$id]['_menu_item_' . $metaKey] = $value;
+        }
+
+        return $id;
+    }
+}
+
+if (! function_exists('wp_delete_nav_menu')) {
+    function wp_delete_nav_menu(int|string|WP_Term $menu): bool|WP_Error
+    {
+        $menuId = $menu instanceof WP_Term ? $menu->term_id : (int) $menu;
+
+        if (! isset(WPState::$navMenus[$menuId])) {
+            return new WP_Error('invalid_menu', 'Invalid menu.');
+        }
+
+        unset(WPState::$navMenus[$menuId]);
+
+        foreach (WPState::$menuItemMenu as $itemId => $menuOfItem) {
+            if ($menuOfItem === $menuId) {
+                unset(WPState::$navMenuItems[$itemId], WPState::$posts[$itemId], WPState::$menuItemMenu[$itemId]);
+            }
+        }
+
+        return true;
+    }
+}
+
+if (! function_exists('wp_delete_post')) {
+    function wp_delete_post(int $post_id = 0, bool $force_delete = false): ?WP_Post
+    {
+        unset($force_delete);
+
+        $post = get_post($post_id);
+
+        if (null === $post) {
+            return null;
+        }
+
+        unset(WPState::$posts[$post_id], WPState::$navMenuItems[$post_id]);
+        WPState::$deletedPostIds[] = $post_id;
+
+        return $post;
+    }
+}
+
+if (! function_exists('wp_get_post_terms')) {
+    /**
+     * @param array<string, mixed> $args
+     * @return array<int, WP_Term>|WP_Error
+     */
+    function wp_get_post_terms(int $post_id, string|array $taxonomy, array $args = array()): array|WP_Error
+    {
+        unset($args);
+
+        $names = is_array($taxonomy) ? $taxonomy : array($taxonomy);
+
+        $items = array();
+
+        foreach ($names as $name) {
+            foreach (WPState::$postTerms[$post_id][$name] ?? array() as $termId) {
+                if (isset(WPState::$terms[$termId])) {
+                    $items[] = WPState::$terms[$termId];
+                } elseif (isset(WPState::$navMenus[$termId])) {
+                    $items[] = WPState::$navMenus[$termId];
+                }
+            }
+        }
+
+        return $items;
+    }
+}
+
+if (! function_exists('get_nav_menu_locations')) {
+    /**
+     * @return array<string, int>
+     */
+    function get_nav_menu_locations(): array
+    {
+        return WPState::$menuLocations;
+    }
+}
+
+if (! function_exists('set_theme_mod')) {
+    function set_theme_mod(string $mod, mixed $value = false): void
+    {
+        WPState::$themeMods[$mod] = $value;
+    }
+}
+
+if (! function_exists('get_theme_mod')) {
+    function get_theme_mod(string $mod, mixed $default = false): mixed
+    {
+        return WPState::$themeMods[$mod] ?? $default;
+    }
+}
+
+if (! function_exists('get_registered_sidebars')) {
+    /**
+     * @return array<int, array<string, string>>
+     */
+    function get_registered_sidebars(): array
+    {
+        return WPState::$sidebars;
+    }
+}
+
+if (! function_exists('wp_get_sidebars_widgets')) {
+    /**
+     * @return array<string, array<int, string>>
+     */
+    function wp_get_sidebars_widgets(bool $deprecated = true): array
+    {
+        unset($deprecated);
+
+        return WPState::$sidebarWidgets;
+    }
+}
+
 if (! function_exists('sanitize_title')) {
     function sanitize_title(string $title): string
     {

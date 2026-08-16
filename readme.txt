@@ -56,6 +56,8 @@ The modern stateless HTTP protocol `2026-07-28` plus legacy clients using
 * Added taxonomy abilities: list-taxonomies, list-terms, create-term, assign-terms.
 * Added media abilities: list/get/upload/update/delete-media.
 * Added comment abilities: list/get/create/reply/moderate/delete-comment.
+* Added menu abilities: list, get-items, create, add/update/delete-item,
+  assign-location. Widget reads: list-sidebars, get-sidebar, list-available.
 * Added risk class opt-in: destructive and privileged operations are denied
   until the site owner enables them.
 
