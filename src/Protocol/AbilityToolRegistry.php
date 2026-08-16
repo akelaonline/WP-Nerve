@@ -14,7 +14,7 @@ use WP_Ability;
 use WP_Error;
 use WPNerve\Policy\PolicyEngine;
 
-final class AbilityToolRegistry
+final class AbilityToolRegistry implements ToolRegistry
 {
     public function __construct(private readonly PolicyEngine $policy)
     {

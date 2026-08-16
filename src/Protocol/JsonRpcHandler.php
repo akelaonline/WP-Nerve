@@ -10,13 +10,13 @@ declare(strict_types=1);
 
 namespace WPNerve\Protocol;
 
-use WPNerve\Audit\AuditRepository;
+use WPNerve\Audit\AuditRecorder;
 
 final class JsonRpcHandler
 {
     public function __construct(
-        private readonly AbilityToolRegistry $tools,
-        private readonly AuditRepository $audit
+        private readonly ToolRegistry $tools,
+        private readonly AuditRecorder $audit
     ) {
     }
 
