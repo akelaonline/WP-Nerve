@@ -430,6 +430,16 @@ if (! function_exists('is_wp_error')) {
     }
 }
 
+if (! function_exists('wp_get_current_user')) {
+    function wp_get_current_user(): object
+    {
+        return (object) array(
+            'ID'           => WPState::$currentUserId,
+            'display_name' => WPState::$currentUserDisplayName,
+        );
+    }
+}
+
 if (! function_exists('wp_unslash')) {
     function wp_unslash(mixed $value): mixed
     {
@@ -639,7 +649,7 @@ if (! function_exists('wp_untrash_post')) {
 }
 
 if (! function_exists('wp_publish_post')) {
-    function wp_publish_post(int|WP_Post $post = null): ?WP_Post
+    function wp_publish_post(int|WP_Post|null $post = null): ?WP_Post
     {
         $id = $post instanceof WP_Post ? $post->ID : (int) $post;
 
@@ -661,7 +671,7 @@ if (! function_exists('wp_get_post_revisions')) {
      * @param array<string, mixed> $args
      * @return array<int, WP_Post>
      */
-    function wp_get_post_revisions(int $post_id = 0, array $args = null): array
+    function wp_get_post_revisions(int $post_id = 0, ?array $args = null): array
     {
         unset($args);
 
@@ -680,7 +690,7 @@ if (! function_exists('wp_get_post_revisions')) {
 }
 
 if (! function_exists('wp_get_post_revision')) {
-    function wp_get_post_revision(int|WP_Post $post = null): ?WP_Post
+    function wp_get_post_revision(int|WP_Post|null $post = null): ?WP_Post
     {
         $id = $post instanceof WP_Post ? $post->ID : (int) $post;
 
@@ -689,7 +699,7 @@ if (! function_exists('wp_get_post_revision')) {
 }
 
 if (! function_exists('wp_restore_post_revision')) {
-    function wp_restore_post_revision(int|WP_Post $revision_id, array $fields = null): int|false
+    function wp_restore_post_revision(int|WP_Post $revision_id, ?array $fields = null): int|false
     {
         unset($fields);
 
@@ -895,6 +905,279 @@ if (! function_exists('wp_get_object_terms')) {
             static fn (int $id): WP_Term => WPState::$terms[$id],
             $items
         ));
+    }
+}
+
+if (! function_exists('wp_upload_bits')) {
+    /**
+     * @return array{file: string, url: string, error: string|false}
+     */
+    function wp_upload_bits(string $name, ?string $deprecated = null, string $bits = '', ?string $time = null): array
+    {
+        unset($deprecated, $time);
+
+        $result = array(
+            'file'  => '/var/www/wp-content/uploads/' . $name,
+            'url'   => WPState::$siteUrl . '/wp-content/uploads/' . $name,
+            'error' => false,
+        );
+
+        WPState::$lastUpload = $result;
+
+        return $result;
+    }
+}
+
+if (! function_exists('wp_insert_attachment')) {
+    /**
+     * @param array<string, mixed> $args
+     */
+    function wp_insert_attachment(array $args, string $file = '', int $parent_post_id = 0, bool $wp_error = false): int|WP_Error
+    {
+        unset($parent_post_id);
+
+        $id = WPState::$nextPostId++;
+
+        $post = new WP_Post($id);
+        $post->post_title      = (string) ($args['post_title'] ?? '');
+        $post->post_content    = (string) ($args['post_content'] ?? '');
+        $post->post_excerpt    = (string) ($args['post_excerpt'] ?? '');
+        $post->post_status     = 'inherit';
+        $post->post_type       = 'attachment';
+        $post->post_mime_type  = (string) ($args['post_mime_type'] ?? '');
+        $post->post_author     = WPState::$currentUserId;
+
+        WPState::$posts[$id] = $post;
+
+        if ('' !== $file) {
+            WPState::$attachedFiles[$id] = $file;
+        }
+
+        unset($wp_error);
+
+        return $id;
+    }
+}
+
+if (! function_exists('wp_generate_attachment_metadata')) {
+    /**
+     * @return array<string, mixed>
+     */
+    function wp_generate_attachment_metadata(int $attachment_id, string $file): array
+    {
+        $metadata = array(
+            'file'   => $file,
+            'width'  => 800,
+            'height' => 600,
+            'sizes'  => array(),
+        );
+
+        WPState::$attachmentMeta[$attachment_id] = $metadata;
+
+        return $metadata;
+    }
+}
+
+if (! function_exists('wp_update_attachment_metadata')) {
+    /**
+     * @param array<string, mixed> $metadata
+     * @return bool
+     */
+    function wp_update_attachment_metadata(int $attachment_id, array $metadata): bool
+    {
+        WPState::$attachmentMeta[$attachment_id] = $metadata;
+
+        return true;
+    }
+}
+
+if (! function_exists('wp_get_attachment_metadata')) {
+    /**
+     * @return array<string, mixed>
+     */
+    function wp_get_attachment_metadata(int $attachment_id, bool $unfiltered = false): array
+    {
+        unset($unfiltered);
+
+        return WPState::$attachmentMeta[$attachment_id] ?? array();
+    }
+}
+
+if (! function_exists('wp_get_attachment_url')) {
+    function wp_get_attachment_url(int $attachment_id): string|false
+    {
+        $file = WPState::$attachedFiles[$attachment_id] ?? '';
+
+        return '' === $file ? false : WPState::$siteUrl . '/wp-content/uploads/' . basename($file);
+    }
+}
+
+if (! function_exists('get_attached_file')) {
+    function get_attached_file(int $attachment_id, bool $unfiltered = false): string|false
+    {
+        unset($unfiltered);
+
+        return WPState::$attachedFiles[$attachment_id] ?? false;
+    }
+}
+
+if (! function_exists('update_post_meta')) {
+    function update_post_meta(int $post_id, string $meta_key, mixed $meta_value, mixed $prev_value = ''): bool
+    {
+        unset($prev_value);
+
+        WPState::$postMeta[$post_id][$meta_key] = $meta_value;
+
+        return true;
+    }
+}
+
+if (! function_exists('get_post_meta')) {
+    function get_post_meta(int $post_id, string $key = '', bool $single = false): mixed
+    {
+        if ('' === $key) {
+            return WPState::$postMeta[$post_id] ?? array();
+        }
+
+        $value = WPState::$postMeta[$post_id][$key] ?? '';
+
+        return $single ? $value : array($value);
+    }
+}
+
+if (! function_exists('wp_delete_attachment')) {
+    function wp_delete_attachment(int $post_id, bool $force_delete = false): ?WP_Post
+    {
+        $post = get_post($post_id);
+
+        if (null === $post) {
+            return null;
+        }
+
+        unset(WPState::$posts[$post_id]);
+        WPState::$deletedAttachmentIds[] = $post_id;
+
+        return $post;
+    }
+}
+
+if (! function_exists('get_comments')) {
+    /**
+     * @param array<string, mixed> $args
+     * @return array<int, WP_Comment>
+     */
+    function get_comments(array $args = array()): array
+    {
+        $status = (string) ($args['status'] ?? 'approve');
+
+        $map = array('approve' => '1', 'hold' => '0', 'spam' => 'spam', 'trash' => 'trash');
+
+        if ('all' === $status) {
+            $statuses = array('1', '0', 'spam', 'trash');
+        } elseif (isset($map[$status])) {
+            $statuses = array($map[$status]);
+        } else {
+            $statuses = array($status);
+        }
+
+        $items = array();
+
+        foreach (WPState::$comments as $comment) {
+            if (! in_array($comment->comment_approved, $statuses, true)) {
+                continue;
+            }
+
+            if (! empty($args['post_id']) && (int) $args['post_id'] !== $comment->comment_post_ID) {
+                continue;
+            }
+
+            $items[] = $comment;
+        }
+
+        if (isset($args['number']) && count($items) > (int) $args['number']) {
+            $items = array_slice($items, 0, (int) $args['number']);
+        }
+
+        return $items;
+    }
+}
+
+if (! function_exists('get_comment')) {
+    function get_comment(int|WP_Comment|null $comment = null, string $output = OBJECT): WP_Comment|null
+    {
+        unset($output);
+
+        $id = $comment instanceof WP_Comment ? $comment->comment_ID : (int) $comment;
+
+        return WPState::$comments[$id] ?? null;
+    }
+}
+
+if (! function_exists('wp_insert_comment')) {
+    /**
+     * @param array<string, mixed> $commentdata
+     */
+    function wp_insert_comment(array $commentdata): int
+    {
+        $id = WPState::$nextCommentId++;
+
+        $comment = new WP_Comment($id);
+        $comment->comment_post_ID     = (int) ($commentdata['comment_post_ID'] ?? 0);
+        $comment->comment_author      = (string) ($commentdata['comment_author'] ?? '');
+        $comment->comment_author_email = (string) ($commentdata['comment_author_email'] ?? '');
+        $comment->comment_content     = (string) ($commentdata['comment_content'] ?? '');
+        $comment->comment_parent      = (int) ($commentdata['comment_parent'] ?? 0);
+        $comment->user_id             = (int) ($commentdata['user_id'] ?? WPState::$currentUserId);
+        $comment->comment_approved    = (string) ($commentdata['comment_approved'] ?? '1');
+
+        WPState::$comments[$id] = $comment;
+
+        return $id;
+    }
+}
+
+if (! function_exists('wp_set_comment_status')) {
+    function wp_set_comment_status(int $comment_id, string $comment_status, bool $wp_error = false): bool|WP_Error
+    {
+        unset($wp_error);
+
+        $comment = get_comment($comment_id);
+
+        if (null === $comment) {
+            return false;
+        }
+
+        $map = array('approve' => '1', 'hold' => '0', 'spam' => 'spam', 'trash' => 'trash');
+
+        $next = $map[$comment_status] ?? $comment_status;
+
+        WPState::$commentStatusChanges[] = array(
+            'comment_id' => $comment_id,
+            'previous'   => $comment->comment_approved,
+            'next'       => $next,
+        );
+
+        $comment->comment_approved = $next;
+
+        return true;
+    }
+}
+
+if (! function_exists('wp_delete_comment')) {
+    function wp_delete_comment(int $comment_id, bool $force_delete = false): bool
+    {
+        unset($force_delete);
+
+        $comment = get_comment($comment_id);
+
+        if (null === $comment) {
+            return false;
+        }
+
+        unset(WPState::$comments[$comment_id]);
+        WPState::$deletedCommentIds[] = $comment_id;
+
+        return true;
     }
 }
 

@@ -29,6 +29,8 @@ if (! class_exists('WP_Post')) {
 
         public string $post_password = '';
 
+        public string $post_mime_type = '';
+
         public int $post_author = 0;
 
         public int $post_parent = 0;
@@ -112,6 +114,33 @@ if (! class_exists('WP_Taxonomy')) {
             $this->show_in_rest = (bool) ($args['show_in_rest'] ?? false);
             $this->rest_base    = isset($args['rest_base']) ? (string) $args['rest_base'] : null;
             $this->public       = (bool) ($args['public'] ?? true);
+        }
+    }
+}
+
+if (! class_exists('WP_Comment')) {
+    class WP_Comment
+    {
+        public int $comment_post_ID = 0;
+
+        public string $comment_author = '';
+
+        public string $comment_author_email = '';
+
+        public string $comment_content = '';
+
+        public string $comment_date = '2026-01-01 00:00:00';
+
+        public string $comment_approved = '1';
+
+        public int $comment_parent = 0;
+
+        public int $user_id = 0;
+
+        public string $comment_type = 'comment';
+
+        public function __construct(public readonly int $comment_ID)
+        {
         }
     }
 }

@@ -55,22 +55,22 @@ re-checks all three conditions before every execution.
 
 | Ability | Risk | Default | Status | Recovery requirement |
 |---|---:|---:|---|---|
-| `list-media` | Read | On | Planned | None |
-| `get-media` | Read | On | Planned | None |
-| `update-media` | Write | On | Planned | Previous metadata |
-| `upload-media` | Write | Off | Planned | Delete uploaded attachment |
-| `delete-media` | Destructive | Off | Planned | Restore from trash |
+| `list-media` | Read | On | **Implemented** | None |
+| `get-media` | Read | On | **Implemented** | None |
+| `update-media` | Write | On | **Implemented** | Previous metadata |
+| `upload-media` | Write | Off | **Implemented** | Delete uploaded attachment |
+| `delete-media` | Destructive | Off | **Implemented** | Restore from trash |
 
 ## Comments
 
 | Ability | Risk | Default | Status | Recovery requirement |
 |---|---:|---:|---|---|
-| `list-comments` | Read | On | Planned | None |
-| `get-comment` | Read | On | Planned | None |
-| `create-comment` | Write | On | Planned | Trash comment |
-| `reply-comment` | Write | On | Planned | Trash reply |
-| `moderate-comment` | Write | On | Planned | Previous status |
-| `delete-comment` | Destructive | Off | Planned | Restore from trash |
+| `list-comments` | Read | On | **Implemented** | None |
+| `get-comment` | Read | On | **Implemented** | None |
+| `create-comment` | Write | On | **Implemented** | Trash comment |
+| `reply-comment` | Write | On | **Implemented** | Trash reply |
+| `moderate-comment` | Write | On | **Implemented** | Previous status |
+| `delete-comment` | Destructive | Off | **Implemented** | Restore from trash |
 
 ## Menus and Widgets
 

@@ -16,6 +16,13 @@ All notable changes to WPNerve will be documented here.
   capability gates. Destructive operations are opt-in.
 - Taxonomy abilities: `list-taxonomies`, `list-terms`, `create-term` (opt-in),
   and `assign-terms` with previous-assignment recovery data.
+- Media abilities: `list-media`, `get-media`, `upload-media` (base64, opt-in),
+  `update-media`, and `delete-media` (opt-in), with upload size limits and
+  attachment metadata handling.
+- Comment abilities: `list-comments`, `get-comment`, `create-comment`,
+  `reply-comment`, `moderate-comment` (previous status returned for recovery),
+  and `delete-comment` (opt-in). Non-approved comment access requires
+  `moderate_comments`.
 - Ability registration refactored into per-domain registrars sharing a common
   base (`AbstractAbilityRegistrar`).
 

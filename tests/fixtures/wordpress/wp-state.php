@@ -60,6 +60,8 @@ final class WPState
 
     public static int $currentUserId = 1;
 
+    public static string $currentUserDisplayName = 'Test User';
+
     public static string $wpVersion = '6.9';
 
     public static bool $multisite = false;
@@ -130,6 +132,32 @@ final class WPState
     /** @var array<int, array<string, array<int, int>>> Post ID => taxonomy => term IDs. */
     public static array $objectTerms = array();
 
+    /** @var array<int, WP_Comment> Comment ID => object. */
+    public static array $comments = array();
+
+    public static int $nextCommentId = 500;
+
+    /** @var array<string, mixed> Last wp_upload_bits result. */
+    public static array $lastUpload = array();
+
+    /** @var array<int, string> Attachment ID => file path. */
+    public static array $attachedFiles = array();
+
+    /** @var array<int, array<string, mixed>> Attachment ID => metadata. */
+    public static array $attachmentMeta = array();
+
+    /** @var array<int, array<string, mixed>> Post ID => meta key => value. */
+    public static array $postMeta = array();
+
+    /** @var array<int, int> */
+    public static array $deletedAttachmentIds = array();
+
+    /** @var array<int, array{comment_id: int, previous: string, next: string}> */
+    public static array $commentStatusChanges = array();
+
+    /** @var array<int, int> */
+    public static array $deletedCommentIds = array();
+
     public static function reset(): void
     {
         self::$abilities = array();
@@ -152,6 +180,7 @@ final class WPState
         self::$pluginDirPath = '';
         self::$pluginDirUrl = 'https://example.test/wp-content/plugins/wp-nerve/';
         self::$currentUserId = 1;
+        self::$currentUserDisplayName = 'Test User';
         self::$wpVersion = '6.9';
         self::$multisite = false;
         self::$deactivatedPlugins = array();
@@ -177,6 +206,15 @@ final class WPState
         self::$taxonomies = array();
         self::$terms = array();
         self::$objectTerms = array();
+        self::$comments = array();
+        self::$nextCommentId = 500;
+        self::$lastUpload = array();
+        self::$attachedFiles = array();
+        self::$attachmentMeta = array();
+        self::$postMeta = array();
+        self::$deletedAttachmentIds = array();
+        self::$commentStatusChanges = array();
+        self::$deletedCommentIds = array();
 
         $GLOBALS['wpdb'] = self::$wpdb;
         $GLOBALS['wp_version'] = self::$wpVersion;
