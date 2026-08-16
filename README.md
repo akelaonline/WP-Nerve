@@ -2,6 +2,12 @@
 
 **The native agent gateway for WordPress.**
 
+[![CI](https://img.shields.io/github/actions/workflow/status/akelaonline/WP-Nerve/ci.yml?label=CI&color=16a34a)](https://github.com/akelaonline/WP-Nerve/actions)
+[![WordPress](https://img.shields.io/badge/WordPress-6.9%2B-21759b)](https://wordpress.org/)
+[![PHP](https://img.shields.io/badge/PHP-8.1%2B-777bb3)](https://www.php.net/)
+[![License](https://img.shields.io/badge/license-GPL--2.0-orange)](LICENSE)
+[![Instagram](https://img.shields.io/badge/Instagram-%40akelaonline-E4405F)](https://www.instagram.com/akelaonline/)
+
 WPNerve is a self-hosted WordPress plugin that exposes carefully selected native
 WordPress Abilities as Model Context Protocol (MCP) tools. It runs entirely inside
 the WordPress installation: no relay, SaaS control plane, or external database is
@@ -116,4 +122,11 @@ Content reads and safe draft mutations come next; plugin, theme, filesystem,
 ## License
 
 GPL-2.0-or-later. See [LICENSE](LICENSE).
+
+## Autor
+
+Creado por **Akela** · [@akelaonline](https://www.instagram.com/akelaonline/) · [akela.dev](https://akela.dev/seo)
+
+- **Instagram:** [@akelaonline](https://www.instagram.com/akelaonline/)
+- **Email:** [adjose@gmail.com](mailto:adjose@gmail.com)
 

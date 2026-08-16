@@ -1,5 +1,5 @@
 {
-  "name": "the-thing/wp-nerve",
+  "name": "akelaonline/wp-nerve",
   "description": "A secure, native MCP server and agent control layer for WordPress.",
   "type": "wordpress-plugin",
   "license": "GPL-2.0-or-later",

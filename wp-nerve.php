@@ -7,7 +7,8 @@
  * Version:           0.1.0-alpha.1
  * Requires at least: 6.9
  * Requires PHP:      8.1
- * Author:            The Thing
+ * Author:            Akela (@akelaonline)
+ * Author URI:        https://www.instagram.com/akelaonline/
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       wp-nerve
