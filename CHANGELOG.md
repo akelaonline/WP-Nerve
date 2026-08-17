@@ -23,11 +23,11 @@ All notable changes to WPNerve will be documented here.
   `reply-comment`, `moderate-comment` (previous status returned for recovery),
   and `delete-comment` (opt-in). Non-approved comment access requires
   `moderate_comments`.
-- Menu abilities: `menus/list`, `menus/get-items`, `menus/create`,
-  `menus/add-item`, `menus/update-item`, `menus/delete-item`, and
-  `menus/assign-location` (previous location map returned for recovery).
-- Widget abilities (read-only): `widgets/list-sidebars`, `widgets/get-sidebar`,
-  and `widgets/list-available`.
+- Menu abilities: `list-menus`, `get-menu-items`, `create-menu`,
+  `add-menu-item`, `update-menu-item`, `delete-menu-item`, and
+  `assign-menu-location` (previous location map returned for recovery).
+- Widget abilities (read-only): `list-sidebars`, `get-sidebar`,
+  and `list-available-widgets`.
 - Ability registration refactored into per-domain registrars sharing a common
   base (`AbstractAbilityRegistrar`).
 

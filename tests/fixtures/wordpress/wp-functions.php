@@ -194,10 +194,16 @@ if (! function_exists('wp_get_abilities')) {
 
 if (! function_exists('wp_register_ability')) {
     /**
+     * Mirrors the WordPress 6.9 name validation from WP_Abilities_Registry.
+     *
      * @param array<string, mixed> $args
      */
-    function wp_register_ability(string $name, array $args = array()): WP_Ability
+    function wp_register_ability(string $name, array $args = array()): ?WP_Ability
     {
+        if (1 !== preg_match('/^[a-z0-9-]+\/[a-z0-9-]+$/', $name)) {
+            return null;
+        }
+
         $ability = new WP_Ability($name, $args);
 
         WPState::$registeredAbilities[] = $ability;

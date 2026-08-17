@@ -261,7 +261,7 @@ final class MenuAbilities extends AbstractAbilityRegistrar
     private function registerListMenus(): void
     {
         $this->registerReadAbility(
-            'wp-nerve/menus/list',
+            'wp-nerve/list-menus',
             __('List menus', 'wp-nerve'),
             __('Lists navigation menus and their assigned theme locations.', 'wp-nerve'),
             $this->emptyInputSchema(),
@@ -295,7 +295,7 @@ final class MenuAbilities extends AbstractAbilityRegistrar
     private function registerGetMenuItems(): void
     {
         $this->registerReadAbility(
-            'wp-nerve/menus/get-items',
+            'wp-nerve/get-menu-items',
             __('Get menu items', 'wp-nerve'),
             __('Returns the items of a navigation menu.', 'wp-nerve'),
             $this->menuIdSchema(),
@@ -316,7 +316,7 @@ final class MenuAbilities extends AbstractAbilityRegistrar
     private function registerCreateMenu(): void
     {
         $this->registerAbility(
-            'wp-nerve/menus/create',
+            'wp-nerve/create-menu',
             __('Create menu', 'wp-nerve'),
             __('Creates a navigation menu. Undo by deleting the created menu.', 'wp-nerve'),
             array(
@@ -349,7 +349,7 @@ final class MenuAbilities extends AbstractAbilityRegistrar
     private function registerAddMenuItem(): void
     {
         $this->registerAbility(
-            'wp-nerve/menus/add-item',
+            'wp-nerve/add-menu-item',
             __('Add menu item', 'wp-nerve'),
             __('Adds an item to a navigation menu. Undo by deleting the item.', 'wp-nerve'),
             $this->menuItemInputSchema(true),
@@ -367,7 +367,7 @@ final class MenuAbilities extends AbstractAbilityRegistrar
     private function registerUpdateMenuItem(): void
     {
         $this->registerAbility(
-            'wp-nerve/menus/update-item',
+            'wp-nerve/update-menu-item',
             __('Update menu item', 'wp-nerve'),
             __('Updates the title, URL, target, or parent of a menu item.', 'wp-nerve'),
             array(
@@ -397,7 +397,7 @@ final class MenuAbilities extends AbstractAbilityRegistrar
     private function registerDeleteMenuItem(): void
     {
         $this->registerAbility(
-            'wp-nerve/menus/delete-item',
+            'wp-nerve/delete-menu-item',
             __('Delete menu item', 'wp-nerve'),
             __('Deletes a menu item. Undo by re-adding the item.', 'wp-nerve'),
             $this->menuItemIdSchema(),
@@ -422,7 +422,7 @@ final class MenuAbilities extends AbstractAbilityRegistrar
     private function registerAssignLocation(): void
     {
         $this->registerAbility(
-            'wp-nerve/menus/assign-location',
+            'wp-nerve/assign-menu-location',
             __('Assign menu location', 'wp-nerve'),
             __('Assigns a menu to a theme location, or removes it with menu_id 0. The previous map is returned for recovery.', 'wp-nerve'),
             array(

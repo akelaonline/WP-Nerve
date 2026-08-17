@@ -36,16 +36,16 @@ final class MenuWidgetTest extends TestCase
     public function testRegistersMenuAndWidgetAbilities(): void
     {
         $expected = array(
-            'wp-nerve/menus/list'            => array('read', true),
-            'wp-nerve/menus/get-items'       => array('read', true),
-            'wp-nerve/menus/create'          => array('write', true),
-            'wp-nerve/menus/add-item'        => array('write', true),
-            'wp-nerve/menus/update-item'     => array('write', true),
-            'wp-nerve/menus/delete-item'     => array('write', true),
-            'wp-nerve/menus/assign-location' => array('write', true),
-            'wp-nerve/widgets/list-sidebars' => array('read', true),
-            'wp-nerve/widgets/get-sidebar'   => array('read', true),
-            'wp-nerve/widgets/list-available' => array('read', true),
+            'wp-nerve/list-menus'             => array('read', true),
+            'wp-nerve/get-menu-items'         => array('read', true),
+            'wp-nerve/create-menu'            => array('write', true),
+            'wp-nerve/add-menu-item'          => array('write', true),
+            'wp-nerve/update-menu-item'       => array('write', true),
+            'wp-nerve/delete-menu-item'       => array('write', true),
+            'wp-nerve/assign-menu-location'   => array('write', true),
+            'wp-nerve/list-sidebars'          => array('read', true),
+            'wp-nerve/get-sidebar'            => array('read', true),
+            'wp-nerve/list-available-widgets' => array('read', true),
         );
 
         $actual = array();
@@ -62,13 +62,31 @@ final class MenuWidgetTest extends TestCase
         self::assertSame($expected, $actual);
     }
 
+    public function testAllRegisteredAbilityNamesPassWordPressValidation(): void
+    {
+        $registrar = new AbilityRegistrar();
+        $registrar->registerAbilities();
+
+        self::assertNotEmpty(WPState::$registeredAbilities);
+
+        foreach (WPState::$registeredAbilities as $ability) {
+            $name = $ability->get_name();
+
+            self::assertSame(
+                1,
+                preg_match('/^[a-z0-9-]+\/[a-z0-9-]+$/', $name),
+                'Ability name fails WordPress 6.9 validation: ' . $name
+            );
+        }
+    }
+
     public function testListMenusReturnsMenusAndLocations(): void
     {
         WPState::$navMenus[10] = $this->menu(10, 'Principal');
         WPState::$navMenus[11] = $this->menu(11, 'Footer');
         WPState::$menuLocations = array('primary' => 10);
 
-        $result = $this->registry->execute('wp_nerve_menus_list', array());
+        $result = $this->registry->execute('wp_nerve_list_menus', array());
 
         self::assertNotInstanceOf(WP_Error::class, $result);
         self::assertCount(2, $result['result']['menus']);
@@ -82,7 +100,7 @@ final class MenuWidgetTest extends TestCase
         WPState::$navMenuItems[21] = $this->menuItem(21, 10, 'Home', 0);
         WPState::$navMenuItems[22] = $this->menuItem(22, 10, 'About', 1);
 
-        $result = $this->registry->execute('wp_nerve_menus_get_items', array('menu_id' => 10));
+        $result = $this->registry->execute('wp_nerve_get_menu_items', array('menu_id' => 10));
 
         self::assertNotInstanceOf(WP_Error::class, $result);
         self::assertSame(2, $result['result']['total']);
@@ -92,7 +110,7 @@ final class MenuWidgetTest extends TestCase
 
     public function testGetMenuItemsRejectsUnknownMenu(): void
     {
-        $result = $this->registry->execute('wp_nerve_menus_get_items', array('menu_id' => 404));
+        $result = $this->registry->execute('wp_nerve_get_menu_items', array('menu_id' => 404));
 
         self::assertInstanceOf(WP_Error::class, $result);
         self::assertSame('wp_nerve_menu_not_found', $result->get_error_code());
@@ -100,7 +118,7 @@ final class MenuWidgetTest extends TestCase
 
     public function testCreateMenuInsertsMenu(): void
     {
-        $result = $this->registry->execute('wp_nerve_menus_create', array('name' => 'Nuevo menú'));
+        $result = $this->registry->execute('wp_nerve_create_menu', array('name' => 'Nuevo menú'));
 
         self::assertNotInstanceOf(WP_Error::class, $result);
         self::assertSame(2000, $result['result']['id']);
@@ -112,7 +130,7 @@ final class MenuWidgetTest extends TestCase
     {
         WPState::$navMenus[10] = $this->menu(10, 'Principal');
 
-        $result = $this->registry->execute('wp_nerve_menus_add_item', array(
+        $result = $this->registry->execute('wp_nerve_add_menu_item', array(
             'menu_id' => 10,
             'title'   => 'Contacto',
             'url'     => 'https://example.test/contacto',
@@ -130,7 +148,7 @@ final class MenuWidgetTest extends TestCase
         WPState::$navMenus[10] = $this->menu(10, 'Principal');
         WPState::$navMenuItems[21] = $this->menuItem(21, 10, 'Home', 0);
 
-        $result = $this->registry->execute('wp_nerve_menus_update_item', array(
+        $result = $this->registry->execute('wp_nerve_update_menu_item', array(
             'item_id' => 21,
             'title'   => 'Inicio',
             'url'     => 'https://example.test/inicio',
@@ -146,7 +164,7 @@ final class MenuWidgetTest extends TestCase
         WPState::$navMenus[10] = $this->menu(10, 'Principal');
         WPState::$navMenuItems[21] = $this->menuItem(21, 10, 'Home', 0);
 
-        $result = $this->registry->execute('wp_nerve_menus_delete_item', array('item_id' => 21));
+        $result = $this->registry->execute('wp_nerve_delete_menu_item', array('item_id' => 21));
 
         self::assertNotInstanceOf(WP_Error::class, $result);
         self::assertSame(true, $result['result']['deleted']);
@@ -158,7 +176,7 @@ final class MenuWidgetTest extends TestCase
         WPState::$navMenus[10] = $this->menu(10, 'Principal');
         WPState::$menuLocations = array('primary' => 0);
 
-        $result = $this->registry->execute('wp_nerve_menus_assign_location', array(
+        $result = $this->registry->execute('wp_nerve_assign_menu_location', array(
             'location' => 'primary',
             'menu_id'  => 10,
         ));
@@ -173,7 +191,7 @@ final class MenuWidgetTest extends TestCase
     {
         WPState::$menuLocations = array('primary' => 10);
 
-        $result = $this->registry->execute('wp_nerve_menus_assign_location', array(
+        $result = $this->registry->execute('wp_nerve_assign_menu_location', array(
             'location' => 'primary',
             'menu_id'  => 0,
         ));
@@ -189,7 +207,7 @@ final class MenuWidgetTest extends TestCase
         );
         $GLOBALS['wp_registered_sidebars'] = WPState::$sidebars;
 
-        $result = $this->registry->execute('wp_nerve_widgets_list_sidebars', array());
+        $result = $this->registry->execute('wp_nerve_list_sidebars', array());
 
         self::assertNotInstanceOf(WP_Error::class, $result);
         self::assertSame('sidebar-1', $result['result']['sidebars'][0]['id']);
@@ -202,7 +220,7 @@ final class MenuWidgetTest extends TestCase
             'sidebar-1' => array('search-2', 'recent-posts-3'),
         );
 
-        $result = $this->registry->execute('wp_nerve_widgets_get_sidebar', array('sidebar_id' => 'sidebar-1'));
+        $result = $this->registry->execute('wp_nerve_get_sidebar', array('sidebar_id' => 'sidebar-1'));
 
         self::assertNotInstanceOf(WP_Error::class, $result);
         self::assertSame(array('search-2', 'recent-posts-3'), $result['result']['widgets']);
@@ -210,7 +228,7 @@ final class MenuWidgetTest extends TestCase
 
     public function testGetSidebarRejectsUnknown(): void
     {
-        $result = $this->registry->execute('wp_nerve_widgets_get_sidebar', array('sidebar_id' => 'nope'));
+        $result = $this->registry->execute('wp_nerve_get_sidebar', array('sidebar_id' => 'nope'));
 
         self::assertInstanceOf(WP_Error::class, $result);
         self::assertSame('wp_nerve_sidebar_not_found', $result->get_error_code());
@@ -226,7 +244,7 @@ final class MenuWidgetTest extends TestCase
         );
         $GLOBALS['wp_widget_factory'] = WPState::$widgetFactory;
 
-        $result = $this->registry->execute('wp_nerve_widgets_list_available', array());
+        $result = $this->registry->execute('wp_nerve_list_available_widgets', array());
 
         self::assertNotInstanceOf(WP_Error::class, $result);
         self::assertCount(2, $result['result']['widgets']);
