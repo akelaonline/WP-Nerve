@@ -178,7 +178,7 @@ final class OAuthTest extends TestCase
         ));
 
         $verifier = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._~';
-        $challenge = base64_encode(hash('sha256', $verifier, true));
+        $challenge = $this->challengeFor($verifier);
 
         // Consent (POST).
         $consent = $this->withParams(new WP_REST_Request('POST', '/oauth/authorize'), array(
@@ -189,6 +189,7 @@ final class OAuthTest extends TestCase
             'code_challenge_method' => 'S256',
             'state'                 => 'state-1',
             'wp_nerve_consent'      => 'allow',
+            'wp_nerve_oauth_nonce'  => 'nonce',
         ));
 
         $response = $this->server->authorize($consent);
@@ -221,6 +222,7 @@ final class OAuthTest extends TestCase
         self::assertNotEmpty($tokens['access_token']);
         self::assertNotEmpty($tokens['refresh_token']);
         self::assertSame('Bearer', $tokens['token_type']);
+        self::assertSame('no-store', $tokenResponse->get_headers()['cache-control']);
 
         // The access token validates to the consenting user.
         self::assertSame(WPState::$currentUserId, $this->store->validateAccessToken($tokens['access_token']));
@@ -245,7 +247,7 @@ final class OAuthTest extends TestCase
             'redirect_uris' => array('https://claude.ai/callback'),
         ));
 
-        $challenge = base64_encode(hash('sha256', 'right-verifier', true));
+        $challenge = $this->challengeFor('right-verifier');
 
         $consent = $this->withParams(new WP_REST_Request('POST', '/oauth/authorize'), array(
             'client_id'             => $clientId,
@@ -254,6 +256,7 @@ final class OAuthTest extends TestCase
             'code_challenge'        => $challenge,
             'code_challenge_method' => 'S256',
             'wp_nerve_consent'      => 'allow',
+            'wp_nerve_oauth_nonce'  => 'nonce',
         ));
 
         $response = $this->server->authorize($consent);
@@ -309,6 +312,62 @@ final class OAuthTest extends TestCase
     public function testValidateAccessTokenReturnsNullForUnknownToken(): void
     {
         self::assertNull($this->store->validateAccessToken('not-a-token'));
+    }
+
+    public function testConsentRejectsInvalidNonce(): void
+    {
+        $clientId = $this->store->createClient(array(
+            'client_name'   => 'Claude',
+            'redirect_uris' => array('https://claude.ai/callback'),
+        ));
+
+        $consent = $this->withParams(new WP_REST_Request('POST', '/oauth/authorize'), array(
+            'client_id'             => $clientId,
+            'redirect_uri'          => 'https://claude.ai/callback',
+            'response_type'         => 'code',
+            'code_challenge'        => $this->challengeFor('verifier'),
+            'code_challenge_method' => 'S256',
+            'state'                 => 'state-2',
+            'wp_nerve_consent'      => 'allow',
+            'wp_nerve_oauth_nonce'  => 'nonce',
+        ));
+
+        WPState::$nonceValid = false;
+
+        $response = $this->server->authorize($consent);
+
+        self::assertSame(302, $response->get_status());
+
+        $location = $response->get_headers()['location'];
+
+        self::assertStringContainsString('access_denied', $location);
+        self::assertStringContainsString('state=state-2', $location);
+    }
+
+    public function testConsentFormIncludesNonceField(): void
+    {
+        $clientId = $this->store->createClient(array(
+            'client_name'   => 'Claude',
+            'redirect_uris' => array('https://claude.ai/callback'),
+        ));
+
+        $request = $this->withParams(new WP_REST_Request('GET', '/oauth/authorize'), array(
+            'client_id'             => $clientId,
+            'redirect_uri'          => 'https://claude.ai/callback',
+            'response_type'         => 'code',
+            'code_challenge'        => 'challenge',
+            'code_challenge_method' => 'S256',
+        ));
+
+        $response = $this->server->authorize($request);
+
+        self::assertStringContainsString('wp_nerve_oauth_nonce', (string) $response->get_data());
+    }
+
+    private function challengeFor(string $verifier): string
+    {
+        // RFC 7636: BASE64URL-ENCODE(SHA256(verifier)), unpadded.
+        return rtrim(strtr(base64_encode(hash('sha256', $verifier, true)), '+/', '-_'), '=');
     }
 
     /**

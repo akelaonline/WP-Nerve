@@ -2,6 +2,37 @@
 
 All notable changes to WPNerve will be documented here.
 
+## [0.1.0-alpha.4] - 2026-08-17
+
+### Added
+
+- User abilities (opt-in): `list-users`, `get-user`, `create-user`,
+  `update-user`, `delete-user`. Administrator creation requires
+  `promote_users`.
+- Plugin abilities (opt-in): `list-plugins`, `activate-plugin`,
+  `deactivate-plugin`, `upload-plugin` (base64 zip), `delete-plugin`.
+- Option abilities (opt-in): `get-option`, `update-option` (previous value
+  returned for recovery), and `list-options` (keys only, never values).
+- System abilities (opt-in): `get-transient` and `debug-log` (tail read).
+- `preview-content-update` dry-run ability, completing the v1 catalog.
+- Admin dashboard: generate an Application Password in one click, toggle the
+  enabled risk classes, and copy client configuration snippets for Claude Code
+  and curl.
+- OAuth 2.1 authorization server for clients that cannot send Application
+  Passwords (Claude web and mobile connectors): dynamic client registration,
+  authorization code grant with PKCE S256, refresh token rotation, bearer
+  token authentication on the MCP endpoint, and the authorization server
+  metadata document. Tokens are stored as SHA-256 hashes in dedicated tables.
+
+### Fixed
+
+- PKCE verification now uses unpadded base64url per RFC 7636, so
+  spec-compliant clients can exchange codes.
+- OAuth token responses send `Cache-Control: no-store` per OAuth 2.1.
+- Consent submission is protected by a nonce (CSRF).
+- Anonymous authorize requests preserve their query parameters through the
+  wp-login redirect.
+
 ## [0.1.0-alpha.3] - 2026-08-16
 
 ### Added
@@ -28,25 +59,16 @@ All notable changes to WPNerve will be documented here.
   `assign-menu-location` (previous location map returned for recovery).
 - Widget abilities (read-only): `list-sidebars`, `get-sidebar`,
   and `list-available-widgets`.
-- User abilities (opt-in): `list-users`, `get-user`, `create-user`,
-  `update-user`, `delete-user`. Administrator creation requires
-  `promote_users`.
-- Plugin abilities (opt-in): `list-plugins`, `activate-plugin`,
-  `deactivate-plugin`, `upload-plugin` (base64 zip), `delete-plugin`.
-- Option abilities (opt-in): `get-option`, `update-option` (previous value
-  returned for recovery), and `list-options` (keys only, never values).
-- System abilities (opt-in): `get-transient` and `debug-log` (tail read).
-- `preview-content-update` dry-run ability, completing the v1 catalog.
-- Admin dashboard: generate an Application Password in one click, toggle the
-  enabled risk classes, and copy client configuration snippets for Claude Code
-  and curl.
-- OAuth 2.1 authorization server for clients that cannot send Application
-  Passwords (Claude web and mobile connectors): dynamic client registration,
-  authorization code grant with PKCE S256, refresh token rotation, bearer
-  token authentication on the MCP endpoint, and the authorization server
-  metadata document. Tokens are stored as SHA-256 hashes in dedicated tables.
 - Ability registration refactored into per-domain registrars sharing a common
   base (`AbstractAbilityRegistrar`).
+
+### Fixed
+
+- Menu and widget ability names renamed to single-slash form so they pass the
+  WordPress 6.9 ability name validation.
+- Menu item output schemas declare the `recovery` field; `trash-content`
+  uses the full content item schema. The runtime double now validates ability
+  output against the output schema.
 
 ## [0.1.0-alpha.2] - 2026-08-16
 
