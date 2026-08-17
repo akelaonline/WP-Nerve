@@ -47,9 +47,11 @@ final class AdminPage
         }
 
         if ('enable_risk_classes' === $action) {
+            // phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- each value is sanitized below.
             $requested = isset($_POST['wp_nerve_risk_classes']) && is_array($_POST['wp_nerve_risk_classes'])
-                ? wp_unslash($_POST['wp_nerve_risk_classes']) // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- each value is sanitized below.
+                ? wp_unslash($_POST['wp_nerve_risk_classes'])
                 : array();
+            // phpcs:enable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
             $this->saveRiskClasses($requested);
         } elseif ('generate_app_password' === $action) {
