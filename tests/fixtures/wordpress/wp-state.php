@@ -43,6 +43,8 @@ final class WPState
 
     public static bool $isLoggedIn = true;
 
+    public static bool $nonceValid = true;
+
     /** @var bool|callable(string, mixed...): bool */
     public static mixed $userCan = true;
 
@@ -231,6 +233,7 @@ final class WPState
             'description' => 'A test site',
         );
         self::$isLoggedIn = true;
+        self::$nonceValid = true;
         self::$userCan = true;
         self::$isSsl = true;
         self::$environmentType = 'development';

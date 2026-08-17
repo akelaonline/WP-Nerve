@@ -134,6 +134,42 @@ final class ContentLifecycleTest extends TestCase
         self::assertSame('wp_nerve_forbidden', $result->get_error_code());
     }
 
+    public function testPreviewContentUpdateShowsProposedChanges(): void
+    {
+        WPState::$posts[7] = $this->post(7, 'Original', 'publish', 'Body original');
+        WPState::$userCan  = static fn (string $cap, mixed $id = null): bool =>
+            'edit_posts' === $cap || ('edit_post' === $cap && 7 === $id);
+
+        $result = $this->registry->execute('wp_nerve_preview_content_update', array(
+            'id'      => 7,
+            'title'   => 'Nuevo título',
+            'content' => 'Body nuevo',
+        ));
+
+        self::assertNotInstanceOf(WP_Error::class, $result);
+
+        $preview = $result['result'];
+
+        self::assertTrue($preview['preview']);
+        self::assertSame('Original', $preview['current']['title']);
+        self::assertSame('Nuevo título', $preview['proposed']['title']);
+        self::assertSame(array('title', 'content'), $preview['changed']);
+        // Nothing was written.
+        self::assertSame(array(), WPState::$lastUpdatedPost);
+        self::assertSame('Original', WPState::$posts[7]->post_title);
+    }
+
+    public function testPreviewContentUpdateRequiresEditCapability(): void
+    {
+        WPState::$posts[7] = $this->post(7, 'Original', 'publish');
+        WPState::$userCan  = static fn (string $cap): bool => 'edit_posts' === $cap;
+
+        $result = $this->registry->execute('wp_nerve_preview_content_update', array('id' => 7, 'title' => 'X'));
+
+        self::assertInstanceOf(WP_Error::class, $result);
+        self::assertSame('wp_nerve_forbidden', $result->get_error_code());
+    }
+
     public function testUpdateContentRejectsMissingPost(): void
     {
         $result = $this->registry->execute('wp_nerve_update_content', array('id' => 999, 'title' => 'X'));

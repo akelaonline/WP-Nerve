@@ -441,6 +441,24 @@ if (! function_exists('is_wp_error')) {
     }
 }
 
+if (! class_exists('WP_Application_Passwords')) {
+    class WP_Application_Passwords
+    {
+        public static int $lastUserId = 0;
+
+        /**
+         * @param array<string, mixed> $args
+         * @return array{password: string}|WP_Error
+         */
+        public static function create_new_application_password(int $user_id, array $args = array()): array|WP_Error
+        {
+            self::$lastUserId = $user_id;
+
+            return array('password' => 'xxxx xxxx xxxx xxxx xxxx xxxx');
+        }
+    }
+}
+
 if (! function_exists('wp_get_current_user')) {
     function wp_get_current_user(): object
     {
@@ -448,6 +466,50 @@ if (! function_exists('wp_get_current_user')) {
             'ID'           => WPState::$currentUserId,
             'display_name' => WPState::$currentUserDisplayName,
         );
+    }
+}
+
+if (! function_exists('wp_nonce_field')) {
+    /**
+     * @param int|string $action
+     * @param array<string, mixed> $args
+     */
+    function wp_nonce_field($action = -1, string $name = '_wpnonce', bool $referer = true, bool $echo = true): string
+    {
+        unset($action, $name, $referer);
+
+        $field = '<input type="hidden" name="wp_nerve_admin" value="nonce" />';
+
+        if ($echo) {
+            echo $field; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- fixture markup.
+        }
+
+        return $field;
+    }
+}
+
+if (! function_exists('wp_verify_nonce')) {
+    /**
+     * @param int|string $action
+     */
+    function wp_verify_nonce(string $nonce, $action = -1): bool
+    {
+        unset($action);
+
+        return WPState::$nonceValid;
+    }
+}
+
+if (! function_exists('checked')) {
+    function checked(mixed $checked, mixed $current = true, bool $echo = true): string
+    {
+        $output = (string) $checked === (string) $current ? ' checked="checked"' : '';
+
+        if ($echo) {
+            echo $output; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- fixture markup.
+        }
+
+        return $output;
     }
 }
 

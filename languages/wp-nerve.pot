@@ -34,6 +34,18 @@ msgstr ""
 msgid "Adds an item to a navigation menu. Undo by deleting the item."
 msgstr ""
 
+#: src/Admin/AdminPage.php:289
+msgid "Application Password created:"
+msgstr ""
+
+#: src/Admin/AdminPage.php:262
+msgid "Application Passwords are not available on this WordPress version."
+msgstr ""
+
+#: src/Admin/AdminPage.php:115
+msgid "Application password"
+msgstr ""
+
 #: src/Abilities/MenuAbilities.php:420
 msgid "Assign menu location"
 msgstr ""
@@ -50,11 +62,11 @@ msgstr ""
 msgid "Assigns terms to a post. The previous assignments are returned so they can be restored."
 msgstr ""
 
-#: src/Admin/AdminPage.php:56
+#: src/Admin/AdminPage.php:109
 msgid "Authenticated users with the edit_posts capability"
 msgstr ""
 
-#: src/Admin/AdminPage.php:46
+#: src/Admin/AdminPage.php:99
 msgid "Authentication"
 msgstr ""
 
@@ -70,23 +82,31 @@ msgstr ""
 msgid "Changing roles requires the promote_users capability."
 msgstr ""
 
-#: src/Admin/AdminPage.php:70
+#: src/Admin/AdminPage.php:159
+msgid "Client configuration"
+msgstr ""
+
+#: src/Admin/AdminPage.php:202
 msgid "Configure the MCP client with the endpoint, username, and generated Application Password."
 msgstr ""
 
-#: src/Admin/AdminPage.php:38
+#: src/Admin/AdminPage.php:91
 msgid "Connection"
 msgstr ""
 
-#: src/Admin/AdminPage.php:66
-msgid "Create a dedicated Application Password named WPNerve."
+#: src/Admin/AdminPage.php:85
+msgid "Copy this password now — it will not be shown again."
+msgstr ""
+
+#: src/Admin/AdminPage.php:118
+msgid "Create a dedicated password for the WordPress user the agent will act as. It is stored by WordPress, never by WPNerve."
 msgstr ""
 
 #: src/Abilities/CommentAbilities.php:291
 msgid "Create comment"
 msgstr ""
 
-#: src/Abilities/ContentLifecycleAbilities.php:293
+#: src/Abilities/ContentLifecycleAbilities.php:350
 msgid "Create draft"
 msgstr ""
 
@@ -106,7 +126,7 @@ msgstr ""
 msgid "Creates a navigation menu. Undo by deleting the created menu."
 msgstr ""
 
-#: src/Abilities/ContentLifecycleAbilities.php:294
+#: src/Abilities/ContentLifecycleAbilities.php:351
 msgid "Creates a new draft post or page. Undo by trashing the draft."
 msgstr ""
 
@@ -146,7 +166,7 @@ msgstr ""
 msgid "Deactivates a plugin. Undo by activating it."
 msgstr ""
 
-#: src/Admin/AdminPage.php:54
+#: src/Admin/AdminPage.php:107
 msgid "Default access"
 msgstr ""
 
@@ -218,8 +238,28 @@ msgstr ""
 msgid "Deleting comments requires the moderate_comments capability."
 msgstr ""
 
-#: src/Abilities/ContentLifecycleAbilities.php:49
+#: src/Admin/AdminPage.php:312
+msgid "Destructive — delete, publish, restore"
+msgstr ""
+
+#: src/Abilities/ContentLifecycleAbilities.php:106
 msgid "Draft status must be draft or pending."
+msgstr ""
+
+#: src/Abilities/ContentLifecycleAbilities.php:406
+msgid "Dry-run preview of update-content: shows the proposed changes without saving anything."
+msgstr ""
+
+#: src/Admin/AdminPage.php:135
+msgid "Enabled risk classes are exposed to MCP clients. Destructive and privileged operations are hidden unless you enable them here."
+msgstr ""
+
+#: src/Admin/AdminPage.php:128
+msgid "Generate Application Password for me"
+msgstr ""
+
+#: src/Admin/AdminPage.php:199
+msgid "Generate or create a dedicated Application Password named WPNerve."
 msgstr ""
 
 #: src/Abilities/CommentAbilities.php:276
@@ -242,7 +282,7 @@ msgstr ""
 msgid "Get option"
 msgstr ""
 
-#: src/Abilities/ContentLifecycleAbilities.php:393
+#: src/Abilities/ContentLifecycleAbilities.php:485
 msgid "Get revision"
 msgstr ""
 
@@ -290,7 +330,7 @@ msgstr ""
 msgid "List plugins"
 msgstr ""
 
-#: src/Abilities/ContentLifecycleAbilities.php:348
+#: src/Abilities/ContentLifecycleAbilities.php:440
 msgid "List revisions"
 msgstr ""
 
@@ -338,7 +378,7 @@ msgstr ""
 msgid "Lists the registered widget sidebars."
 msgstr ""
 
-#: src/Abilities/ContentLifecycleAbilities.php:349
+#: src/Abilities/ContentLifecycleAbilities.php:441
 msgid "Lists the revisions of a post, most recent first."
 msgstr ""
 
@@ -354,7 +394,7 @@ msgstr ""
 msgid "Lists users with optional role and search filters. Requires list_users."
 msgstr ""
 
-#: src/Admin/AdminPage.php:42
+#: src/Admin/AdminPage.php:95
 msgid "MCP endpoint"
 msgstr ""
 
@@ -366,20 +406,16 @@ msgstr ""
 msgid "Moderating comments requires the moderate_comments capability."
 msgstr ""
 
-#: src/Abilities/ContentLifecycleAbilities.php:428
+#: src/Abilities/ContentLifecycleAbilities.php:520
 msgid "Moves content to the trash. Undo with restore-content."
 msgstr ""
 
-#: src/Abilities/ContentLifecycleAbilities.php:41
+#: src/Abilities/ContentLifecycleAbilities.php:98
 msgid "Only post and page drafts are supported."
 msgstr ""
 
-#: src/Abilities/ContentLifecycleAbilities.php:219
+#: src/Abilities/ContentLifecycleAbilities.php:276
 msgid "Only trashed content can be restored."
-msgstr ""
-
-#: src/Admin/AdminPage.php:64
-msgid "Open the WordPress profile for the user the agent will act as."
 msgstr ""
 
 #: src/Abilities/CommentAbilities.php:237
@@ -396,15 +432,23 @@ msgstr ""
 msgid "Plugin activation failed"
 msgstr ""
 
-#: src/Admin/AdminPage.php:50
+#: src/Abilities/ContentLifecycleAbilities.php:405
+msgid "Preview content update"
+msgstr ""
+
+#: src/Admin/AdminPage.php:311
+msgid "Privileged — administration (users, plugins, options)"
+msgstr ""
+
+#: src/Admin/AdminPage.php:103
 msgid "Protocol versions"
 msgstr ""
 
-#: src/Abilities/ContentLifecycleAbilities.php:460
+#: src/Abilities/ContentLifecycleAbilities.php:552
 msgid "Publish content"
 msgstr ""
 
-#: src/Abilities/ContentLifecycleAbilities.php:461
+#: src/Abilities/ContentLifecycleAbilities.php:553
 msgid "Publishes a post or page. The previous status and a revision are kept for recovery."
 msgstr ""
 
@@ -416,12 +460,20 @@ msgstr ""
 msgid "Read debug log"
 msgstr ""
 
+#: src/Admin/AdminPage.php:309
+msgid "Read — safe information abilities"
+msgstr ""
+
 #: src/Abilities/SystemAbilities.php:115
 msgid "Reads the tail of wp-content/debug.log. Requires manage_options."
 msgstr ""
 
 #: src/Abilities/PluginAbilities.php:191
 msgid "Reinstall the plugin to undo."
+msgstr ""
+
+#: src/Admin/AdminPage.php:162
+msgid "Replace USERNAME and APPLICATION_PASSWORD with the user and the password generated above."
 msgstr ""
 
 #: src/Abilities/CommentAbilities.php:320
@@ -432,11 +484,11 @@ msgstr ""
 msgid "Replying to comments requires the moderate_comments capability."
 msgstr ""
 
-#: src/Abilities/ContentLifecycleAbilities.php:444
+#: src/Abilities/ContentLifecycleAbilities.php:536
 msgid "Restore content"
 msgstr ""
 
-#: src/Abilities/ContentLifecycleAbilities.php:477
+#: src/Abilities/ContentLifecycleAbilities.php:569
 msgid "Restore revision"
 msgstr ""
 
@@ -448,11 +500,11 @@ msgstr ""
 msgid "Restore the previous value to undo."
 msgstr ""
 
-#: src/Abilities/ContentLifecycleAbilities.php:478
+#: src/Abilities/ContentLifecycleAbilities.php:570
 msgid "Restores a post from one of its revisions. A new revision is created before restoring."
 msgstr ""
 
-#: src/Abilities/ContentLifecycleAbilities.php:445
+#: src/Abilities/ContentLifecycleAbilities.php:537
 msgid "Restores trashed content to its previous status."
 msgstr ""
 
@@ -476,7 +528,7 @@ msgstr ""
 msgid "Returns a single post with full content when the user may read it."
 msgstr ""
 
-#: src/Abilities/ContentLifecycleAbilities.php:394
+#: src/Abilities/ContentLifecycleAbilities.php:486
 msgid "Returns a single revision with its full content."
 msgstr ""
 
@@ -504,12 +556,25 @@ msgstr ""
 msgid "Returns the widgets assigned to a sidebar."
 msgstr ""
 
-#: src/Admin/AdminPage.php:78
+#: src/Admin/AdminPage.php:210
 msgid "Revoke that Application Password immediately if the client or device is lost."
+msgstr ""
+
+#: src/Admin/AdminPage.php:132
+#: src/Admin/AdminPage.php:145
+msgid "Risk classes"
+msgstr ""
+
+#: src/Admin/AdminPage.php:250
+msgid "Risk classes updated."
 msgstr ""
 
 #: src/Abilities/AbilityRegistrar.php:26
 msgid "Safe site information abilities exposed by WPNerve."
+msgstr ""
+
+#: src/Admin/AdminPage.php:155
+msgid "Save risk classes"
 msgstr ""
 
 #: src/Abilities/AbilityRegistrar.php:268
@@ -524,11 +589,11 @@ msgstr ""
 msgid "Searching non-public content requires the read_private_posts capability."
 msgstr ""
 
-#: src/Admin/AdminPage.php:36
+#: src/Admin/AdminPage.php:77
 msgid "Secure MCP access to the native WordPress Abilities API."
 msgstr ""
 
-#: src/Admin/AdminPage.php:62
+#: src/Admin/AdminPage.php:197
 msgid "Secure setup"
 msgstr ""
 
@@ -557,11 +622,11 @@ msgstr ""
 msgid "The comment could not be deleted."
 msgstr ""
 
-#: src/Abilities/ContentLifecycleAbilities.php:196
+#: src/Abilities/ContentLifecycleAbilities.php:253
 msgid "The content could not be trashed."
 msgstr ""
 
-#: src/Abilities/ContentLifecycleAbilities.php:114
+#: src/Abilities/ContentLifecycleAbilities.php:171
 msgid "The content could not be updated."
 msgstr ""
 
@@ -583,7 +648,7 @@ msgstr ""
 msgid "The debug log is not readable or does not exist."
 msgstr ""
 
-#: src/Abilities/ContentLifecycleAbilities.php:70
+#: src/Abilities/ContentLifecycleAbilities.php:127
 msgid "The draft could not be created."
 msgstr ""
 
@@ -686,17 +751,17 @@ msgstr ""
 
 #: src/Abilities/AbilityRegistrar.php:167
 #: src/Abilities/CommentAbilities.php:97
-#: src/Abilities/ContentLifecycleAbilities.php:131
-#: src/Abilities/ContentLifecycleAbilities.php:186
-#: src/Abilities/ContentLifecycleAbilities.php:215
-#: src/Abilities/ContentLifecycleAbilities.php:244
-#: src/Abilities/ContentLifecycleAbilities.php:525
+#: src/Abilities/ContentLifecycleAbilities.php:188
+#: src/Abilities/ContentLifecycleAbilities.php:243
+#: src/Abilities/ContentLifecycleAbilities.php:272
+#: src/Abilities/ContentLifecycleAbilities.php:301
+#: src/Abilities/ContentLifecycleAbilities.php:617
 #: src/Abilities/TaxonomyAbilities.php:153
 msgid "The requested post does not exist."
 msgstr ""
 
-#: src/Abilities/ContentLifecycleAbilities.php:162
-#: src/Abilities/ContentLifecycleAbilities.php:271
+#: src/Abilities/ContentLifecycleAbilities.php:219
+#: src/Abilities/ContentLifecycleAbilities.php:328
 msgid "The requested revision does not exist."
 msgstr ""
 
@@ -715,7 +780,7 @@ msgstr ""
 msgid "The requested user does not exist."
 msgstr ""
 
-#: src/Abilities/ContentLifecycleAbilities.php:283
+#: src/Abilities/ContentLifecycleAbilities.php:340
 msgid "The revision could not be restored."
 msgstr ""
 
@@ -746,7 +811,7 @@ msgstr ""
 msgid "The user could not be deleted."
 msgstr ""
 
-#: src/Abilities/ContentLifecycleAbilities.php:427
+#: src/Abilities/ContentLifecycleAbilities.php:519
 msgid "Trash content"
 msgstr ""
 
@@ -758,7 +823,7 @@ msgstr ""
 msgid "Trashed media can be restored from the WordPress trash."
 msgstr ""
 
-#: src/Abilities/ContentLifecycleAbilities.php:321
+#: src/Abilities/ContentLifecycleAbilities.php:378
 msgid "Update content"
 msgstr ""
 
@@ -794,7 +859,7 @@ msgstr ""
 msgid "Updates the title, caption, description, or alt text of a media item."
 msgstr ""
 
-#: src/Abilities/ContentLifecycleAbilities.php:322
+#: src/Abilities/ContentLifecycleAbilities.php:379
 msgid "Updates the title, content, or excerpt of an existing post. A WordPress revision is kept for recovery."
 msgstr ""
 
@@ -814,13 +879,13 @@ msgstr ""
 msgid "Uploads a base64-encoded plugin zip and installs it. Undo by deleting the plugin."
 msgstr ""
 
-#: src/Admin/AdminPage.php:18
-#: src/Admin/AdminPage.php:19
-#: src/Admin/AdminPage.php:35
+#: src/Admin/AdminPage.php:22
+#: src/Admin/AdminPage.php:23
+#: src/Admin/AdminPage.php:76
 msgid "WPNerve"
 msgstr ""
 
-#: src/Admin/AdminPage.php:88
+#: src/Admin/AdminPage.php:220
 msgid "WPNerve never displays or stores the Application Password. Tool arguments and credentials are excluded from the audit log."
 msgstr ""
 
@@ -840,11 +905,15 @@ msgstr ""
 msgid "WPNerve: Site"
 msgstr ""
 
-#: src/Admin/AdminPage.php:47
+#: src/Admin/AdminPage.php:100
 msgid "WordPress Application Password over HTTPS"
 msgstr ""
 
-#: src/Abilities/ContentLifecycleAbilities.php:45
+#: src/Admin/AdminPage.php:310
+msgid "Write — recoverable mutations"
+msgstr ""
+
+#: src/Abilities/ContentLifecycleAbilities.php:102
 msgid "You are not allowed to create pages."
 msgstr ""
 
@@ -864,7 +933,7 @@ msgstr ""
 msgid "You are not allowed to delete this user."
 msgstr ""
 
-#: src/Abilities/ContentLifecycleAbilities.php:529
+#: src/Abilities/ContentLifecycleAbilities.php:621
 #: src/Abilities/TaxonomyAbilities.php:157
 msgid "You are not allowed to edit this content."
 msgstr ""
@@ -877,11 +946,11 @@ msgstr ""
 msgid "You are not allowed to edit this user."
 msgstr ""
 
-#: src/Abilities/ContentLifecycleAbilities.php:250
+#: src/Abilities/ContentLifecycleAbilities.php:307
 msgid "You are not allowed to publish this content."
 msgstr ""
 
-#: src/Abilities/ContentLifecycleAbilities.php:135
+#: src/Abilities/ContentLifecycleAbilities.php:192
 msgid "You are not allowed to read revisions for this content."
 msgstr ""
 
@@ -893,19 +962,19 @@ msgstr ""
 msgid "You are not allowed to read this content."
 msgstr ""
 
-#: src/Abilities/ContentLifecycleAbilities.php:166
+#: src/Abilities/ContentLifecycleAbilities.php:223
 msgid "You are not allowed to read this revision."
 msgstr ""
 
-#: src/Abilities/ContentLifecycleAbilities.php:223
+#: src/Abilities/ContentLifecycleAbilities.php:280
 msgid "You are not allowed to restore this content."
 msgstr ""
 
-#: src/Abilities/ContentLifecycleAbilities.php:275
+#: src/Abilities/ContentLifecycleAbilities.php:332
 msgid "You are not allowed to restore this revision."
 msgstr ""
 
-#: src/Abilities/ContentLifecycleAbilities.php:190
+#: src/Abilities/ContentLifecycleAbilities.php:247
 msgid "You are not allowed to trash this content."
 msgstr ""
 
