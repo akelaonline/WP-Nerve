@@ -520,9 +520,9 @@ if (! function_exists('wp_nonce_field')) {
      */
     function wp_nonce_field($action = -1, string $name = '_wpnonce', bool $referer = true, bool $echo = true): string
     {
-        unset($action, $name, $referer);
+        unset($action, $referer);
 
-        $field = '<input type="hidden" name="wp_nerve_admin" value="nonce" />';
+        $field = '<input type="hidden" name="' . $name . '" value="nonce" />';
 
         if ($echo) {
             echo $field; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- fixture markup.

@@ -21,6 +21,8 @@ use WP_REST_Response;
 
 final class OAuthServer
 {
+    private const NONCE_ACTION = 'wp_nerve_oauth_consent';
+
     public function __construct(private readonly OAuthStore $store)
     {
     }
@@ -97,10 +99,12 @@ final class OAuthServer
         }
 
         if (! is_user_logged_in()) {
-            return $this->redirect(
-                wp_login_url(add_query_arg(array(), rest_url('wp-nerve/v1/oauth/authorize'))),
-                $request
+            $authorizeUrl = add_query_arg(
+                $request->get_params(),
+                rest_url('wp-nerve/v1/oauth/authorize')
             );
+
+            return $this->redirect(wp_login_url($authorizeUrl), $request);
         }
 
         if ('POST' !== $request->get_method()) {
@@ -108,8 +112,13 @@ final class OAuthServer
         }
 
         $consent = (string) $request->get_param('wp_nerve_consent');
+        $nonce   = (string) $request->get_param('wp_nerve_oauth_nonce');
 
         if ('allow' !== $consent) {
+            return $this->redirectToClient($redirectUri, array('error' => 'access_denied', 'state' => $state));
+        }
+
+        if (! wp_verify_nonce($nonce, self::NONCE_ACTION)) {
             return $this->redirectToClient($redirectUri, array('error' => 'access_denied', 'state' => $state));
         }
 
@@ -195,6 +204,19 @@ final class OAuthServer
         );
     }
 
+    /**
+     * @param array<string, mixed> $payload
+     */
+    private function tokenResponse(array $payload): WP_REST_Response
+    {
+        $response = new WP_REST_Response($payload, 200);
+
+        $response->header('Cache-Control', 'no-store');
+        $response->header('Pragma', 'no-cache');
+
+        return $response;
+    }
+
     private function tokenFromCode(WP_REST_Request $request): WP_REST_Response
     {
         $clientId     = sanitize_text_field((string) $request->get_param('client_id'));
@@ -220,12 +242,11 @@ final class OAuthServer
 
         $tokens = $this->store->issueTokens($clientId, (int) $record['user_id']);
 
-        return new WP_REST_Response(
+        return $this->tokenResponse(
             array_merge(
                 $tokens,
                 array('token_type' => 'Bearer', 'scope' => 'mcp')
-            ),
-            200
+            )
         );
     }
 
@@ -243,9 +264,8 @@ final class OAuthServer
             );
         }
 
-        return new WP_REST_Response(
-            array_merge($result, array('token_type' => 'Bearer', 'scope' => 'mcp')),
-            200
+        return $this->tokenResponse(
+            array_merge($result, array('token_type' => 'Bearer', 'scope' => 'mcp'))
         );
     }
 
@@ -261,7 +281,8 @@ final class OAuthServer
 
     private function pkceChallenge(string $verifier): string
     {
-        return base64_encode(hash('sha256', $verifier, true));
+        // RFC 7636: BASE64URL-ENCODE(SHA256(ASCII(code_verifier))), unpadded.
+        return rtrim(strtr(base64_encode(hash('sha256', $verifier, true)), '+/', '-_'), '=');
     }
 
     private function redirect(string $url, WP_REST_Request $request): WP_REST_Response
@@ -295,6 +316,7 @@ final class OAuthServer
             . '<input type="hidden" name="code_challenge_method" value="S256">'
             . '<input type="hidden" name="response_type" value="code">'
             . '<input type="hidden" name="wp_nerve_consent" value="allow">'
+            . wp_nonce_field(self::NONCE_ACTION, 'wp_nerve_oauth_nonce', true, false)
             . '<button type="submit" style="padding: 8px 16px">' . esc_html__('Allow access', 'wp-nerve') . '</button>'
             . '</form></body></html>';
 
