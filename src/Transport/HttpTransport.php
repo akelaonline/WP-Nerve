@@ -13,6 +13,7 @@ namespace WPNerve\Transport;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
+use WPNerve\OAuth\OAuthStore;
 use WPNerve\Protocol\DispatchResult;
 use WPNerve\Protocol\JsonRpcHandler;
 use WPNerve\Protocol\ProtocolError;
@@ -59,6 +60,23 @@ final class HttpTransport
                 __('The request Origin is not allowed to access WPNerve.', 'wp-nerve'),
                 array('status' => 403)
             );
+        }
+
+        $authorization = $request->get_header('authorization');
+
+        if (is_string($authorization) && str_starts_with(strtolower($authorization), 'bearer ')) {
+            $token  = trim(substr($authorization, 7));
+            $userId = (new OAuthStore())->validateAccessToken($token);
+
+            if (null === $userId) {
+                return new WP_Error(
+                    'wp_nerve_oauth_invalid_token',
+                    __('The bearer token is invalid or expired.', 'wp-nerve'),
+                    array('status' => 401)
+                );
+            }
+
+            wp_set_current_user($userId);
         }
 
         if (! is_user_logged_in()) {

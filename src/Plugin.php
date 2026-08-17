@@ -13,6 +13,8 @@ namespace WPNerve;
 use WPNerve\Abilities\AbilityRegistrar;
 use WPNerve\Admin\AdminPage;
 use WPNerve\Audit\AuditRepository;
+use WPNerve\OAuth\OAuthServer;
+use WPNerve\OAuth\OAuthStore;
 use WPNerve\Policy\PolicyEngine;
 use WPNerve\Protocol\AbilityToolRegistry;
 use WPNerve\Protocol\JsonRpcHandler;
@@ -47,9 +49,10 @@ final class Plugin
             return;
         }
 
-        if ('1' !== get_option('wp_nerve_schema_version')) {
+        if ('2' !== get_option('wp_nerve_schema_version')) {
             AuditRepository::installSchema();
-            update_option('wp_nerve_schema_version', '1', false);
+            OAuthStore::installSchema();
+            update_option('wp_nerve_schema_version', '2', false);
         }
 
         $abilities = new AbilityRegistrar();
@@ -59,11 +62,13 @@ final class Plugin
         $handler   = new JsonRpcHandler($registry, $audit);
         $transport = new HttpTransport(new RequestValidator(), $handler);
         $admin     = new AdminPage();
+        $oauth     = new OAuthServer(new OAuthStore());
 
         add_action('init', array($this, 'loadTextdomain'));
         add_action('wp_abilities_api_categories_init', array($abilities, 'registerCategory'));
         add_action('wp_abilities_api_init', array($abilities, 'registerAbilities'));
         add_action('rest_api_init', array($transport, 'registerRoutes'));
+        add_action('rest_api_init', array($oauth, 'registerRoutes'));
         add_action('admin_menu', array($admin, 'registerMenu'));
         add_filter('rest_allowed_cors_headers', array($transport, 'allowedCorsHeaders'), 10, 2);
     }

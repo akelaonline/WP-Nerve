@@ -16,11 +16,20 @@ if (! class_exists('WP_REST_Request')) {
 
         private string $body = '';
 
+        /** @var array<string, mixed> */
+        private array $parameters = array();
+
         public function __construct(
             private readonly string $method = 'GET',
             private readonly string $route = '',
-            private readonly array $parameters = array()
+            array $parameters = array()
         ) {
+            $this->parameters = $parameters;
+        }
+
+        public function set_param(string $key, mixed $value): void
+        {
+            $this->parameters[$key] = $value;
         }
 
         public function get_method(): string

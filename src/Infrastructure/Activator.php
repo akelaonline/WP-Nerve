@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace WPNerve\Infrastructure;
 
 use WPNerve\Audit\AuditRepository;
+use WPNerve\OAuth\OAuthStore;
 
 final class Activator
 {
@@ -37,6 +38,7 @@ final class Activator
         }
 
         AuditRepository::installSchema();
-        update_option('wp_nerve_schema_version', '1', false);
+        OAuthStore::installSchema();
+        update_option('wp_nerve_schema_version', '2', false);
     }
 }

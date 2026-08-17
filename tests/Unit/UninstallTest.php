@@ -16,7 +16,7 @@ final class UninstallTest extends TestCase
 {
     public function testPreservesDataByDefault(): void
     {
-        WPState::$options['wp_nerve_schema_version'] = '1';
+        WPState::$options['wp_nerve_schema_version'] = '2';
 
         $this->runUninstall();
 
@@ -26,7 +26,7 @@ final class UninstallTest extends TestCase
 
     public function testDeletesDataWhenOptedIn(): void
     {
-        WPState::$options['wp_nerve_schema_version']             = '1';
+        WPState::$options['wp_nerve_schema_version']             = '2';
         WPState::$options['wp_nerve_delete_data_on_uninstall']   = true;
 
         $this->runUninstall();

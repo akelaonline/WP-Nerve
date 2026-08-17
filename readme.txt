@@ -63,6 +63,8 @@ The modern stateless HTTP protocol `2026-07-28` plus legacy clients using
   and debug log.
 * Added preview-content-update dry-run and an admin dashboard with one-click
   Application Password generation, risk class toggles, and client snippets.
+* Added an OAuth 2.1 authorization server (PKCE S256, dynamic client
+  registration, refresh tokens) for Claude web and mobile connectors.
 * Added risk class opt-in: destructive and privileged operations are denied
   until the site owner enables them.
 

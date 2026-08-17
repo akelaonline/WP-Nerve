@@ -107,6 +107,36 @@ final class HttpTransportTest extends TestCase
         self::assertSame(401, $result->get_error_data()['status']);
     }
 
+    public function testCheckPermissionAcceptsValidBearerToken(): void
+    {
+        WPState::$isLoggedIn = false;
+
+        $store  = new \WPNerve\OAuth\OAuthStore();
+        $tokens = $store->issueTokens('client-1', 42);
+
+        $request = $this->request('POST');
+        $request->set_header('Authorization', 'Bearer ' . $tokens['access_token']);
+
+        $result = $this->transport->checkPermission($request);
+
+        self::assertTrue($result);
+        self::assertSame(42, WPState::$currentUserId);
+    }
+
+    public function testCheckPermissionRejectsInvalidBearerToken(): void
+    {
+        WPState::$isLoggedIn = false;
+
+        $request = $this->request('POST');
+        $request->set_header('Authorization', 'Bearer not-a-real-token');
+
+        $result = $this->transport->checkPermission($request);
+
+        self::assertInstanceOf(WP_Error::class, $result);
+        self::assertSame('wp_nerve_oauth_invalid_token', $result->get_error_code());
+        self::assertSame(401, $result->get_error_data()['status']);
+    }
+
     public function testCheckPermissionRejectsWithoutCapability(): void
     {
         WPState::$userCan = false;
