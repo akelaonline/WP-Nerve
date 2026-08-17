@@ -459,6 +459,50 @@ if (! class_exists('WP_Application_Passwords')) {
     }
 }
 
+if (! function_exists('wp_set_current_user')) {
+    function wp_set_current_user(int $id, string $name = ''): bool
+    {
+        unset($name);
+
+        WPState::$currentUserId = $id;
+        WPState::$isLoggedIn    = $id > 0;
+
+        return true;
+    }
+}
+
+if (! function_exists('wp_login_url')) {
+    function wp_login_url(string $redirect = '', bool $force_reauth = false): string
+    {
+        unset($force_reauth);
+
+        return WPState::$siteUrl . '/wp-login.php' . ('' !== $redirect ? '?redirect_to=' . rawurlencode($redirect) : '');
+    }
+}
+
+if (! function_exists('add_query_arg')) {
+    function add_query_arg(array|string $key, mixed $value = false, string $url = ''): string
+    {
+        unset($key, $value);
+
+        return $url;
+    }
+}
+
+if (! function_exists('__return_true')) {
+    function __return_true(): bool
+    {
+        return true;
+    }
+}
+
+if (! function_exists('esc_url')) {
+    function esc_url(string $url): string
+    {
+        return $url;
+    }
+}
+
 if (! function_exists('wp_get_current_user')) {
     function wp_get_current_user(): object
     {

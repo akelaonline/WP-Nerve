@@ -40,6 +40,11 @@ All notable changes to WPNerve will be documented here.
 - Admin dashboard: generate an Application Password in one click, toggle the
   enabled risk classes, and copy client configuration snippets for Claude Code
   and curl.
+- OAuth 2.1 authorization server for clients that cannot send Application
+  Passwords (Claude web and mobile connectors): dynamic client registration,
+  authorization code grant with PKCE S256, refresh token rotation, bearer
+  token authentication on the MCP endpoint, and the authorization server
+  metadata document. Tokens are stored as SHA-256 hashes in dedicated tables.
 - Ability registration refactored into per-domain registrars sharing a common
   base (`AbstractAbilityRegistrar`).
 

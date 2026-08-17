@@ -34,15 +34,23 @@ msgstr ""
 msgid "Adds an item to a navigation menu. Undo by deleting the item."
 msgstr ""
 
-#: src/Admin/AdminPage.php:289
+#: src/OAuth/OAuthServer.php:287
+msgid "Allow"
+msgstr ""
+
+#: src/OAuth/OAuthServer.php:298
+msgid "Allow access"
+msgstr ""
+
+#: src/Admin/AdminPage.php:290
 msgid "Application Password created:"
 msgstr ""
 
-#: src/Admin/AdminPage.php:262
+#: src/Admin/AdminPage.php:263
 msgid "Application Passwords are not available on this WordPress version."
 msgstr ""
 
-#: src/Admin/AdminPage.php:115
+#: src/Admin/AdminPage.php:116
 msgid "Application password"
 msgstr ""
 
@@ -62,16 +70,20 @@ msgstr ""
 msgid "Assigns terms to a post. The previous assignments are returned so they can be restored."
 msgstr ""
 
-#: src/Admin/AdminPage.php:109
+#: src/Admin/AdminPage.php:110
 msgid "Authenticated users with the edit_posts capability"
 msgstr ""
 
-#: src/Admin/AdminPage.php:99
+#: src/Admin/AdminPage.php:100
 msgid "Authentication"
 msgstr ""
 
-#: src/Transport/HttpTransport.php:67
+#: src/Transport/HttpTransport.php:85
 msgid "Authentication is required to access WPNerve."
+msgstr ""
+
+#: src/OAuth/OAuthServer.php:286
+msgid "Authorize"
 msgstr ""
 
 #: src/Abilities/CommentAbilities.php:350
@@ -82,23 +94,23 @@ msgstr ""
 msgid "Changing roles requires the promote_users capability."
 msgstr ""
 
-#: src/Admin/AdminPage.php:159
+#: src/Admin/AdminPage.php:160
 msgid "Client configuration"
 msgstr ""
 
-#: src/Admin/AdminPage.php:202
+#: src/Admin/AdminPage.php:203
 msgid "Configure the MCP client with the endpoint, username, and generated Application Password."
 msgstr ""
 
-#: src/Admin/AdminPage.php:91
+#: src/Admin/AdminPage.php:92
 msgid "Connection"
 msgstr ""
 
-#: src/Admin/AdminPage.php:85
+#: src/Admin/AdminPage.php:86
 msgid "Copy this password now — it will not be shown again."
 msgstr ""
 
-#: src/Admin/AdminPage.php:118
+#: src/Admin/AdminPage.php:119
 msgid "Create a dedicated password for the WordPress user the agent will act as. It is stored by WordPress, never by WPNerve."
 msgstr ""
 
@@ -166,7 +178,7 @@ msgstr ""
 msgid "Deactivates a plugin. Undo by activating it."
 msgstr ""
 
-#: src/Admin/AdminPage.php:107
+#: src/Admin/AdminPage.php:108
 msgid "Default access"
 msgstr ""
 
@@ -238,7 +250,7 @@ msgstr ""
 msgid "Deleting comments requires the moderate_comments capability."
 msgstr ""
 
-#: src/Admin/AdminPage.php:312
+#: src/Admin/AdminPage.php:313
 msgid "Destructive — delete, publish, restore"
 msgstr ""
 
@@ -250,15 +262,15 @@ msgstr ""
 msgid "Dry-run preview of update-content: shows the proposed changes without saving anything."
 msgstr ""
 
-#: src/Admin/AdminPage.php:135
+#: src/Admin/AdminPage.php:136
 msgid "Enabled risk classes are exposed to MCP clients. Destructive and privileged operations are hidden unless you enable them here."
 msgstr ""
 
-#: src/Admin/AdminPage.php:128
+#: src/Admin/AdminPage.php:129
 msgid "Generate Application Password for me"
 msgstr ""
 
-#: src/Admin/AdminPage.php:199
+#: src/Admin/AdminPage.php:200
 msgid "Generate or create a dedicated Application Password named WPNerve."
 msgstr ""
 
@@ -394,7 +406,7 @@ msgstr ""
 msgid "Lists users with optional role and search filters. Requires list_users."
 msgstr ""
 
-#: src/Admin/AdminPage.php:95
+#: src/Admin/AdminPage.php:96
 msgid "MCP endpoint"
 msgstr ""
 
@@ -427,8 +439,8 @@ msgstr ""
 msgid "Permanent deletion requires the delete_others_posts capability."
 msgstr ""
 
-#: src/Infrastructure/Activator.php:23
-#: src/Infrastructure/Activator.php:34
+#: src/Infrastructure/Activator.php:24
+#: src/Infrastructure/Activator.php:35
 msgid "Plugin activation failed"
 msgstr ""
 
@@ -436,11 +448,11 @@ msgstr ""
 msgid "Preview content update"
 msgstr ""
 
-#: src/Admin/AdminPage.php:311
+#: src/Admin/AdminPage.php:312
 msgid "Privileged — administration (users, plugins, options)"
 msgstr ""
 
-#: src/Admin/AdminPage.php:103
+#: src/Admin/AdminPage.php:104
 msgid "Protocol versions"
 msgstr ""
 
@@ -460,7 +472,7 @@ msgstr ""
 msgid "Read debug log"
 msgstr ""
 
-#: src/Admin/AdminPage.php:309
+#: src/Admin/AdminPage.php:310
 msgid "Read — safe information abilities"
 msgstr ""
 
@@ -472,7 +484,7 @@ msgstr ""
 msgid "Reinstall the plugin to undo."
 msgstr ""
 
-#: src/Admin/AdminPage.php:162
+#: src/Admin/AdminPage.php:163
 msgid "Replace USERNAME and APPLICATION_PASSWORD with the user and the password generated above."
 msgstr ""
 
@@ -556,16 +568,16 @@ msgstr ""
 msgid "Returns the widgets assigned to a sidebar."
 msgstr ""
 
-#: src/Admin/AdminPage.php:210
+#: src/Admin/AdminPage.php:211
 msgid "Revoke that Application Password immediately if the client or device is lost."
 msgstr ""
 
-#: src/Admin/AdminPage.php:132
-#: src/Admin/AdminPage.php:145
+#: src/Admin/AdminPage.php:133
+#: src/Admin/AdminPage.php:146
 msgid "Risk classes"
 msgstr ""
 
-#: src/Admin/AdminPage.php:250
+#: src/Admin/AdminPage.php:251
 msgid "Risk classes updated."
 msgstr ""
 
@@ -573,7 +585,7 @@ msgstr ""
 msgid "Safe site information abilities exposed by WPNerve."
 msgstr ""
 
-#: src/Admin/AdminPage.php:155
+#: src/Admin/AdminPage.php:156
 msgid "Save risk classes"
 msgstr ""
 
@@ -589,11 +601,11 @@ msgstr ""
 msgid "Searching non-public content requires the read_private_posts capability."
 msgstr ""
 
-#: src/Admin/AdminPage.php:77
+#: src/Admin/AdminPage.php:78
 msgid "Secure MCP access to the native WordPress Abilities API."
 msgstr ""
 
-#: src/Admin/AdminPage.php:197
+#: src/Admin/AdminPage.php:198
 msgid "Secure setup"
 msgstr ""
 
@@ -609,8 +621,12 @@ msgstr ""
 msgid "The attachment could not be registered."
 msgstr ""
 
-#: src/Transport/HttpTransport.php:75
+#: src/Transport/HttpTransport.php:93
 msgid "The authenticated user cannot access WPNerve."
+msgstr ""
+
+#: src/Transport/HttpTransport.php:74
+msgid "The bearer token is invalid or expired."
 msgstr ""
 
 #: src/Abilities/CommentAbilities.php:422
@@ -710,7 +726,7 @@ msgstr ""
 msgid "The reassign target user does not exist."
 msgstr ""
 
-#: src/Transport/HttpTransport.php:59
+#: src/Transport/HttpTransport.php:60
 msgid "The request Origin is not allowed to access WPNerve."
 msgstr ""
 
@@ -881,23 +897,23 @@ msgstr ""
 
 #: src/Admin/AdminPage.php:22
 #: src/Admin/AdminPage.php:23
-#: src/Admin/AdminPage.php:76
+#: src/Admin/AdminPage.php:77
 msgid "WPNerve"
 msgstr ""
 
-#: src/Admin/AdminPage.php:220
+#: src/Admin/AdminPage.php:221
 msgid "WPNerve never displays or stores the Application Password. Tool arguments and credentials are excluded from the audit log."
 msgstr ""
 
-#: src/Transport/HttpTransport.php:83
+#: src/Transport/HttpTransport.php:101
 msgid "WPNerve requires HTTPS in production."
 msgstr ""
 
-#: src/Infrastructure/Activator.php:22
+#: src/Infrastructure/Activator.php:23
 msgid "WPNerve requires PHP 8.1 or newer."
 msgstr ""
 
-#: src/Infrastructure/Activator.php:33
+#: src/Infrastructure/Activator.php:34
 msgid "WPNerve requires WordPress 6.9 or newer."
 msgstr ""
 
@@ -905,11 +921,11 @@ msgstr ""
 msgid "WPNerve: Site"
 msgstr ""
 
-#: src/Admin/AdminPage.php:100
+#: src/Admin/AdminPage.php:101
 msgid "WordPress Application Password over HTTPS"
 msgstr ""
 
-#: src/Admin/AdminPage.php:310
+#: src/Admin/AdminPage.php:311
 msgid "Write — recoverable mutations"
 msgstr ""
 
@@ -988,5 +1004,13 @@ msgstr ""
 
 #: src/Abilities/PluginAbilities.php:120
 msgid "filename and base64 zip content are required."
+msgstr ""
+
+#: src/OAuth/OAuthServer.php:289
+msgid "through MCP as"
+msgstr ""
+
+#: src/OAuth/OAuthServer.php:288
+msgid "to access"
 msgstr ""
 

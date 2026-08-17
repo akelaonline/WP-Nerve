@@ -27,6 +27,15 @@ final class WpDb
 
     public string $lastPrepared = '';
 
+    /** @var array<int, array<string, mixed>> Rows queued for get_row(). */
+    public array $rows = array();
+
+    /** @var array<int, array{table: string, where: array<string, mixed>}> */
+    public array $deletes = array();
+
+    /** @var array<string, array<int, array<string, mixed>>> In-memory tables. */
+    public array $tables = array();
+
     public function get_charset_collate(): string
     {
         return 'DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci';
@@ -43,8 +52,9 @@ final class WpDb
 
         $this->insertCalls[] = $call;
         $this->lastInsert    = $call;
+        $this->tables[$table][] = $data;
 
-        return 1;
+        return count($this->tables[$table]);
     }
 
     public function prepare(string $query, mixed ...$args): string
@@ -91,5 +101,81 @@ final class WpDb
     public function query(string $query): void
     {
         $this->lastQuery = $query;
+    }
+
+    public function get_row(?string $query = null, string $output = OBJECT, int $y = 0): object|array|null
+    {
+        unset($y);
+
+        $this->lastQuery = (string) $query;
+
+        if (array() !== $this->rows) {
+            $row = array_shift($this->rows);
+
+            return OBJECT === $output ? (object) $row : $row;
+        }
+
+        // Fall back to the in-memory tables when no rows were queued.
+        if (preg_match('/FROM `?(\w+_oauth_\w+)`?/', (string) $query, $matches)) {
+            $table = $matches[1];
+            $conditions = array();
+
+            preg_match_all("/([a-z_]+) = '([^']*)'/", (string) $query, $pairs, PREG_SET_ORDER);
+
+            foreach ($pairs as $pair) {
+                $conditions[$pair[1]] = $pair[2];
+            }
+
+            foreach ($this->tables[$table] ?? array() as $row) {
+                $match = true;
+
+                foreach ($conditions as $column => $value) {
+                    if ((string) ($row[$column] ?? '') !== $value) {
+                        $match = false;
+                        break;
+                    }
+                }
+
+                if ($match) {
+                    return OBJECT === $output ? (object) $row : $row;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @param array<string, mixed> $where
+     * @param array<int, string>   $format
+     */
+    public function delete(string $table, array $where, array $format = null): int
+    {
+        unset($format);
+
+        $this->deletes[] = array('table' => $table, 'where' => $where);
+
+        if (isset($this->tables[$table])) {
+            $kept = array();
+
+            foreach ($this->tables[$table] as $row) {
+                $match = true;
+
+                foreach ($where as $column => $value) {
+                    if ((string) ($row[$column] ?? '') !== (string) $value) {
+                        $match = false;
+                        break;
+                    }
+                }
+
+                if (! $match) {
+                    $kept[] = $row;
+                }
+            }
+
+            $this->tables[$table] = $kept;
+        }
+
+        return 1;
     }
 }
