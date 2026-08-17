@@ -26,17 +26,29 @@ final class WidgetAbilities extends AbstractAbilityRegistrar
     {
         unset($input);
 
-        $sidebars = array();
+        $byId = array();
 
         foreach ($this->registeredSidebars() as $sidebar) {
-            $sidebars[] = array(
+            $byId[(string) ($sidebar['id'] ?? '')] = array(
                 'id'          => (string) ($sidebar['id'] ?? ''),
                 'name'        => (string) ($sidebar['name'] ?? ''),
                 'description' => (string) ($sidebar['description'] ?? ''),
             );
         }
 
-        return array('sidebars' => $sidebars);
+        // Block themes do not register sidebars classically; any sidebar that
+        // actually holds widgets is still reported.
+        foreach (array_keys(wp_get_sidebars_widgets()) as $sidebarId) {
+            if (! isset($byId[$sidebarId])) {
+                $byId[$sidebarId] = array(
+                    'id'          => $sidebarId,
+                    'name'        => $sidebarId,
+                    'description' => '',
+                );
+            }
+        }
+
+        return array('sidebars' => array_values($byId));
     }
 
     /**

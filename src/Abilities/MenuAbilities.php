@@ -353,10 +353,7 @@ final class MenuAbilities extends AbstractAbilityRegistrar
             __('Add menu item', 'wp-nerve'),
             __('Adds an item to a navigation menu. Undo by deleting the item.', 'wp-nerve'),
             $this->menuItemInputSchema(true),
-            array_merge(
-                array('$schema' => 'https://json-schema.org/draft/2020-12/schema'),
-                $this->menuItemSchema()
-            ),
+            $this->menuItemOutputSchema(),
             array($this, 'addMenuItem'),
             'write',
             true,
@@ -383,10 +380,7 @@ final class MenuAbilities extends AbstractAbilityRegistrar
                     'parent'  => array('type' => 'integer', 'minimum' => 0),
                 ),
             ),
-            array_merge(
-                array('$schema' => 'https://json-schema.org/draft/2020-12/schema'),
-                $this->menuItemSchema()
-            ),
+            $this->menuItemOutputSchema(),
             array($this, 'updateMenuItem'),
             'write',
             true,
@@ -479,6 +473,24 @@ final class MenuAbilities extends AbstractAbilityRegistrar
             'target'    => (string) $this->itemMeta($item->ID, 'target', ''),
             'parent'    => (int) $item->post_parent,
             'order'     => (int) $item->menu_order,
+        );
+    }
+
+    /**
+     * Output schema for mutation results, which include the item plus the
+     * optional recovery guidance.
+     *
+     * @return array<string, mixed>
+     */
+    private function menuItemOutputSchema(): array
+    {
+        $schema = $this->menuItemSchema();
+
+        $schema['properties']['recovery'] = array('type' => 'object');
+
+        return array_merge(
+            array('$schema' => 'https://json-schema.org/draft/2020-12/schema'),
+            $schema
         );
     }
 

@@ -214,6 +214,19 @@ final class MenuWidgetTest extends TestCase
         self::assertSame('Sidebar principal', $result['result']['sidebars'][0]['name']);
     }
 
+    public function testListSidebarsFallsBackToWidgetSidebarsForBlockThemes(): void
+    {
+        // Block themes do not register sidebars classically; sidebars that hold
+        // widgets must still be reported.
+        WPState::$sidebarWidgets = array('sidebar-1' => array('block-2'), 'footer-1' => array('block-3'));
+        $GLOBALS['wp_registered_sidebars'] = array();
+
+        $result = $this->registry->execute('wp_nerve_list_sidebars', array());
+
+        self::assertNotInstanceOf(WP_Error::class, $result);
+        self::assertSame(array('sidebar-1', 'footer-1'), array_column($result['result']['sidebars'], 'id'));
+    }
+
     public function testGetSidebarReturnsWidgets(): void
     {
         WPState::$sidebarWidgets = array(

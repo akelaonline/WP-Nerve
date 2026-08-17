@@ -22,7 +22,7 @@ msgstr ""
 msgid "Adds an item to a navigation menu. Undo by deleting the item."
 msgstr ""
 
-#: src/Abilities/MenuAbilities.php:426
+#: src/Abilities/MenuAbilities.php:420
 msgid "Assign menu location"
 msgstr ""
 
@@ -30,7 +30,7 @@ msgstr ""
 msgid "Assign terms"
 msgstr ""
 
-#: src/Abilities/MenuAbilities.php:427
+#: src/Abilities/MenuAbilities.php:421
 msgid "Assigns a menu to a theme location, or removes it with menu_id 0. The previous map is returned for recovery."
 msgstr ""
 
@@ -118,7 +118,7 @@ msgstr ""
 msgid "Delete media item"
 msgstr ""
 
-#: src/Abilities/MenuAbilities.php:401
+#: src/Abilities/MenuAbilities.php:395
 msgid "Delete menu item"
 msgstr ""
 
@@ -130,7 +130,7 @@ msgstr ""
 msgid "Delete the created menu to undo."
 msgstr ""
 
-#: src/Abilities/MenuAbilities.php:537
+#: src/Abilities/MenuAbilities.php:549
 msgid "Delete the item to undo."
 msgstr ""
 
@@ -142,7 +142,7 @@ msgstr ""
 msgid "Deletes a media item. Trash by default; permanent deletion requires delete_others_posts."
 msgstr ""
 
-#: src/Abilities/MenuAbilities.php:402
+#: src/Abilities/MenuAbilities.php:396
 msgid "Deletes a menu item. Undo by re-adding the item."
 msgstr ""
 
@@ -174,7 +174,7 @@ msgstr ""
 msgid "Get revision"
 msgstr ""
 
-#: src/Abilities/WidgetAbilities.php:131
+#: src/Abilities/WidgetAbilities.php:143
 msgid "Get sidebar widgets"
 msgstr ""
 
@@ -182,7 +182,7 @@ msgstr ""
 msgid "Get site status"
 msgstr ""
 
-#: src/Abilities/WidgetAbilities.php:160
+#: src/Abilities/WidgetAbilities.php:172
 msgid "List available widgets"
 msgstr ""
 
@@ -206,7 +206,7 @@ msgstr ""
 msgid "List revisions"
 msgstr ""
 
-#: src/Abilities/WidgetAbilities.php:99
+#: src/Abilities/WidgetAbilities.php:111
 msgid "List sidebars"
 msgstr ""
 
@@ -234,7 +234,7 @@ msgstr ""
 msgid "Lists navigation menus and their assigned theme locations."
 msgstr ""
 
-#: src/Abilities/WidgetAbilities.php:100
+#: src/Abilities/WidgetAbilities.php:112
 msgid "Lists the registered widget sidebars."
 msgstr ""
 
@@ -246,7 +246,7 @@ msgstr ""
 msgid "Lists the terms of a taxonomy with optional search."
 msgstr ""
 
-#: src/Abilities/WidgetAbilities.php:161
+#: src/Abilities/WidgetAbilities.php:173
 msgid "Lists the widget types registered by the active theme and plugins."
 msgstr ""
 
@@ -296,11 +296,11 @@ msgstr ""
 msgid "Protocol versions"
 msgstr ""
 
-#: src/Abilities/ContentLifecycleAbilities.php:466
+#: src/Abilities/ContentLifecycleAbilities.php:460
 msgid "Publish content"
 msgstr ""
 
-#: src/Abilities/ContentLifecycleAbilities.php:467
+#: src/Abilities/ContentLifecycleAbilities.php:461
 msgid "Publishes a post or page. The previous status and a revision are kept for recovery."
 msgstr ""
 
@@ -316,11 +316,11 @@ msgstr ""
 msgid "Replying to comments requires the moderate_comments capability."
 msgstr ""
 
-#: src/Abilities/ContentLifecycleAbilities.php:450
+#: src/Abilities/ContentLifecycleAbilities.php:444
 msgid "Restore content"
 msgstr ""
 
-#: src/Abilities/ContentLifecycleAbilities.php:483
+#: src/Abilities/ContentLifecycleAbilities.php:477
 msgid "Restore revision"
 msgstr ""
 
@@ -328,11 +328,11 @@ msgstr ""
 msgid "Restore the previous location map to undo."
 msgstr ""
 
-#: src/Abilities/ContentLifecycleAbilities.php:484
+#: src/Abilities/ContentLifecycleAbilities.php:478
 msgid "Restores a post from one of its revisions. A new revision is created before restoring."
 msgstr ""
 
-#: src/Abilities/ContentLifecycleAbilities.php:451
+#: src/Abilities/ContentLifecycleAbilities.php:445
 msgid "Restores trashed content to its previous status."
 msgstr ""
 
@@ -368,7 +368,7 @@ msgstr ""
 msgid "Returns the public taxonomies registered in the site."
 msgstr ""
 
-#: src/Abilities/WidgetAbilities.php:132
+#: src/Abilities/WidgetAbilities.php:144
 msgid "Returns the widgets assigned to a sidebar."
 msgstr ""
 
@@ -466,7 +466,7 @@ msgstr ""
 msgid "The menu item could not be deleted."
 msgstr ""
 
-#: src/Abilities/MenuAbilities.php:531
+#: src/Abilities/MenuAbilities.php:543
 msgid "The menu item could not be saved."
 msgstr ""
 
@@ -508,7 +508,7 @@ msgstr ""
 msgid "The requested media item does not exist."
 msgstr ""
 
-#: src/Abilities/MenuAbilities.php:552
+#: src/Abilities/MenuAbilities.php:564
 msgid "The requested menu does not exist."
 msgstr ""
 
@@ -523,7 +523,7 @@ msgstr ""
 #: src/Abilities/ContentLifecycleAbilities.php:186
 #: src/Abilities/ContentLifecycleAbilities.php:215
 #: src/Abilities/ContentLifecycleAbilities.php:244
-#: src/Abilities/ContentLifecycleAbilities.php:531
+#: src/Abilities/ContentLifecycleAbilities.php:525
 #: src/Abilities/TaxonomyAbilities.php:153
 msgid "The requested post does not exist."
 msgstr ""
@@ -533,7 +533,7 @@ msgstr ""
 msgid "The requested revision does not exist."
 msgstr ""
 
-#: src/Abilities/WidgetAbilities.php:53
+#: src/Abilities/WidgetAbilities.php:65
 msgid "The requested sidebar does not exist."
 msgstr ""
 
@@ -575,11 +575,11 @@ msgstr ""
 msgid "Update media item"
 msgstr ""
 
-#: src/Abilities/MenuAbilities.php:371
+#: src/Abilities/MenuAbilities.php:368
 msgid "Update menu item"
 msgstr ""
 
-#: src/Abilities/MenuAbilities.php:372
+#: src/Abilities/MenuAbilities.php:369
 msgid "Updates the title, URL, target, or parent of a menu item."
 msgstr ""
 
@@ -641,7 +641,7 @@ msgstr ""
 msgid "You are not allowed to delete this media item."
 msgstr ""
 
-#: src/Abilities/ContentLifecycleAbilities.php:535
+#: src/Abilities/ContentLifecycleAbilities.php:529
 #: src/Abilities/TaxonomyAbilities.php:157
 msgid "You are not allowed to edit this content."
 msgstr ""

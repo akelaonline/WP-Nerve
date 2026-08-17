@@ -88,7 +88,31 @@ if (! class_exists('WP_Ability')) {
         {
             $callback = $this->args['execute_callback'] ?? null;
 
-            return is_callable($callback) ? $callback($input) : null;
+            if (! is_callable($callback)) {
+                return null;
+            }
+
+            $result = $callback($input);
+
+            // WordPress validates ability output against the output schema and
+            // rejects undeclared keys when additionalProperties is false.
+            if (is_array($result)) {
+                $output = $this->get_output_schema();
+                $properties = is_array($output) ? ($output['properties'] ?? null) : null;
+
+                if (is_array($properties) && false === ($output['additionalProperties'] ?? false)) {
+                    $undeclared = array_diff(array_keys($result), array_keys($properties));
+
+                    if (array() !== $undeclared) {
+                        return new WP_Error(
+                            'wp_nerve_invalid_output',
+                            'Undeclared output keys: ' . implode(', ', $undeclared)
+                        );
+                    }
+                }
+            }
+
+            return $result;
         }
     }
 }
