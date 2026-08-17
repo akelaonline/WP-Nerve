@@ -427,15 +427,9 @@ final class ContentLifecycleAbilities extends AbstractAbilityRegistrar
             __('Trash content', 'wp-nerve'),
             __('Moves content to the trash. Undo with restore-content.', 'wp-nerve'),
             $this->idInputSchema(),
-            array(
-                '$schema'              => 'https://json-schema.org/draft/2020-12/schema',
-                'type'                 => 'object',
-                'additionalProperties' => false,
-                'required'             => array('id', 'status'),
-                'properties'           => array(
-                    'id'     => array('type' => 'integer'),
-                    'status' => array('type' => 'string'),
-                ),
+            array_merge(
+                array('$schema' => 'https://json-schema.org/draft/2020-12/schema'),
+                $this->contentItemSchema(false)
             ),
             array($this, 'trashContent'),
             'destructive',
