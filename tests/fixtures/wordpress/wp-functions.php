@@ -1588,7 +1588,7 @@ if (! function_exists('delete_plugins')) {
 }
 
 if (! function_exists('unzip_file')) {
-    function unzip_file(string $file, string $to): true|WP_Error
+    function unzip_file(string $file, string $to): bool|WP_Error
     {
         WPState::$unzippedFiles[] = array('file' => $file, 'to' => $to);
 
