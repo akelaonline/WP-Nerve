@@ -61,6 +61,8 @@ The modern stateless HTTP protocol `2026-07-28` plus legacy clients using
 * Added user, plugin, option, and system abilities (opt-in by default):
   list/get/create/update/delete-user, plugin lifecycle, options, transients,
   and debug log.
+* Added preview-content-update dry-run and an admin dashboard with one-click
+  Application Password generation, risk class toggles, and client snippets.
 * Added risk class opt-in: destructive and privileged operations are denied
   until the site owner enables them.
 

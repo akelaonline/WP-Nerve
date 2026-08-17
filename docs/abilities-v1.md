@@ -49,7 +49,7 @@ re-checks all three conditions before every execution.
 | `publish-content` | Destructive | Off | **Implemented** | Previous status and revision |
 | `trash-content` | Destructive | Off | **Implemented** | Restore from trash |
 | `restore-revision` | Destructive | Off | **Implemented** | New revision before restore |
-| `preview-content-update` | Read | On | Planned | None |
+| `preview-content-update` | Read | On | **Implemented** | None |
 
 ## Media
 

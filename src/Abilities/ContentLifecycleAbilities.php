@@ -19,12 +19,69 @@ final class ContentLifecycleAbilities extends AbstractAbilityRegistrar
     {
         $this->registerCreateDraft();
         $this->registerUpdateContent();
+        $this->registerPreviewContentUpdate();
         $this->registerListRevisions();
         $this->registerGetRevision();
         $this->registerTrashContent();
         $this->registerRestoreContent();
         $this->registerPublishContent();
         $this->registerRestoreRevision();
+    }
+
+    /**
+     * Dry-run preview of an update-content call: nothing is written.
+     *
+     * @param array<string, mixed> $input
+     * @return array<string, mixed>|WP_Error
+     */
+    public function previewContentUpdate(mixed $input = null): array|WP_Error
+    {
+        $input = is_array($input) ? $input : array();
+        $id    = (int) ($input['id'] ?? 0);
+
+        $post = $this->editablePost($id);
+
+        if ($post instanceof WP_Error) {
+            return $post;
+        }
+
+        $fields = array(
+            'title'   => 'post_title',
+            'content' => 'post_content',
+            'excerpt' => 'post_excerpt',
+        );
+
+        $proposed = array();
+
+        foreach ($fields as $key => $property) {
+            $proposed[$key] = $post->{$property};
+        }
+
+        foreach ($fields as $key => $property) {
+            if (array_key_exists($key, $input)) {
+                $proposed[$key] = (string) $input[$key];
+            }
+        }
+
+        $changed = array();
+
+        foreach ($fields as $key => $property) {
+            if ($proposed[$key] !== $post->{$property}) {
+                $changed[] = $key;
+            }
+        }
+
+        return array(
+            'id'       => $post->ID,
+            'current'  => array(
+                'title'   => $post->post_title,
+                'content' => $post->post_content,
+                'excerpt' => $post->post_excerpt,
+            ),
+            'proposed' => $proposed,
+            'changed'  => $changed,
+            'preview'  => true,
+        );
     }
 
     /**
@@ -338,6 +395,41 @@ final class ContentLifecycleAbilities extends AbstractAbilityRegistrar
             ),
             array($this, 'updateContent'),
             'write'
+        );
+    }
+
+    private function registerPreviewContentUpdate(): void
+    {
+        $this->registerReadAbility(
+            'wp-nerve/preview-content-update',
+            __('Preview content update', 'wp-nerve'),
+            __('Dry-run preview of update-content: shows the proposed changes without saving anything.', 'wp-nerve'),
+            array(
+                '$schema'              => 'https://json-schema.org/draft/2020-12/schema',
+                'type'                 => 'object',
+                'additionalProperties' => false,
+                'required'             => array('id'),
+                'properties'           => array(
+                    'id'      => array('type' => 'integer', 'minimum' => 1),
+                    'title'   => array('type' => 'string', 'minLength' => 1, 'maxLength' => 500),
+                    'content' => array('type' => 'string'),
+                    'excerpt' => array('type' => 'string'),
+                ),
+            ),
+            array(
+                '$schema'              => 'https://json-schema.org/draft/2020-12/schema',
+                'type'                 => 'object',
+                'additionalProperties' => false,
+                'required'             => array('id', 'current', 'proposed', 'changed', 'preview'),
+                'properties'           => array(
+                    'id'       => array('type' => 'integer'),
+                    'current'  => array('type' => 'object'),
+                    'proposed' => array('type' => 'object'),
+                    'changed'  => array('type' => 'array', 'items' => array('type' => 'string')),
+                    'preview'  => array('type' => 'boolean'),
+                ),
+            ),
+            array($this, 'previewContentUpdate')
         );
     }
 

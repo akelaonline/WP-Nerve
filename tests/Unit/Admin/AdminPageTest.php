@@ -53,4 +53,88 @@ final class AdminPageTest extends TestCase
         self::assertStringContainsString('edit_posts', $output);
         self::assertStringContainsString('2026-07-28', $output);
     }
+
+    public function testRenderShowsRiskTogglesAndClientSnippets(): void
+    {
+        $page = new AdminPage();
+
+        ob_start();
+        $page->render();
+        $output = (string) ob_get_clean();
+
+        self::assertStringContainsString('Risk classes', $output);
+        self::assertStringContainsString('wp_nerve_risk_classes[]', $output);
+        self::assertStringContainsString('Claude Code', $output);
+        self::assertStringContainsString('USERNAME:APPLICATION_PASSWORD', $output);
+        self::assertStringContainsString('Generate Application Password for me', $output);
+    }
+
+    public function testHandleActionsSavesRiskClasses(): void
+    {
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- test harness.
+        $_POST['wp_nerve_admin']         = 'nonce';
+        $_POST['wp_nerve_action']        = 'enable_risk_classes';
+        $_POST['wp_nerve_risk_classes']  = array('read', 'write', 'privileged', 'destructive');
+
+        $page = new AdminPage();
+        $page->handleActions();
+
+        self::assertSame(
+            array('read', 'write', 'privileged', 'destructive'),
+            WPState::$options['wp_nerve_enabled_risk_classes']
+        );
+        self::assertIsArray(get_transient('wp_nerve_admin_notice'));
+
+        unset($_POST['wp_nerve_admin'], $_POST['wp_nerve_action'], $_POST['wp_nerve_risk_classes']);
+    }
+
+    public function testHandleActionsRejectsInvalidRiskClasses(): void
+    {
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- test harness.
+        $_POST['wp_nerve_admin']        = 'nonce';
+        $_POST['wp_nerve_action']       = 'enable_risk_classes';
+        $_POST['wp_nerve_risk_classes'] = array('read', 'dangerous', 'hack');
+
+        $page = new AdminPage();
+        $page->handleActions();
+
+        self::assertSame(array('read'), WPState::$options['wp_nerve_enabled_risk_classes']);
+
+        unset($_POST['wp_nerve_admin'], $_POST['wp_nerve_action'], $_POST['wp_nerve_risk_classes']);
+    }
+
+    public function testHandleActionsGeneratesApplicationPassword(): void
+    {
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- test harness.
+        $_POST['wp_nerve_admin']  = 'nonce';
+        $_POST['wp_nerve_action'] = 'generate_app_password';
+
+        $page = new AdminPage();
+        $page->handleActions();
+
+        self::assertSame(WPState::$currentUserId, \WP_Application_Passwords::$lastUserId);
+
+        $notice = get_transient('wp_nerve_admin_notice');
+
+        self::assertIsArray($notice);
+        self::assertSame('xxxx xxxx xxxx xxxx xxxx xxxx', $notice['password']);
+
+        unset($_POST['wp_nerve_admin'], $_POST['wp_nerve_action']);
+    }
+
+    public function testHandleActionsIgnoresInvalidNonce(): void
+    {
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- test harness.
+        $_POST['wp_nerve_admin']  = 'nonce';
+        $_POST['wp_nerve_action'] = 'enable_risk_classes';
+
+        WPState::$nonceValid = false;
+
+        $page = new AdminPage();
+        $page->handleActions();
+
+        self::assertArrayNotHasKey('wp_nerve_enabled_risk_classes', WPState::$options);
+
+        unset($_POST['wp_nerve_admin'], $_POST['wp_nerve_action']);
+    }
 }

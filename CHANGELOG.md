@@ -36,6 +36,10 @@ All notable changes to WPNerve will be documented here.
 - Option abilities (opt-in): `get-option`, `update-option` (previous value
   returned for recovery), and `list-options` (keys only, never values).
 - System abilities (opt-in): `get-transient` and `debug-log` (tail read).
+- `preview-content-update` dry-run ability, completing the v1 catalog.
+- Admin dashboard: generate an Application Password in one click, toggle the
+  enabled risk classes, and copy client configuration snippets for Claude Code
+  and curl.
 - Ability registration refactored into per-domain registrars sharing a common
   base (`AbstractAbilityRegistrar`).
 
