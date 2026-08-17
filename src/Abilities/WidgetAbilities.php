@@ -95,7 +95,7 @@ final class WidgetAbilities extends AbstractAbilityRegistrar
     private function registerListSidebars(): void
     {
         $this->registerReadAbility(
-            'wp-nerve/widgets/list-sidebars',
+            'wp-nerve/list-sidebars',
             __('List sidebars', 'wp-nerve'),
             __('Lists the registered widget sidebars.', 'wp-nerve'),
             $this->emptyInputSchema(),
@@ -127,7 +127,7 @@ final class WidgetAbilities extends AbstractAbilityRegistrar
     private function registerGetSidebar(): void
     {
         $this->registerReadAbility(
-            'wp-nerve/widgets/get-sidebar',
+            'wp-nerve/get-sidebar',
             __('Get sidebar widgets', 'wp-nerve'),
             __('Returns the widgets assigned to a sidebar.', 'wp-nerve'),
             array(
@@ -156,7 +156,7 @@ final class WidgetAbilities extends AbstractAbilityRegistrar
     private function registerListAvailable(): void
     {
         $this->registerReadAbility(
-            'wp-nerve/widgets/list-available',
+            'wp-nerve/list-available-widgets',
             __('List available widgets', 'wp-nerve'),
             __('Lists the widget types registered by the active theme and plugins.', 'wp-nerve'),
             $this->emptyInputSchema(),
