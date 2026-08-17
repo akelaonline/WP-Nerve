@@ -91,31 +91,31 @@ re-checks all three conditions before every execution.
 
 | Ability | Risk | Default | Status | Recovery requirement |
 |---|---:|---:|---|---|
-| `users/list` | Read | Off | Planned | None |
-| `users/get` | Read | Off | Planned | None |
-| `users/create` | Privileged | Off | Planned | Delete created user |
-| `users/update` | Privileged | Off | Planned | Previous user state |
-| `users/delete` | Destructive | Off | Planned | Trash/reassign content |
+| `list-users` | Read | Off | **Implemented** | None |
+| `get-user` | Read | Off | **Implemented** | None |
+| `create-user` | Privileged | Off | **Implemented** | Delete created user |
+| `update-user` | Privileged | Off | **Implemented** | Previous user state |
+| `delete-user` | Destructive | Off | **Implemented** | Trash/reassign content |
 
 ## Plugins
 
 | Ability | Risk | Default | Status | Recovery requirement |
 |---|---:|---:|---|---|
-| `plugins/list` | Read | Off | Planned | None |
-| `plugins/activate` | Privileged | Off | Planned | Previous status |
-| `plugins/deactivate` | Privileged | Off | Planned | Previous status |
-| `plugins/upload` | Destructive | Off | Planned | Delete uploaded plugin |
-| `plugins/delete` | Destructive | Off | Planned | Plugin archive backup |
+| `list-plugins` | Read | Off | **Implemented** | None |
+| `activate-plugin` | Privileged | Off | **Implemented** | Previous status |
+| `deactivate-plugin` | Privileged | Off | **Implemented** | Previous status |
+| `upload-plugin` | Destructive | Off | **Implemented** | Delete uploaded plugin |
+| `delete-plugin` | Destructive | Off | **Implemented** | Plugin archive backup |
 
 ## Options and System
 
 | Ability | Risk | Default | Status | Recovery requirement |
 |---|---:|---:|---|---|
-| `options/get` | Privileged | Off | Planned | None |
-| `options/update` | Privileged | Off | Planned | Previous value |
-| `options/list` | Privileged | Off | Planned | None |
-| `system/get-transient` | Privileged | Off | Planned | None |
-| `system/debug-log` | Privileged | Off | Planned | None |
+| `get-option` | Privileged | Off | **Implemented** | None |
+| `update-option` | Privileged | Off | **Implemented** | Previous value |
+| `list-options` | Privileged | Off | **Implemented** | None |
+| `get-transient` | Privileged | Off | **Implemented** | None |
+| `debug-log` | Privileged | Off | **Implemented** | None |
 
 Plugin, theme, filesystem, SQL, and code execution abilities are outside the
 product scope.

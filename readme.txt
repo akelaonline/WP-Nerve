@@ -58,6 +58,9 @@ The modern stateless HTTP protocol `2026-07-28` plus legacy clients using
 * Added comment abilities: list/get/create/reply/moderate/delete-comment.
 * Added menu abilities: list, get-items, create, add/update/delete-item,
   assign-location. Widget reads: list-sidebars, get-sidebar, list-available.
+* Added user, plugin, option, and system abilities (opt-in by default):
+  list/get/create/update/delete-user, plugin lifecycle, options, transients,
+  and debug log.
 * Added risk class opt-in: destructive and privileged operations are denied
   until the site owner enables them.
 

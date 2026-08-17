@@ -256,6 +256,11 @@ if (! function_exists('deactivate_plugins')) {
         unset($silent, $network_wide);
 
         WPState::$deactivatedPlugins = array_merge(WPState::$deactivatedPlugins, (array) $plugins);
+
+        foreach ((array) $plugins as $plugin) {
+            WPState::$pluginDeactivations[] = array('plugin' => $plugin);
+            WPState::$activePlugins         = array_values(array_diff(WPState::$activePlugins, array($plugin)));
+        }
     }
 }
 
@@ -1405,6 +1410,226 @@ if (! function_exists('wp_get_sidebars_widgets')) {
         unset($deprecated);
 
         return WPState::$sidebarWidgets;
+    }
+}
+
+if (! function_exists('get_users')) {
+    /**
+     * @param array<string, mixed> $args
+     * @return array<int, WP_User>
+     */
+    function get_users(array $args = array()): array
+    {
+        $items = array();
+
+        foreach (WPState::$users as $user) {
+            if (! empty($args['role']) && ! in_array($args['role'], $user->roles, true)) {
+                continue;
+            }
+
+            if (! empty($args['search']) && false === strpos($user->user_login, (string) $args['search'])) {
+                continue;
+            }
+
+            $items[] = $user;
+        }
+
+        if (isset($args['number']) && count($items) > (int) $args['number']) {
+            $items = array_slice($items, 0, (int) $args['number']);
+        }
+
+        return $items;
+    }
+}
+
+if (! function_exists('get_userdata')) {
+    function get_userdata(int $user_id): WP_User|false
+    {
+        return WPState::$users[$user_id] ?? false;
+    }
+}
+
+if (! function_exists('wp_insert_user')) {
+    /**
+     * @param array<string, mixed> $userdata
+     */
+    function wp_insert_user(array $userdata): int|WP_Error
+    {
+        $login = (string) ($userdata['user_login'] ?? '');
+
+        if ('' === $login) {
+            return new WP_Error('empty_user_login', 'User login is required.');
+        }
+
+        foreach (WPState::$users as $user) {
+            if ($user->user_login === $login) {
+                return new WP_Error('existing_user_login', 'User login already exists.');
+            }
+        }
+
+        $id = WPState::$nextUserId++;
+
+        $user = new WP_User($id);
+        $user->user_login   = $login;
+        $user->display_name = (string) ($userdata['display_name'] ?? $login);
+        $user->user_email   = (string) ($userdata['user_email'] ?? '');
+        $user->roles        = array_map('strval', (array) ($userdata['role'] ?? array('subscriber')));
+
+        WPState::$users[$id] = $user;
+
+        return $id;
+    }
+}
+
+if (! function_exists('wp_update_user')) {
+    /**
+     * @param array<string, mixed> $userdata
+     */
+    function wp_update_user(array $userdata): int|WP_Error
+    {
+        $id = (int) ($userdata['ID'] ?? 0);
+
+        if (! isset(WPState::$users[$id])) {
+            return new WP_Error('invalid_user_id', 'Invalid user ID.');
+        }
+
+        $user = WPState::$users[$id];
+
+        if (isset($userdata['display_name'])) {
+            $user->display_name = (string) $userdata['display_name'];
+        }
+
+        if (isset($userdata['user_email'])) {
+            $user->user_email = (string) $userdata['user_email'];
+        }
+
+        if (isset($userdata['role'])) {
+            $user->roles = array_map('strval', (array) $userdata['role']);
+        }
+
+        return $id;
+    }
+}
+
+if (! function_exists('wp_delete_user')) {
+    function wp_delete_user(int $id, ?int $reassign = null): bool
+    {
+        unset($reassign);
+
+        if (! isset(WPState::$users[$id])) {
+            return false;
+        }
+
+        unset(WPState::$users[$id]);
+
+        return true;
+    }
+}
+
+if (! function_exists('get_plugins')) {
+    /**
+     * @return array<string, array<string, string>>
+     */
+    function get_plugins(string $plugin_folder = ''): array
+    {
+        unset($plugin_folder);
+
+        return WPState::$plugins;
+    }
+}
+
+if (! function_exists('is_plugin_active')) {
+    function is_plugin_active(string $plugin): bool
+    {
+        return in_array($plugin, WPState::$activePlugins, true);
+    }
+}
+
+if (! function_exists('activate_plugin')) {
+    /**
+     * @return null|WP_Error
+     */
+    function activate_plugin(string $plugin, string $redirect = '', bool $network_wide = false, bool $silent = false): ?WP_Error
+    {
+        unset($redirect, $network_wide, $silent);
+
+        if (! isset(WPState::$plugins[$plugin])) {
+            return new WP_Error('plugin_not_found', 'Plugin file does not exist.');
+        }
+
+        WPState::$pluginActivations[] = array('plugin' => $plugin);
+        WPState::$activePlugins[]     = $plugin;
+
+        return null;
+    }
+}
+
+if (! function_exists('delete_plugins')) {
+    /**
+     * @param array<int, string> $plugins
+     * @return array<int, string>
+     */
+    function delete_plugins(array $plugins): array
+    {
+        $failed = array();
+
+        foreach ($plugins as $plugin) {
+            if (! isset(WPState::$plugins[$plugin])) {
+                $failed[] = $plugin;
+                continue;
+            }
+
+            unset(WPState::$plugins[$plugin]);
+            WPState::$deletedPlugins[] = $plugin;
+        }
+
+        return $failed;
+    }
+}
+
+if (! function_exists('unzip_file')) {
+    function unzip_file(string $file, string $to): true|WP_Error
+    {
+        WPState::$unzippedFiles[] = array('file' => $file, 'to' => $to);
+
+        return true;
+    }
+}
+
+if (! function_exists('wp_load_alloptions')) {
+    /**
+     * @return array<string, mixed>
+     */
+    function wp_load_alloptions(): array
+    {
+        return WPState::$options;
+    }
+}
+
+if (! function_exists('get_transient')) {
+    function get_transient(string $transient): mixed
+    {
+        return WPState::$transients[$transient] ?? false;
+    }
+}
+
+if (! function_exists('set_transient')) {
+    function set_transient(string $transient, mixed $value, int $expiration = 0): bool
+    {
+        unset($expiration);
+
+        WPState::$transients[$transient] = $value;
+
+        return true;
+    }
+}
+
+if (! function_exists('delete_transient')) {
+    function delete_transient(string $transient): bool
+    {
+        unset(WPState::$transients[$transient]);
+
+        return true;
     }
 }
 

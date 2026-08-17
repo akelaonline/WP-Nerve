@@ -120,6 +120,26 @@ if (! class_exists('WP_Taxonomy')) {
     }
 }
 
+if (! class_exists('WP_User')) {
+    class WP_User
+    {
+        public string $user_login = '';
+
+        public string $display_name = '';
+
+        public string $user_email = '';
+
+        public string $user_registered = '2026-01-01 00:00:00';
+
+        /** @var array<int, string> */
+        public array $roles = array();
+
+        public function __construct(public readonly int $ID)
+        {
+        }
+    }
+}
+
 if (! class_exists('WP_Comment')) {
     class WP_Comment
     {
