@@ -14,6 +14,18 @@ msgstr ""
 "X-Generator: WPNerve pot generator\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
+#: src/Abilities/PluginAbilities.php:237
+msgid "Activate plugin"
+msgstr ""
+
+#: src/Abilities/PluginAbilities.php:104
+msgid "Activate the plugin to undo."
+msgstr ""
+
+#: src/Abilities/PluginAbilities.php:238
+msgid "Activates a plugin. Undo by deactivating it."
+msgstr ""
+
 #: src/Abilities/MenuAbilities.php:353
 msgid "Add menu item"
 msgstr ""
@@ -54,6 +66,10 @@ msgstr ""
 msgid "Changes a comment status to approve, hold, spam, or trash. The previous status is returned for recovery."
 msgstr ""
 
+#: src/Abilities/UserAbilities.php:159
+msgid "Changing roles requires the promote_users capability."
+msgstr ""
+
 #: src/Admin/AdminPage.php:70
 msgid "Configure the MCP client with the endpoint, username, and generated Application Password."
 msgstr ""
@@ -82,6 +98,10 @@ msgstr ""
 msgid "Create term"
 msgstr ""
 
+#: src/Abilities/UserAbilities.php:274
+msgid "Create user"
+msgstr ""
+
 #: src/Abilities/MenuAbilities.php:321
 msgid "Creates a navigation menu. Undo by deleting the created menu."
 msgstr ""
@@ -94,6 +114,10 @@ msgstr ""
 msgid "Creates a term in a taxonomy. Requires manage_categories. Undo by deleting the created term."
 msgstr ""
 
+#: src/Abilities/UserAbilities.php:275
+msgid "Creates a user. Administrator creation requires promote_users. Undo by deleting the user."
+msgstr ""
+
 #: src/Abilities/CommentAbilities.php:292
 msgid "Creates an approved comment on a post. Requires moderate_comments."
 msgstr ""
@@ -102,8 +126,24 @@ msgstr ""
 msgid "Creates an approved reply to an existing comment. Requires moderate_comments."
 msgstr ""
 
+#: src/Abilities/UserAbilities.php:90
+msgid "Creating administrators requires the promote_users capability."
+msgstr ""
+
 #: src/Abilities/CommentAbilities.php:107
 msgid "Creating comments requires the moderate_comments capability."
+msgstr ""
+
+#: src/Abilities/PluginAbilities.php:252
+msgid "Deactivate plugin"
+msgstr ""
+
+#: src/Abilities/PluginAbilities.php:77
+msgid "Deactivate the plugin to undo."
+msgstr ""
+
+#: src/Abilities/PluginAbilities.php:253
+msgid "Deactivates a plugin. Undo by activating it."
 msgstr ""
 
 #: src/Admin/AdminPage.php:54
@@ -122,6 +162,10 @@ msgstr ""
 msgid "Delete menu item"
 msgstr ""
 
+#: src/Abilities/PluginAbilities.php:301
+msgid "Delete plugin"
+msgstr ""
+
 #: src/Abilities/MediaAbilities.php:149
 msgid "Delete the created attachment to undo this upload."
 msgstr ""
@@ -130,8 +174,20 @@ msgstr ""
 msgid "Delete the created menu to undo."
 msgstr ""
 
+#: src/Abilities/UserAbilities.php:119
+msgid "Delete the created user to undo."
+msgstr ""
+
 #: src/Abilities/MenuAbilities.php:549
 msgid "Delete the item to undo."
+msgstr ""
+
+#: src/Abilities/PluginAbilities.php:153
+msgid "Delete the plugin to undo. Verify the extracted folder with plugins/list."
+msgstr ""
+
+#: src/Abilities/UserAbilities.php:337
+msgid "Delete user"
 msgstr ""
 
 #: src/Abilities/CommentAbilities.php:385
@@ -146,6 +202,18 @@ msgstr ""
 msgid "Deletes a menu item. Undo by re-adding the item."
 msgstr ""
 
+#: src/Abilities/UserAbilities.php:338
+msgid "Deletes a user, optionally reassigning their content. Cannot be undone."
+msgstr ""
+
+#: src/Abilities/PluginAbilities.php:302
+msgid "Deletes an installed plugin. Cannot be undone."
+msgstr ""
+
+#: src/Abilities/UserAbilities.php:214
+msgid "Deleting a user cannot be undone; recreate the user if needed."
+msgstr ""
+
 #: src/Abilities/CommentAbilities.php:221
 msgid "Deleting comments requires the moderate_comments capability."
 msgstr ""
@@ -158,7 +226,7 @@ msgstr ""
 msgid "Get comment"
 msgstr ""
 
-#: src/Abilities/AbilityRegistrar.php:328
+#: src/Abilities/AbilityRegistrar.php:332
 msgid "Get content"
 msgstr ""
 
@@ -170,6 +238,10 @@ msgstr ""
 msgid "Get menu items"
 msgstr ""
 
+#: src/Abilities/OptionAbilities.php:92
+msgid "Get option"
+msgstr ""
+
 #: src/Abilities/ContentLifecycleAbilities.php:393
 msgid "Get revision"
 msgstr ""
@@ -178,8 +250,16 @@ msgstr ""
 msgid "Get sidebar widgets"
 msgstr ""
 
-#: src/Abilities/AbilityRegistrar.php:177
+#: src/Abilities/AbilityRegistrar.php:181
 msgid "Get site status"
+msgstr ""
+
+#: src/Abilities/SystemAbilities.php:82
+msgid "Get transient"
+msgstr ""
+
+#: src/Abilities/UserAbilities.php:256
+msgid "Get user"
 msgstr ""
 
 #: src/Abilities/WidgetAbilities.php:172
@@ -190,7 +270,7 @@ msgstr ""
 msgid "List comments"
 msgstr ""
 
-#: src/Abilities/AbilityRegistrar.php:219
+#: src/Abilities/AbilityRegistrar.php:223
 msgid "List content types"
 msgstr ""
 
@@ -200,6 +280,14 @@ msgstr ""
 
 #: src/Abilities/MenuAbilities.php:265
 msgid "List menus"
+msgstr ""
+
+#: src/Abilities/OptionAbilities.php:151
+msgid "List options"
+msgstr ""
+
+#: src/Abilities/PluginAbilities.php:200
+msgid "List plugins"
 msgstr ""
 
 #: src/Abilities/ContentLifecycleAbilities.php:348
@@ -218,6 +306,10 @@ msgstr ""
 msgid "List terms"
 msgstr ""
 
+#: src/Abilities/UserAbilities.php:223
+msgid "List users"
+msgstr ""
+
 #: src/Abilities/CommentAbilities.php:39
 msgid "Listing non-approved comments requires the moderate_comments capability."
 msgstr ""
@@ -226,12 +318,20 @@ msgstr ""
 msgid "Lists approved comments, or any status with the moderate_comments capability."
 msgstr ""
 
+#: src/Abilities/PluginAbilities.php:201
+msgid "Lists installed plugins with their active state. Requires activate_plugins."
+msgstr ""
+
 #: src/Abilities/MediaAbilities.php:251
 msgid "Lists media library items with optional mime and search filters."
 msgstr ""
 
 #: src/Abilities/MenuAbilities.php:266
 msgid "Lists navigation menus and their assigned theme locations."
+msgstr ""
+
+#: src/Abilities/OptionAbilities.php:152
+msgid "Lists option keys only, without values. Requires manage_options."
 msgstr ""
 
 #: src/Abilities/WidgetAbilities.php:112
@@ -248,6 +348,10 @@ msgstr ""
 
 #: src/Abilities/WidgetAbilities.php:173
 msgid "Lists the widget types registered by the active theme and plugins."
+msgstr ""
+
+#: src/Abilities/UserAbilities.php:224
+msgid "Lists users with optional role and search filters. Requires list_users."
 msgstr ""
 
 #: src/Admin/AdminPage.php:42
@@ -308,6 +412,18 @@ msgstr ""
 msgid "Re-add the menu item to undo."
 msgstr ""
 
+#: src/Abilities/SystemAbilities.php:114
+msgid "Read debug log"
+msgstr ""
+
+#: src/Abilities/SystemAbilities.php:115
+msgid "Reads the tail of wp-content/debug.log. Requires manage_options."
+msgstr ""
+
+#: src/Abilities/PluginAbilities.php:191
+msgid "Reinstall the plugin to undo."
+msgstr ""
+
 #: src/Abilities/CommentAbilities.php:320
 msgid "Reply to comment"
 msgstr ""
@@ -328,12 +444,24 @@ msgstr ""
 msgid "Restore the previous location map to undo."
 msgstr ""
 
+#: src/Abilities/OptionAbilities.php:72
+msgid "Restore the previous value to undo."
+msgstr ""
+
 #: src/Abilities/ContentLifecycleAbilities.php:478
 msgid "Restores a post from one of its revisions. A new revision is created before restoring."
 msgstr ""
 
 #: src/Abilities/ContentLifecycleAbilities.php:445
 msgid "Restores trashed content to its previous status."
+msgstr ""
+
+#: src/Abilities/OptionAbilities.php:93
+msgid "Returns a named option and its value. Requires manage_options."
+msgstr ""
+
+#: src/Abilities/SystemAbilities.php:83
+msgid "Returns a named transient value. Requires manage_options."
 msgstr ""
 
 #: src/Abilities/CommentAbilities.php:277
@@ -344,7 +472,7 @@ msgstr ""
 msgid "Returns a single media library item with metadata."
 msgstr ""
 
-#: src/Abilities/AbilityRegistrar.php:329
+#: src/Abilities/AbilityRegistrar.php:333
 msgid "Returns a single post with full content when the user may read it."
 msgstr ""
 
@@ -352,7 +480,11 @@ msgstr ""
 msgid "Returns a single revision with its full content."
 msgstr ""
 
-#: src/Abilities/AbilityRegistrar.php:178
+#: src/Abilities/UserAbilities.php:257
+msgid "Returns a single user including email. Requires list_users."
+msgstr ""
+
+#: src/Abilities/AbilityRegistrar.php:182
 msgid "Returns non-sensitive WordPress and WPNerve runtime information for connection diagnostics."
 msgstr ""
 
@@ -360,7 +492,7 @@ msgstr ""
 msgid "Returns the items of a navigation menu."
 msgstr ""
 
-#: src/Abilities/AbilityRegistrar.php:220
+#: src/Abilities/AbilityRegistrar.php:224
 msgid "Returns the public content types registered in the site."
 msgstr ""
 
@@ -380,15 +512,15 @@ msgstr ""
 msgid "Safe site information abilities exposed by WPNerve."
 msgstr ""
 
-#: src/Abilities/AbilityRegistrar.php:264
+#: src/Abilities/AbilityRegistrar.php:268
 msgid "Search content"
 msgstr ""
 
-#: src/Abilities/AbilityRegistrar.php:265
+#: src/Abilities/AbilityRegistrar.php:269
 msgid "Searches published content and returns matching posts with metadata."
 msgstr ""
 
-#: src/Abilities/AbilityRegistrar.php:113
+#: src/Abilities/AbilityRegistrar.php:117
 msgid "Searching non-public content requires the read_private_posts capability."
 msgstr ""
 
@@ -439,15 +571,32 @@ msgid "The content parameter must be a non-empty string."
 msgstr ""
 
 #: src/Abilities/MediaAbilities.php:110
+#: src/Abilities/PluginAbilities.php:130
 msgid "The content parameter must be valid base64."
+msgstr ""
+
+#: src/Abilities/SystemAbilities.php:64
+msgid "The debug log could not be opened."
+msgstr ""
+
+#: src/Abilities/SystemAbilities.php:56
+msgid "The debug log is not readable or does not exist."
 msgstr ""
 
 #: src/Abilities/ContentLifecycleAbilities.php:70
 msgid "The draft could not be created."
 msgstr ""
 
-#: src/Abilities/AbilityRegistrar.php:157
+#: src/Abilities/AbilityRegistrar.php:161
 msgid "The id parameter must be a positive integer."
+msgstr ""
+
+#: src/Abilities/OptionAbilities.php:60
+msgid "The key and value parameters are required."
+msgstr ""
+
+#: src/Abilities/OptionAbilities.php:38
+msgid "The key parameter is required."
 msgstr ""
 
 #: src/Abilities/MenuAbilities.php:232
@@ -484,8 +633,16 @@ msgstr ""
 msgid "The parent comment does not exist."
 msgstr ""
 
-#: src/Abilities/AbilityRegistrar.php:105
+#: src/Abilities/PluginAbilities.php:184
+msgid "The plugin could not be deleted."
+msgstr ""
+
+#: src/Abilities/AbilityRegistrar.php:109
 msgid "The query parameter must be a non-empty string."
+msgstr ""
+
+#: src/Abilities/UserAbilities.php:201
+msgid "The reassign target user does not exist."
 msgstr ""
 
 #: src/Transport/HttpTransport.php:59
@@ -517,7 +674,17 @@ msgstr ""
 msgid "The requested menu item does not exist."
 msgstr ""
 
-#: src/Abilities/AbilityRegistrar.php:163
+#: src/Abilities/OptionAbilities.php:44
+msgid "The requested option does not exist."
+msgstr ""
+
+#: src/Abilities/PluginAbilities.php:63
+#: src/Abilities/PluginAbilities.php:94
+#: src/Abilities/PluginAbilities.php:170
+msgid "The requested plugin does not exist."
+msgstr ""
+
+#: src/Abilities/AbilityRegistrar.php:167
 #: src/Abilities/CommentAbilities.php:97
 #: src/Abilities/ContentLifecycleAbilities.php:131
 #: src/Abilities/ContentLifecycleAbilities.php:186
@@ -533,8 +700,19 @@ msgstr ""
 msgid "The requested revision does not exist."
 msgstr ""
 
+#: src/Abilities/UserAbilities.php:86
+#: src/Abilities/UserAbilities.php:155
+msgid "The requested role is not allowed."
+msgstr ""
+
 #: src/Abilities/WidgetAbilities.php:65
 msgid "The requested sidebar does not exist."
+msgstr ""
+
+#: src/Abilities/UserAbilities.php:65
+#: src/Abilities/UserAbilities.php:136
+#: src/Abilities/UserAbilities.php:191
+msgid "The requested user does not exist."
 msgstr ""
 
 #: src/Abilities/ContentLifecycleAbilities.php:283
@@ -551,8 +729,21 @@ msgstr ""
 msgid "The term could not be created."
 msgstr ""
 
+#: src/Abilities/SystemAbilities.php:37
+msgid "The transient parameter is required."
+msgstr ""
+
 #: src/Abilities/MediaAbilities.php:104
+#: src/Abilities/PluginAbilities.php:124
 msgid "The uploaded file exceeds the configured size limit."
+msgstr ""
+
+#: src/Abilities/UserAbilities.php:113
+msgid "The user could not be created."
+msgstr ""
+
+#: src/Abilities/UserAbilities.php:207
+msgid "The user could not be deleted."
 msgstr ""
 
 #: src/Abilities/ContentLifecycleAbilities.php:427
@@ -579,6 +770,22 @@ msgstr ""
 msgid "Update menu item"
 msgstr ""
 
+#: src/Abilities/OptionAbilities.php:116
+msgid "Update option"
+msgstr ""
+
+#: src/Abilities/UserAbilities.php:305
+msgid "Update user"
+msgstr ""
+
+#: src/Abilities/OptionAbilities.php:117
+msgid "Updates a named option. The previous value is returned for recovery. Requires manage_options."
+msgstr ""
+
+#: src/Abilities/UserAbilities.php:306
+msgid "Updates a user profile or role. Role changes require promote_users."
+msgstr ""
+
 #: src/Abilities/MenuAbilities.php:369
 msgid "Updates the title, URL, target, or parent of a menu item."
 msgstr ""
@@ -595,8 +802,16 @@ msgstr ""
 msgid "Upload media"
 msgstr ""
 
+#: src/Abilities/PluginAbilities.php:267
+msgid "Upload plugin"
+msgstr ""
+
 #: src/Abilities/MediaAbilities.php:297
 msgid "Uploads a base64-encoded file to the media library. Requires upload_files. Undo by deleting the attachment."
+msgstr ""
+
+#: src/Abilities/PluginAbilities.php:268
+msgid "Uploads a base64-encoded plugin zip and installs it. Undo by deleting the plugin."
 msgstr ""
 
 #: src/Admin/AdminPage.php:18
@@ -637,8 +852,16 @@ msgstr ""
 msgid "You are not allowed to create terms."
 msgstr ""
 
+#: src/Abilities/UserAbilities.php:80
+msgid "You are not allowed to create users."
+msgstr ""
+
 #: src/Abilities/MediaAbilities.php:221
 msgid "You are not allowed to delete this media item."
+msgstr ""
+
+#: src/Abilities/UserAbilities.php:195
+msgid "You are not allowed to delete this user."
 msgstr ""
 
 #: src/Abilities/ContentLifecycleAbilities.php:529
@@ -648,6 +871,10 @@ msgstr ""
 
 #: src/Abilities/MediaAbilities.php:170
 msgid "You are not allowed to edit this media item."
+msgstr ""
+
+#: src/Abilities/UserAbilities.php:140
+msgid "You are not allowed to edit this user."
 msgstr ""
 
 #: src/Abilities/ContentLifecycleAbilities.php:250
@@ -662,7 +889,7 @@ msgstr ""
 msgid "You are not allowed to read this comment."
 msgstr ""
 
-#: src/Abilities/AbilityRegistrar.php:167
+#: src/Abilities/AbilityRegistrar.php:171
 msgid "You are not allowed to read this content."
 msgstr ""
 
@@ -688,5 +915,9 @@ msgstr ""
 
 #: src/Abilities/MediaAbilities.php:94
 msgid "filename and base64 content are required."
+msgstr ""
+
+#: src/Abilities/PluginAbilities.php:120
+msgid "filename and base64 zip content are required."
 msgstr ""
 

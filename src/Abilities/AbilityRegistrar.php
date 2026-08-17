@@ -41,6 +41,10 @@ final class AbilityRegistrar extends AbstractAbilityRegistrar
         (new CommentAbilities())->register();
         (new MenuAbilities())->register();
         (new WidgetAbilities())->register();
+        (new UserAbilities())->register();
+        (new PluginAbilities())->register();
+        (new OptionAbilities())->register();
+        (new SystemAbilities())->register();
     }
 
     public function canReadSiteStatus(mixed $input = null): bool

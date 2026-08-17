@@ -191,6 +191,32 @@ final class WPState
     /** @var array<int, array<int, int>> Post ID => taxonomy => term IDs (nav_menu). */
     public static array $postTerms = array();
 
+    /** @var array<int, WP_User> User ID => object. */
+    public static array $users = array();
+
+    public static int $nextUserId = 900;
+
+    /** @var array<string, array<string, string>> Plugin file => plugin data. */
+    public static array $plugins = array();
+
+    /** @var array<int, string> */
+    public static array $activePlugins = array();
+
+    /** @var array<int, array<string, mixed>> */
+    public static array $pluginActivations = array();
+
+    /** @var array<int, array<string, mixed>> */
+    public static array $pluginDeactivations = array();
+
+    /** @var array<int, string> */
+    public static array $deletedPlugins = array();
+
+    /** @var array<int, array{file: string, to: string}> */
+    public static array $unzippedFiles = array();
+
+    /** @var array<string, mixed> */
+    public static array $transients = array();
+
     public static function reset(): void
     {
         self::$abilities = array();
@@ -259,6 +285,15 @@ final class WPState
         self::$widgetFactory = (object) array('widgets' => array());
         self::$deletedPostIds = array();
         self::$postTerms = array();
+        self::$users = array();
+        self::$nextUserId = 900;
+        self::$plugins = array();
+        self::$activePlugins = array();
+        self::$pluginActivations = array();
+        self::$pluginDeactivations = array();
+        self::$deletedPlugins = array();
+        self::$unzippedFiles = array();
+        self::$transients = array();
 
         $GLOBALS['wpdb'] = self::$wpdb;
         $GLOBALS['wp_widget_factory'] = self::$widgetFactory;

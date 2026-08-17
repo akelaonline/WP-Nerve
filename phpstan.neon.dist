@@ -12,4 +12,7 @@ parameters:
     reportUnmatchedIgnoredErrors: false
     ignoreErrors:
         - identifier: missingType.iterableValue
+        # wp-admin/includes/plugin.php only exists on a real WordPress install;
+        # the runtime double provides get_plugins() in tests.
+        - identifier: requireOnce.fileNotFound
 

@@ -28,6 +28,14 @@ All notable changes to WPNerve will be documented here.
   `assign-menu-location` (previous location map returned for recovery).
 - Widget abilities (read-only): `list-sidebars`, `get-sidebar`,
   and `list-available-widgets`.
+- User abilities (opt-in): `list-users`, `get-user`, `create-user`,
+  `update-user`, `delete-user`. Administrator creation requires
+  `promote_users`.
+- Plugin abilities (opt-in): `list-plugins`, `activate-plugin`,
+  `deactivate-plugin`, `upload-plugin` (base64 zip), `delete-plugin`.
+- Option abilities (opt-in): `get-option`, `update-option` (previous value
+  returned for recovery), and `list-options` (keys only, never values).
+- System abilities (opt-in): `get-transient` and `debug-log` (tail read).
 - Ability registration refactored into per-domain registrars sharing a common
   base (`AbstractAbilityRegistrar`).
 
