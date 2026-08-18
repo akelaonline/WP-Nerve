@@ -13,10 +13,11 @@ flowchart TD
     A["MCP request"] --> B["Transport validation"]
     B --> C["WordPress authentication"]
     C --> D["Tool discovery or lookup"]
-    D --> E["WPNerve policy decision"]
-    E --> F["WP_Ability::execute"]
-    F --> G["Structured MCP result"]
-    E --> H["Metadata-only audit event"]
+    D --> E["Idempotency guard"]
+    E --> F["WPNerve policy decision"]
+    F --> G["WP_Ability::execute"]
+    G --> H["Structured MCP result"]
+    F --> I["Metadata-only audit event"]
 ```
 
 ### Transport
@@ -37,6 +38,13 @@ deterministically ordered MCP tools.
 `PolicyEngine` is the mandatory gateway for discovery and execution. It reads
 WPNerve-specific ability metadata and applies secure defaults. An unknown risk
 classification is treated as privileged.
+
+### Idempotency
+
+`IdempotentToolRegistry` decorates the native ability registry. It bypasses
+reads and atomically claims every mutation using an authoritative credential
+identity and canonical argument digest. A completed retry returns the stored
+outcome; conflicting, concurrent, ambiguous, or unavailable states fail closed.
 
 ### Abilities
 
@@ -67,10 +75,14 @@ the exposed tools are stateless from the protocol's perspective.
 3. The transport validates JSON and selects the protocol era.
 4. Modern mirrored headers are compared with body values.
 5. The handler discovers or invokes a tool.
-6. The policy engine makes an independent authorization decision.
-7. `WP_Ability::execute()` validates input, checks object permissions, executes,
+6. The idempotency decorator atomically claims every mutating request key.
+7. The policy engine makes an independent authorization decision.
+8. `WP_Ability::execute()` validates input, checks object permissions, executes,
    and validates output.
-8. WPNerve records a metadata-only audit event.
+9. WPNerve persists the mutation outcome and records a metadata-only audit event.
+
+See [mutation idempotency](security/idempotency.md) for the request contract,
+replay behavior, crash-safety policy, and storage guarantees.
 
 ## Extensibility
 

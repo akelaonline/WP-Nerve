@@ -28,7 +28,7 @@ in this document passes.
 | Gate | Deliverable | Required evidence | Exit criterion |
 |---|---|---|---|
 | G0 Contract integrity | README, catalog, threat model, changelog and version agree | Automated documentation/version checks | No stale or contradictory security claims |
-| G1 Idempotency | Persistent per-user/client/tool idempotency store | Unit, integration and replay tests | A retry cannot duplicate a mutation |
+| G1 Idempotency | Persistent per-user/authoritative-credential/tool idempotency store | Unit, integration and replay tests | A retry cannot duplicate a mutation |
 | G2 Destructive confirmation | Short-lived, single-use confirmation bound to actor, tool and canonical arguments | Tamper, expiry, reuse and cross-user tests | No destructive or privileged mutation executes without a valid confirmation |
 | G3 Rate limiting | Separate budgets for MCP, OAuth registration, authorization and token routes | Proxy/IP tests and deterministic clock tests | Limits fail closed without trusting arbitrary forwarding headers |
 | G4 Privileged hardening | Per-object authorization and safe allow/deny lists for users, plugins, options and logs | Adversarial tests for privilege escalation and secret disclosure | No path to administrator creation, protected option access or unsafe plugin replacement outside explicit policy |

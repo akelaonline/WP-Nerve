@@ -19,6 +19,10 @@ use WPNerve\Policy\PolicyEngine;
 use WPNerve\Protocol\AbilityToolRegistry;
 use WPNerve\Protocol\JsonRpcHandler;
 use WPNerve\Protocol\RequestValidator;
+use WPNerve\Security\Idempotency\CanonicalJson;
+use WPNerve\Security\Idempotency\IdempotentToolRegistry;
+use WPNerve\Security\Idempotency\Service as IdempotencyService;
+use WPNerve\Security\Idempotency\WpdbRepository;
 use WPNerve\Transport\HttpTransport;
 
 final class Plugin
@@ -49,16 +53,19 @@ final class Plugin
             return;
         }
 
-        if ('2' !== get_option('wp_nerve_schema_version')) {
+        if ('3' !== get_option('wp_nerve_schema_version')) {
             AuditRepository::installSchema();
             OAuthStore::installSchema();
-            update_option('wp_nerve_schema_version', '2', false);
+            WpdbRepository::installSchema();
+            update_option('wp_nerve_schema_version', '3', false);
         }
 
         $abilities = new AbilityRegistrar();
         $audit     = new AuditRepository();
         $policy    = new PolicyEngine();
-        $registry  = new AbilityToolRegistry($policy);
+        $abilitiesRegistry = new AbilityToolRegistry($policy);
+        $idempotency       = new IdempotencyService(new WpdbRepository(), new CanonicalJson());
+        $registry          = new IdempotentToolRegistry($abilitiesRegistry, $idempotency);
         $handler   = new JsonRpcHandler($registry, $audit);
         $transport = new HttpTransport(new RequestValidator(), $handler);
         $admin     = new AdminPage();

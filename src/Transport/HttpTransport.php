@@ -24,6 +24,8 @@ final class HttpTransport
     private const NAMESPACE = 'wp-nerve/v1';
     private const ROUTE     = '/mcp';
 
+    private string $credentialId = '';
+
     public function __construct(
         private readonly RequestValidator $validator,
         private readonly JsonRpcHandler $handler
@@ -52,6 +54,8 @@ final class HttpTransport
 
     public function checkPermission(WP_REST_Request $request): bool|WP_Error
     {
+        $this->credentialId = '';
+
         $origin = $request->get_header('origin');
 
         if (is_string($origin) && '' !== $origin && ! $this->isAllowedOrigin($origin)) {
@@ -66,9 +70,9 @@ final class HttpTransport
 
         if (is_string($authorization) && str_starts_with(strtolower($authorization), 'bearer ')) {
             $token  = trim(substr($authorization, 7));
-            $userId = (new OAuthStore())->validateAccessToken($token);
+            $identity = (new OAuthStore())->validateAccessTokenIdentity($token);
 
-            if (null === $userId) {
+            if (null === $identity) {
                 return new WP_Error(
                     'wp_nerve_oauth_invalid_token',
                     __('The bearer token is invalid or expired.', 'wp-nerve'),
@@ -76,7 +80,8 @@ final class HttpTransport
                 );
             }
 
-            wp_set_current_user($userId);
+            wp_set_current_user($identity['user_id']);
+            $this->credentialId = 'oauth:' . $identity['client_id'];
         }
 
         if (! is_user_logged_in()) {
@@ -85,6 +90,13 @@ final class HttpTransport
                 __('Authentication is required to access WPNerve.', 'wp-nerve'),
                 array('status' => 401)
             );
+        }
+
+        if ('' === $this->credentialId) {
+            $applicationPassword = rest_get_authenticated_app_password();
+            $this->credentialId  = is_string($applicationPassword) && '' !== $applicationPassword
+                ? 'application-password:' . $applicationPassword
+                : 'wordpress-session';
         }
 
         if (! current_user_can($this->transportCapability())) {
@@ -280,6 +292,7 @@ final class HttpTransport
             'client_version' => is_array($clientInfo) && is_string($clientInfo['version'] ?? null)
                 ? $clientInfo['version']
                 : '',
+            'credential_id'  => $this->credentialId,
         );
     }
 

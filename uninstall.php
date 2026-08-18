@@ -21,11 +21,20 @@ if (true !== get_option('wp_nerve_delete_data_on_uninstall', false)) {
 
 global $wpdb;
 
-$table = $wpdb->prefix . 'wp_nerve_audit_log';
-$sql   = $wpdb->prepare('DROP TABLE IF EXISTS %i', $table);
+foreach (
+    array(
+        'wp_nerve_audit_log',
+        'wp_nerve_idempotency',
+        'wp_nerve_oauth_clients',
+        'wp_nerve_oauth_tokens',
+    ) as $suffix
+) {
+    $table = $wpdb->prefix . $suffix;
+    $sql   = $wpdb->prepare('DROP TABLE IF EXISTS %i', $table);
 
-if (is_string($sql)) {
-    $wpdb->query($sql); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Prepared directly above with an identifier placeholder.
+    if (is_string($sql)) {
+        $wpdb->query($sql); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Prepared directly above with an identifier placeholder.
+    }
 }
 
 delete_option('wp_nerve_schema_version');

@@ -1763,3 +1763,10 @@ if (! function_exists('current_user_can_for_blog')) {
         return current_user_can($capability, ...$args);
     }
 }
+
+if (! function_exists('rest_get_authenticated_app_password')) {
+    function rest_get_authenticated_app_password(): ?string
+    {
+        return WPState::$applicationPasswordUuid;
+    }
+}

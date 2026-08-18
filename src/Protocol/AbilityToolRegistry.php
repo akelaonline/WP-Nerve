@@ -41,8 +41,10 @@ final class AbilityToolRegistry implements ToolRegistry
      * @param array<string, mixed> $arguments
      * @return array{result: mixed, risk: string}|WP_Error
      */
-    public function execute(string $toolName, array $arguments): array|WP_Error
+    public function execute(string $toolName, array $arguments, array $context = array()): array|WP_Error
     {
+        unset($context);
+
         $ability = $this->find($toolName);
 
         if (null === $ability) {
@@ -65,6 +67,13 @@ final class AbilityToolRegistry implements ToolRegistry
             'result' => $result,
             'risk'   => $this->policy->risk($ability)->value,
         );
+    }
+
+    public function risk(string $toolName): ?string
+    {
+        $ability = $this->find($toolName);
+
+        return null === $ability ? null : $this->policy->risk($ability)->value;
     }
 
     private function find(string $toolName): ?WP_Ability
@@ -111,6 +120,7 @@ final class AbilityToolRegistry implements ToolRegistry
             '_meta'        => array(
                 'wp-nerve/ability' => $ability->get_name(),
                 'wp-nerve/risk'    => $this->policy->risk($ability)->value,
+                'wp-nerve/idempotencyRequired' => 'read' !== $this->policy->risk($ability)->value,
             ),
         );
 

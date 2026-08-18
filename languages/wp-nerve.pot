@@ -2,7 +2,7 @@
 # This file is distributed under the GPL-2.0-or-later license.
 msgid ""
 msgstr ""
-"Project-Id-Version: WPNerve 0.1.0-alpha.4\n"
+"Project-Id-Version: WPNerve 0.1.0-alpha.5\n"
 "Report-Msgid-Bugs-To: https://github.com/akelaonline/WP-Nerve/issues\n"
 "POT-Creation-Date: 2026-08-16 12:00+0000\n"
 "MIME-Version: 1.0\n"
@@ -13,6 +13,55 @@ msgstr ""
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "X-Generator: WPNerve pot generator\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: src/Security/Idempotency/Service.php:78
+msgid "An authenticated credential identity is required for mutating tools."
+msgstr ""
+
+#: src/Security/Idempotency/Service.php:71
+msgid "An authenticated user is required."
+msgstr ""
+
+#: src/Security/Idempotency/Service.php:46
+msgid "Mutating tools require an idempotency key in params._meta[\"wp-nerve/idempotencyKey\"]."
+msgstr ""
+
+#: src/Security/Idempotency/Service.php:53
+msgid "The idempotency key must be 8-128 ASCII letters, digits, dots, colons, underscores, or hyphens."
+msgstr ""
+
+#: src/Security/Idempotency/Service.php:108
+msgid "The idempotency store is unavailable; the mutation was not executed."
+msgstr ""
+
+#: src/Security/Idempotency/Service.php:122
+msgid "The operation ran but its result could not be persisted. Its key is locked to prevent an unsafe retry."
+msgstr ""
+
+#: src/Security/Idempotency/Service.php:160
+msgid "The previous execution failed."
+msgstr ""
+
+#: src/Security/Idempotency/Service.php:152
+#: src/Security/Idempotency/Service.php:171
+msgid "The stored idempotency outcome is invalid."
+msgstr ""
+
+#: src/Security/Idempotency/Service.php:101
+msgid "The stored outcome has expired. Use a new idempotency key after verifying the original operation."
+msgstr ""
+
+#: src/Security/Idempotency/Service.php:87
+msgid "This idempotency key was already used with different tool arguments."
+msgstr ""
+
+#: src/Security/Idempotency/Service.php:94
+msgid "This operation is already running or its final state is indeterminate. It will not be repeated automatically."
+msgstr ""
+
+#: src/Security/Idempotency/Service.php:62
+msgid "Tool arguments cannot be canonicalized safely."
+msgstr ""
 
 #: src/Abilities/PluginAbilities.php:237
 msgid "Activate plugin"
@@ -1013,4 +1062,3 @@ msgstr ""
 #: src/OAuth/OAuthServer.php:288
 msgid "to access"
 msgstr ""
-

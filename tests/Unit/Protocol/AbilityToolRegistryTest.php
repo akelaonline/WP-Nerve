@@ -58,6 +58,7 @@ final class AbilityToolRegistryTest extends TestCase
         self::assertFalse($tool['annotations']['openWorldHint']);
         self::assertSame('wp-nerve/site-status', $tool['_meta']['wp-nerve/ability']);
         self::assertSame('read', $tool['_meta']['wp-nerve/risk']);
+        self::assertFalse($tool['_meta']['wp-nerve/idempotencyRequired']);
         self::assertArrayNotHasKey('outputSchema', $tool);
     }
 

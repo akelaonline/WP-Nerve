@@ -190,6 +190,36 @@ final class JsonRpcHandlerTest extends TestCase
         self::assertSame('Denied.', $result->body['result']['content'][0]['text']);
     }
 
+    public function testToolsCallPassesIdempotencyKeyOutsideAbilityArguments(): void
+    {
+        $this->tools->expects(self::once())->method('execute')->with(
+            'wp_nerve_create_draft',
+            array('title' => 'A'),
+            array(
+                'idempotency_key' => 'request-123',
+                'credential_id'   => 'application-password:test',
+            )
+        )->willReturn(array('result' => array('id' => 41), 'risk' => 'write'));
+
+        $result = $this->handler->handle(
+            array(
+                'jsonrpc' => '2.0',
+                'id'      => 7,
+                'method'  => 'tools/call',
+                'params'  => array(
+                    'name'      => 'wp_nerve_create_draft',
+                    'arguments' => array('title' => 'A'),
+                    '_meta'     => array('wp-nerve/idempotencyKey' => 'request-123'),
+                ),
+            ),
+            RequestValidator::MODERN_VERSION,
+            true,
+            array('credential_id' => 'application-password:test')
+        );
+
+        self::assertFalse($result->body['result']['isError']);
+    }
+
     public function testToolsCallUnknownToolReturnsProtocolError(): void
     {
         $this->tools->method('execute')->willReturn(new WP_Error('wp_nerve_tool_not_found', 'No such tool.'));

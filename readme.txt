@@ -4,7 +4,7 @@ Tags: mcp, ai, agents, abilities, automation
 Requires at least: 6.9
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 0.1.0-alpha.4
+Stable tag: 0.1.0-alpha.5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -48,9 +48,23 @@ capabilities. Destructive and privileged operations are denied by default.
 The modern stateless HTTP protocol `2026-07-28` plus legacy clients using
 `2025-11-25` and `2025-06-18`.
 
+= Do mutating tools require an idempotency key? =
+
+Yes. Every write, destructive, and privileged call must send a unique
+`wp-nerve/idempotencyKey` in request `_meta`. Reuse the same key only when
+retrying the exact same call. This prevents network retries from duplicating
+changes.
+
 == Changelog ==
 
-= Unreleased =
+= 0.1.0-alpha.5 =
+* Added persistent, atomic idempotency for every mutating MCP tool.
+* Claims are scoped to the authenticated user, authoritative credential, tool,
+  key, and canonical argument digest.
+* Added safe outcome replay, collision detection, and fail-closed handling of
+  concurrent or indeterminate executions.
+
+= 0.1.0-alpha.4 =
 * Added content lifecycle abilities: create-draft, update-content,
   list/get-revisions, trash/restore/publish-content, and restore-revision.
 * Added taxonomy abilities: list-taxonomies, list-terms, create-term, assign-terms.

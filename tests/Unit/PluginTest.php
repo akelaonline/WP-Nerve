@@ -42,13 +42,13 @@ final class PluginTest extends TestCase
     {
         Plugin::instance()->boot();
 
-        self::assertCount(3, WPState::$schemaCalls);
-        self::assertSame('2', WPState::$options['wp_nerve_schema_version']);
+        self::assertCount(4, WPState::$schemaCalls);
+        self::assertSame('3', WPState::$options['wp_nerve_schema_version']);
     }
 
     public function testBootSkipsSchemaWhenAlreadyInstalled(): void
     {
-        WPState::$options['wp_nerve_schema_version'] = '2';
+        WPState::$options['wp_nerve_schema_version'] = '3';
 
         Plugin::instance()->boot();
 

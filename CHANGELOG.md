@@ -2,6 +2,23 @@
 
 All notable changes to WPNerve will be documented here.
 
+## [0.1.0-alpha.5] - 2026-08-17
+
+### Added
+
+- Persistent idempotency for every write, destructive, and privileged MCP tool.
+- Atomic claims scoped to the WordPress user, authoritative Application Password
+  or OAuth client identity, tool, key, and canonical argument digest.
+- Safe replay of completed results, conflict detection, and fail-closed handling
+  for concurrent or indeterminate executions.
+- Tool metadata advertising when an idempotency key is required.
+- Dedicated schema v3 idempotency table and security documentation.
+
+### Changed
+
+- Mutating tool calls now require `wp-nerve/idempotencyKey` in request `_meta`.
+- Explicit uninstall cleanup removes audit, idempotency, and OAuth tables.
+
 ## [0.1.0-alpha.4] - 2026-08-17
 
 ### Added

@@ -128,7 +128,18 @@ final class JsonRpcHandler
         }
 
         $started = hrtime(true);
-        $result  = $this->tools->execute($name, $arguments);
+        $meta = is_array($params['_meta'] ?? null) ? $params['_meta'] : array();
+
+        $result  = $this->tools->execute(
+            $name,
+            $arguments,
+            array(
+                'idempotency_key' => $meta['wp-nerve/idempotencyKey'] ?? null,
+                'credential_id'   => is_string($context['credential_id'] ?? null)
+                    ? $context['credential_id']
+                    : '',
+            )
+        );
         $elapsed = (int) round((hrtime(true) - $started) / 1_000_000);
 
         if (is_wp_error($result)) {
@@ -137,7 +148,7 @@ final class JsonRpcHandler
                 $protocolVersion,
                 $context,
                 $name,
-                '',
+                (string) ($this->tools->risk($name) ?? ''),
                 'error',
                 $elapsed,
                 (string) $result->get_error_code()

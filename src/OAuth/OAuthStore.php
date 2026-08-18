@@ -128,13 +128,29 @@ final class OAuthStore
      */
     public function validateAccessToken(string $token): ?int
     {
+        $identity = $this->validateAccessTokenIdentity($token);
+
+        return null === $identity ? null : $identity['user_id'];
+    }
+
+    /**
+     * Returns the authoritative user and OAuth client bound to an access token.
+     *
+     * @return array{user_id: int, client_id: string}|null
+     */
+    public function validateAccessTokenIdentity(string $token): ?array
+    {
         $row = $this->findToken($token, 'access_token');
 
         if (null === $row || ! $this->isActive($row)) {
             return null;
         }
 
-        return (int) $row['user_id'];
+        $clientId = $row['client_id'] ?? null;
+
+        return is_string($clientId) && '' !== $clientId
+            ? array('user_id' => (int) $row['user_id'], 'client_id' => $clientId)
+            : null;
     }
 
     /** @return array<string, mixed>|null */

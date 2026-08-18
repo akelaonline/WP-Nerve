@@ -27,6 +27,9 @@ final class WpDb
 
     public string $lastPrepared = '';
 
+    /** @var array<int, int|false> Results queued for query(). */
+    public array $queryResults = array();
+
     /** @var array<int, array<string, mixed>> Rows queued for get_row(). */
     public array $rows = array();
 
@@ -98,9 +101,15 @@ final class WpDb
         return is_string($result) ? $result : $query;
     }
 
-    public function query(string $query): void
+    public function query(string $query): int|false
     {
         $this->lastQuery = $query;
+
+        if (array() !== $this->queryResults) {
+            return array_shift($this->queryResults);
+        }
+
+        return 1;
     }
 
     public function get_row(?string $query = null, string $output = OBJECT, int $y = 0): object|array|null
@@ -149,7 +158,7 @@ final class WpDb
      * @param array<string, mixed> $where
      * @param array<int, string>   $format
      */
-    public function delete(string $table, array $where, array $format = null): int
+    public function delete(string $table, array $where, ?array $format = null): int
     {
         unset($format);
 

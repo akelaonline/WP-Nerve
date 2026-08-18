@@ -20,8 +20,14 @@ interface ToolRegistry
     public function tools(): array;
 
     /**
+     * Returns the effective risk of a discoverable tool.
+     */
+    public function risk(string $toolName): ?string;
+
+    /**
      * @param array<string, mixed> $arguments
+     * @param array<string, mixed> $context
      * @return array{result: mixed, risk: string}|WP_Error
      */
-    public function execute(string $toolName, array $arguments): array|WP_Error;
+    public function execute(string $toolName, array $arguments, array $context = array()): array|WP_Error;
 }

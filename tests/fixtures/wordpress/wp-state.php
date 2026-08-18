@@ -62,6 +62,8 @@ final class WPState
 
     public static int $currentUserId = 1;
 
+    public static ?string $applicationPasswordUuid = 'test-application-password';
+
     public static string $currentUserDisplayName = 'Test User';
 
     public static string $wpVersion = '6.9';
@@ -242,6 +244,7 @@ final class WPState
         self::$pluginDirPath = '';
         self::$pluginDirUrl = 'https://example.test/wp-content/plugins/wp-nerve/';
         self::$currentUserId = 1;
+        self::$applicationPasswordUuid = 'test-application-password';
         self::$currentUserDisplayName = 'Test User';
         self::$wpVersion = '6.9';
         self::$multisite = false;
