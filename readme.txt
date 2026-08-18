@@ -4,7 +4,7 @@ Tags: mcp, ai, agents, abilities, automation
 Requires at least: 6.9
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 0.1.0-alpha.6
+Stable tag: 0.1.0-alpha.7
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -17,9 +17,10 @@ over the Model Context Protocol. It runs entirely inside WordPress and does not
 require an external relay, SaaS account, or additional database.
 
 Read-only abilities ship enabled by default: site status, content type listing,
-content search, and full content reads. Recoverable writes are available for
-drafts, content updates, revisions, and taxonomy assignment. Destructive and
-privileged operations are denied until the site owner opts in.
+content search, and full content reads. Recoverable writes are available across
+the selected v1 surface. Destructive and privileged tools are hidden until the
+site owner opts in and then require a matching, short-lived approval in Tools >
+WPNerve before each logical operation.
 
 This version is an early alpha for development and security review.
 
@@ -57,7 +58,24 @@ Yes. Every write, destructive, and privileged call must send a unique
 retrying the exact same call. This prevents network retries from duplicating
 changes.
 
+= Do destructive or privileged tools require confirmation? =
+
+Yes. Their risk class must first be enabled by an administrator. The first exact
+call returns a short-lived token and display code without executing. Match and
+approve that code in Tools > WPNerve, then retry with the same arguments,
+idempotency key, credential and confirmation token. Changed or expired requests
+fail closed.
+
 == Changelog ==
+
+= 0.1.0-alpha.7 =
+* Added out-of-band admin confirmation for destructive and privileged MCP tools.
+* Challenges are short-lived and bound to the WordPress user, authoritative
+  credential, tool, canonical arguments and idempotency key.
+* Added atomic approval/consumption, safe idempotent replay, tamper and expiry
+  protection, and privacy-preserving confirmation storage.
+* Fixed admin action wiring so credential and confirmation forms run on the
+  correct WordPress hook.
 
 = 0.1.0-alpha.6 =
 * Added least-privilege user selection, copy-ready client configuration,

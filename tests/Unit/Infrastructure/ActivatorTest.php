@@ -20,8 +20,8 @@ final class ActivatorTest extends TestCase
     {
         Activator::activate();
 
-        self::assertCount(4, WPState::$schemaCalls);
-        self::assertSame('3', WPState::$options['wp_nerve_schema_version']);
+        self::assertCount(5, WPState::$schemaCalls);
+        self::assertSame('4', WPState::$options['wp_nerve_schema_version']);
         self::assertSame(array(), WPState::$deactivatedPlugins);
     }
 

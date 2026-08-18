@@ -106,6 +106,7 @@ final class AbilityToolRegistry implements ToolRegistry
     {
         $annotations = $ability->get_meta_item('annotations', array());
         $annotations = is_array($annotations) ? $annotations : array();
+        $risk         = $this->policy->risk($ability)->value;
         $descriptor  = array(
             'name'         => $this->toolName($ability),
             'title'        => $ability->get_label(),
@@ -119,8 +120,9 @@ final class AbilityToolRegistry implements ToolRegistry
             ),
             '_meta'        => array(
                 'wp-nerve/ability' => $ability->get_name(),
-                'wp-nerve/risk'    => $this->policy->risk($ability)->value,
-                'wp-nerve/idempotencyRequired' => 'read' !== $this->policy->risk($ability)->value,
+                'wp-nerve/risk'    => $risk,
+                'wp-nerve/idempotencyRequired' => 'read' !== $risk,
+                'wp-nerve/confirmationRequired' => in_array($risk, array('destructive', 'privileged'), true),
             ),
         );
 

@@ -64,6 +64,8 @@ final class WPState
 
     public static ?string $applicationPasswordUuid = 'test-application-password';
 
+    public static string $sessionToken = 'test-session-token';
+
     public static bool $applicationPasswordsAvailable = true;
 
     /** @var array<int, array<int, array<string, mixed>>> User ID => credentials. */
@@ -259,6 +261,7 @@ final class WPState
         self::$pluginDirUrl = 'https://example.test/wp-content/plugins/wp-nerve/';
         self::$currentUserId = 1;
         self::$applicationPasswordUuid = 'test-application-password';
+        self::$sessionToken = 'test-session-token';
         self::$applicationPasswordsAvailable = true;
         self::$applicationPasswords = array();
         self::$lastRemotePost = null;

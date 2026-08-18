@@ -35,7 +35,8 @@ Tool descriptors advertise `wp-nerve/idempotencyRequired` in `_meta`.
 The persistence scope is the authenticated WordPress user, authoritative
 credential identity, tool, and SHA-256 hash of the client key. Application
 Passwords use the UUID collected by WordPress; OAuth calls use the client ID
-bound to the validated access token. Self-reported MCP client names are never
+bound to the validated access token; cookie-authenticated calls use a one-way
+digest of the WordPress session token. Self-reported MCP client names are never
 used as authority. The record also binds a canonical digest of the complete
 arguments.
 

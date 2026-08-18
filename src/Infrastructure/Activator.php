@@ -12,6 +12,7 @@ namespace WPNerve\Infrastructure;
 
 use WPNerve\Audit\AuditRepository;
 use WPNerve\OAuth\OAuthStore;
+use WPNerve\Security\Confirmation\WpdbRepository as ConfirmationRepository;
 use WPNerve\Security\Idempotency\WpdbRepository;
 
 final class Activator
@@ -41,6 +42,7 @@ final class Activator
         AuditRepository::installSchema();
         OAuthStore::installSchema();
         WpdbRepository::installSchema();
-        update_option('wp_nerve_schema_version', '3', false);
+        ConfirmationRepository::installSchema();
+        update_option('wp_nerve_schema_version', '4', false);
     }
 }

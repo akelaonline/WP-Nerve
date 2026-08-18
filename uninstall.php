@@ -25,6 +25,7 @@ foreach (
     array(
         'wp_nerve_audit_log',
         'wp_nerve_idempotency',
+        'wp_nerve_confirmations',
         'wp_nerve_oauth_clients',
         'wp_nerve_oauth_tokens',
     ) as $suffix

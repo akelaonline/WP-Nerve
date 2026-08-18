@@ -196,8 +196,9 @@ final class JsonRpcHandlerTest extends TestCase
             'wp_nerve_create_draft',
             array('title' => 'A'),
             array(
-                'idempotency_key' => 'request-123',
-                'credential_id'   => 'application-password:test',
+                'idempotency_key'    => 'request-123',
+                'confirmation_token' => 'wpc_' . str_repeat('a', 43),
+                'credential_id'      => 'application-password:test',
             )
         )->willReturn(array('result' => array('id' => 41), 'risk' => 'write'));
 
@@ -209,7 +210,10 @@ final class JsonRpcHandlerTest extends TestCase
                 'params'  => array(
                     'name'      => 'wp_nerve_create_draft',
                     'arguments' => array('title' => 'A'),
-                    '_meta'     => array('wp-nerve/idempotencyKey' => 'request-123'),
+                    '_meta'     => array(
+                        'wp-nerve/idempotencyKey'    => 'request-123',
+                        'wp-nerve/confirmationToken' => 'wpc_' . str_repeat('a', 43),
+                    ),
                 ),
             ),
             RequestValidator::MODERN_VERSION,
@@ -218,6 +222,45 @@ final class JsonRpcHandlerTest extends TestCase
         );
 
         self::assertFalse($result->body['result']['isError']);
+    }
+
+    public function testToolsCallReturnsConfirmationChallengeMetadata(): void
+    {
+        $error = new WP_Error(
+            'wp_nerve_confirmation_required',
+            'Approval required.',
+            array(
+                'wp_nerve_confirmation' => array(
+                    'status'      => 'pending',
+                    'displayCode' => 'ABCD-EF12',
+                    'token'       => 'wpc_' . str_repeat('a', 43),
+                ),
+            )
+        );
+
+        $this->tools->method('execute')->willReturn($error);
+
+        $result = $this->handler->handle(
+            array(
+                'jsonrpc' => '2.0',
+                'id'      => 7,
+                'method'  => 'tools/call',
+                'params'  => array('name' => 'wp_nerve_delete_user', 'arguments' => array('id' => 41)),
+            ),
+            RequestValidator::MODERN_VERSION,
+            true
+        );
+
+        $confirmation = $result->body['result']['_meta']['wp-nerve/confirmation'];
+
+        self::assertTrue($result->body['result']['isError']);
+        self::assertSame('pending', $confirmation['status']);
+        self::assertSame('ABCD-EF12', $confirmation['displayCode']);
+        self::assertMatchesRegularExpression('/^wpc_/', $confirmation['token']);
+        self::assertSame(
+            'WPNerve',
+            $result->body['result']['_meta']['io.modelcontextprotocol/serverInfo']['name']
+        );
     }
 
     public function testToolsCallUnknownToolReturnsProtocolError(): void

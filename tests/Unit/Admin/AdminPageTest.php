@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace WPNerve\Tests\Unit\Admin;
 
 use WPNerve\Admin\AdminPage;
+use WPNerve\Security\Confirmation\Repository;
 use WPNerve\Tests\Fixtures\WPState;
 use WPNerve\Tests\Unit\TestCase;
 
@@ -80,6 +81,69 @@ final class AdminPageTest extends TestCase
         self::assertStringContainsString('BASE64_USERNAME_COLON_APPLICATION_PASSWORD', $output);
         self::assertStringContainsString('Generate WPNerve credential', $output);
         self::assertStringContainsString('Agent Editor', $output);
+    }
+
+    public function testRenderShowsPendingConfirmationWithoutSensitiveArguments(): void
+    {
+        $repository = $this->createMock(Repository::class);
+        $repository->method('pending')->willReturn(
+            array(
+                array(
+                    'id'           => 41,
+                    'user_id'      => WPState::$currentUserId,
+                    'tool_name'    => 'wp_nerve_delete_user',
+                    'risk'         => 'destructive',
+                    'display_code' => 'ABCD-EF12',
+                    'created_at'   => '2099-01-01 00:00:00',
+                    'expires_at'   => '2099-01-01 00:05:00',
+                ),
+            )
+        );
+
+        $page = new AdminPage(null, $repository);
+
+        ob_start();
+        $page->render();
+        $output = (string) ob_get_clean();
+
+        self::assertStringContainsString('ABCD-EF12', $output);
+        self::assertStringContainsString('wp_nerve_delete_user', $output);
+        self::assertStringContainsString('Agent Editor', $output);
+        self::assertStringContainsString('approve_confirmation', $output);
+        self::assertStringContainsString('deny_confirmation', $output);
+        self::assertStringNotContainsString('credential_hash', $output);
+        self::assertStringNotContainsString('request_hash', $output);
+    }
+
+    public function testHandleActionsApprovesLiveConfirmation(): void
+    {
+        $repository = $this->createMock(Repository::class);
+        $repository->expects(self::once())->method('decide')->with(
+            41,
+            WPState::$currentUserId,
+            true
+        )->willReturn(true);
+        $repository->method('pending')->willReturn(array());
+
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- test harness.
+        $_POST['wp_nerve_admin']           = 'nonce';
+        $_POST['wp_nerve_action']          = 'approve_confirmation';
+        $_POST['wp_nerve_confirmation_id'] = '41';
+
+        $page = new AdminPage(null, $repository);
+        $page->handleActions();
+
+        ob_start();
+        $page->render();
+        $output = (string) ob_get_clean();
+
+        self::assertStringContainsString('operation approved', $output);
+
+        unset(
+            $_POST['wp_nerve_admin'],
+            $_POST['wp_nerve_action'],
+            $_POST['wp_nerve_confirmation_id']
+        );
     }
 
     public function testHandleActionsSavesRiskClasses(): void

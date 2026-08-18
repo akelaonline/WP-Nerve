@@ -27,11 +27,17 @@ final class WpDb
 
     public string $lastPrepared = '';
 
+    /** @var array<int, string> */
+    public array $queries = array();
+
     /** @var array<int, int|false> Results queued for query(). */
     public array $queryResults = array();
 
     /** @var array<int, array<string, mixed>> Rows queued for get_row(). */
     public array $rows = array();
+
+    /** @var array<int, array<int, array<string, mixed>>> Result sets queued for get_results(). */
+    public array $resultSets = array();
 
     /** @var array<int, array{table: string, where: array<string, mixed>}> */
     public array $deletes = array();
@@ -104,6 +110,7 @@ final class WpDb
     public function query(string $query): int|false
     {
         $this->lastQuery = $query;
+        $this->queries[] = $query;
 
         if (array() !== $this->queryResults) {
             return array_shift($this->queryResults);
@@ -152,6 +159,19 @@ final class WpDb
         }
 
         return null;
+    }
+
+    /** @return array<int, object|array<string, mixed>> */
+    public function get_results(?string $query = null, string $output = OBJECT): array
+    {
+        $this->lastQuery = (string) $query;
+        $rows            = array() !== $this->resultSets ? array_shift($this->resultSets) : array();
+
+        if (OBJECT === $output) {
+            return array_map(static fn (array $row): object => (object) $row, $rows);
+        }
+
+        return $rows;
     }
 
     /**

@@ -94,9 +94,15 @@ final class HttpTransport
 
         if ('' === $this->credentialId) {
             $applicationPassword = rest_get_authenticated_app_password();
-            $this->credentialId  = is_string($applicationPassword) && '' !== $applicationPassword
-                ? 'application-password:' . $applicationPassword
-                : 'wordpress-session';
+
+            if (is_string($applicationPassword) && '' !== $applicationPassword) {
+                $this->credentialId = 'application-password:' . $applicationPassword;
+            } else {
+                $sessionToken = wp_get_session_token();
+                $this->credentialId = '' !== $sessionToken
+                    ? 'wordpress-session:' . hash('sha256', $sessionToken)
+                    : '';
+            }
         }
 
         if (! current_user_can($this->transportCapability())) {

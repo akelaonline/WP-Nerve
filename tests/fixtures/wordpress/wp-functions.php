@@ -1876,3 +1876,10 @@ if (! function_exists('rest_get_authenticated_app_password')) {
         return WPState::$applicationPasswordUuid;
     }
 }
+
+if (! function_exists('wp_get_session_token')) {
+    function wp_get_session_token(): string
+    {
+        return WPState::$sessionToken;
+    }
+}

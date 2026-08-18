@@ -16,7 +16,7 @@ final class UninstallTest extends TestCase
 {
     public function testPreservesDataByDefault(): void
     {
-        WPState::$options['wp_nerve_schema_version'] = '3';
+        WPState::$options['wp_nerve_schema_version'] = '4';
 
         $this->runUninstall();
 
@@ -26,13 +26,19 @@ final class UninstallTest extends TestCase
 
     public function testDeletesDataWhenOptedIn(): void
     {
-        WPState::$options['wp_nerve_schema_version']             = '3';
+        WPState::$options['wp_nerve_schema_version']             = '4';
         WPState::$options['wp_nerve_delete_data_on_uninstall']   = true;
 
         $this->runUninstall();
 
         self::assertStringContainsString('DROP TABLE IF EXISTS', WPState::$wpdb->lastPrepared);
         self::assertStringContainsString('wp_wp_nerve_oauth_tokens', WPState::$wpdb->lastQuery);
+        self::assertTrue(
+            (bool) array_filter(
+                WPState::$wpdb->queries,
+                static fn (string $query): bool => str_contains($query, 'wp_wp_nerve_confirmations')
+            )
+        );
         self::assertArrayNotHasKey('wp_nerve_schema_version', WPState::$options);
         self::assertArrayNotHasKey('wp_nerve_delete_data_on_uninstall', WPState::$options);
     }

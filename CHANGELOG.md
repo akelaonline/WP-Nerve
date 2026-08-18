@@ -2,6 +2,33 @@
 
 All notable changes to WPNerve will be documented here.
 
+## [0.1.0-alpha.7] - 2026-08-18
+
+### Added
+
+- Out-of-band WordPress admin approval for every enabled destructive or
+  privileged MCP tool.
+- Five-minute confirmation challenges bound to the authenticated WordPress
+  user, authoritative Application Password, OAuth client or hashed WordPress
+  session identity, tool, canonical arguments and idempotency key.
+- Atomic approve/deny/consume transitions with changed-input, cross-user,
+  cross-credential, expiry and replay protection.
+- MCP tool metadata and error response metadata describing the confirmation
+  requirement, display code, expiry and opaque retry token.
+- Privacy-preserving confirmation storage and a pending-decision table in
+  Tools → WPNerve.
+
+### Fixed
+
+- Admin form handling is now registered on `admin_init` during plugin boot,
+  before WordPress fires the hook. Credential generation, revocation, risk
+  settings and confirmation decisions therefore execute from the real panel.
+
+### Changed
+
+- Database schema version increased to 4 and explicit uninstall cleanup now
+  includes the confirmation table.
+
 ## [0.1.0-alpha.6] - 2026-08-18
 
 ### Added

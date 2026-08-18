@@ -23,6 +23,17 @@ verified controls around every exposed operation.
 The code is alpha quality. It is not approved for production until every P0 gate
 in this document passes.
 
+### Implemented controls awaiting full gate evidence
+
+- **G1 implementation:** alpha.5 added persistent, atomic, credential-bound
+  idempotency with collision, replay and fail-closed unit coverage.
+- **G2 implementation:** alpha.7 added an out-of-band WordPress admin decision,
+  expiring single-operation tokens, canonical argument binding and tamper,
+  expiry, replay, cross-user and cross-credential unit coverage.
+
+These controls are code-complete, but G1 and G2 remain open until their real
+WordPress database, browser and MCP wire evidence is recorded under G6/G7.
+
 ## Release gates
 
 | Gate | Deliverable | Required evidence | Exit criterion |

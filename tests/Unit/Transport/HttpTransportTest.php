@@ -348,8 +348,41 @@ final class HttpTransportTest extends TestCase
             'wp_nerve_create_draft',
             array('title' => 'A'),
             array(
-                'idempotency_key' => 'request-123',
-                'credential_id'   => 'application-password:test-application-password',
+                'idempotency_key'    => 'request-123',
+                'confirmation_token' => null,
+                'credential_id'      => 'application-password:test-application-password',
+            )
+        )->willReturn(array('result' => array('id' => 41), 'risk' => 'write'));
+
+        $message = $this->modernMessage('tools/call');
+        $message['params']['name'] = 'wp_nerve_create_draft';
+        $message['params']['arguments'] = array('title' => 'A');
+        $message['params']['_meta']['wp-nerve/idempotencyKey'] = 'request-123';
+
+        $request = $this->modernRequest(
+            'tools/call',
+            array('mcp-name' => 'wp_nerve_create_draft')
+        );
+        $request->set_body(wp_json_encode($message));
+
+        self::assertTrue($this->transport->checkPermission($request));
+
+        $response = $this->transport->handle($request);
+
+        self::assertSame(41, $response->get_data()['result']['structuredContent']['id']);
+    }
+
+    public function testAuthenticatedWordPressSessionHasDistinctCredentialIdentity(): void
+    {
+        WPState::$applicationPasswordUuid = null;
+
+        $this->tools->expects(self::once())->method('execute')->with(
+            'wp_nerve_create_draft',
+            array('title' => 'A'),
+            array(
+                'idempotency_key'    => 'request-123',
+                'confirmation_token' => null,
+                'credential_id'      => 'wordpress-session:' . hash('sha256', WPState::$sessionToken),
             )
         )->willReturn(array('result' => array('id' => 41), 'risk' => 'write'));
 

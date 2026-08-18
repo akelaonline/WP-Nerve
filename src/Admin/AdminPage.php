@@ -10,20 +10,28 @@ declare(strict_types=1);
 
 namespace WPNerve\Admin;
 
+use WPNerve\Security\Confirmation\Repository as ConfirmationRepository;
+use WPNerve\Security\Confirmation\WpdbRepository as ConfirmationWpdbRepository;
+
 final class AdminPage
 {
     private const NONCE_ACTION = 'wp_nerve_admin';
 
     private ApplicationPasswords $applicationPasswords;
 
+    private ConfirmationRepository $confirmations;
+
     /** @var array<string, mixed>|null */
     private ?array $requestNotice = null;
 
     private ?int $selectedUserId = null;
 
-    public function __construct(?ApplicationPasswords $applicationPasswords = null)
-    {
+    public function __construct(
+        ?ApplicationPasswords $applicationPasswords = null,
+        ?ConfirmationRepository $confirmations = null
+    ) {
         $this->applicationPasswords = $applicationPasswords ?? new ApplicationPasswords();
+        $this->confirmations        = $confirmations ?? new ConfirmationWpdbRepository();
     }
 
     public function registerMenu(): void
@@ -35,8 +43,6 @@ final class AdminPage
             'wp-nerve',
             array($this, 'render')
         );
-
-        add_action('admin_init', array($this, 'handleActions'));
     }
 
     public function handleActions(): void
@@ -78,6 +84,12 @@ final class AdminPage
 
             $this->selectedUserId = $userId;
             $this->revokeApplicationPassword($userId, $uuid);
+        } elseif (in_array($action, array('approve_confirmation', 'deny_confirmation'), true)) {
+            $challengeId = isset($_POST['wp_nerve_confirmation_id'])
+                ? absint(wp_unslash($_POST['wp_nerve_confirmation_id']))
+                : 0;
+
+            $this->decideConfirmation($challengeId, 'approve_confirmation' === $action);
         }
     }
 
@@ -87,14 +99,15 @@ final class AdminPage
             return;
         }
 
-        $endpoint    = rest_url('wp-nerve/v1/mcp');
-        $enabled     = $this->enabledRiskClasses();
-        $notice      = $this->requestNotice ?? get_transient('wp_nerve_admin_notice');
-        $users       = $this->applicationPasswords->editableUsers();
-        $selected    = $this->selectedUser($users);
-        $credentials = null === $selected
+        $endpoint      = rest_url('wp-nerve/v1/mcp');
+        $enabled       = $this->enabledRiskClasses();
+        $notice        = $this->requestNotice ?? get_transient('wp_nerve_admin_notice');
+        $users         = $this->applicationPasswords->editableUsers();
+        $selected      = $this->selectedUser($users);
+        $credentials   = null === $selected
             ? array()
             : $this->applicationPasswords->credentials($selected->ID);
+        $confirmations = $this->confirmations->pending();
 
         if (null === $this->requestNotice && false !== $notice) {
             delete_transient('wp_nerve_admin_notice');
@@ -146,6 +159,61 @@ final class AdminPage
                     </tr>
                 </tbody>
             </table>
+
+            <h2><?php echo esc_html__('Pending high-risk confirmations', 'wp-nerve'); ?></h2>
+            <p class="description">
+                <?php
+                echo esc_html__(
+                    'Match the code shown by the MCP client. Approve only when the user, tool, risk, and code describe the operation you expect.',
+                    'wp-nerve'
+                );
+                ?>
+            </p>
+            <?php if (array() === $confirmations) : ?>
+                <p><?php echo esc_html__('No high-risk operations are waiting for approval.', 'wp-nerve'); ?></p>
+            <?php else : ?>
+                <table class="widefat striped" style="max-width: 1100px">
+                    <thead>
+                        <tr>
+                            <th><?php echo esc_html__('Code', 'wp-nerve'); ?></th>
+                            <th><?php echo esc_html__('Agent user', 'wp-nerve'); ?></th>
+                            <th><?php echo esc_html__('Tool', 'wp-nerve'); ?></th>
+                            <th><?php echo esc_html__('Risk', 'wp-nerve'); ?></th>
+                            <th><?php echo esc_html__('Expires', 'wp-nerve'); ?></th>
+                            <th><?php echo esc_html__('Decision', 'wp-nerve'); ?></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($confirmations as $confirmation) : ?>
+                            <tr>
+                                <td><code><?php echo esc_html($confirmation['display_code']); ?></code></td>
+                                <td><?php echo esc_html($this->confirmationActor($confirmation['user_id'])); ?></td>
+                                <td><code><?php echo esc_html($confirmation['tool_name']); ?></code></td>
+                                <td><?php echo esc_html($confirmation['risk']); ?></td>
+                                <td><?php echo esc_html($this->formatDatabaseTime($confirmation['expires_at'])); ?></td>
+                                <td>
+                                    <form method="post" style="display: inline-block">
+                                        <?php wp_nonce_field(self::NONCE_ACTION, 'wp_nerve_admin'); ?>
+                                        <input type="hidden" name="wp_nerve_action" value="approve_confirmation" />
+                                        <input type="hidden" name="wp_nerve_confirmation_id" value="<?php echo esc_attr((string) $confirmation['id']); ?>" />
+                                        <button type="submit" class="button button-primary">
+                                            <?php echo esc_html__('Approve', 'wp-nerve'); ?>
+                                        </button>
+                                    </form>
+                                    <form method="post" style="display: inline-block">
+                                        <?php wp_nonce_field(self::NONCE_ACTION, 'wp_nerve_admin'); ?>
+                                        <input type="hidden" name="wp_nerve_action" value="deny_confirmation" />
+                                        <input type="hidden" name="wp_nerve_confirmation_id" value="<?php echo esc_attr((string) $confirmation['id']); ?>" />
+                                        <button type="submit" class="button button-secondary">
+                                            <?php echo esc_html__('Deny', 'wp-nerve'); ?>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            <?php endif; ?>
 
             <h2><?php echo esc_html__('Application password', 'wp-nerve'); ?></h2>
             <p class="description">
@@ -270,7 +338,8 @@ final class AdminPage
             <p class="description">
                 <?php
                 echo esc_html__(
-                    'Enabled risk classes are exposed to MCP clients. Destructive and privileged operations are hidden unless you enable them here.',
+                    // phpcs:ignore Generic.Files.LineLength.TooLong -- translatable sentence remains intact.
+                    'Enabled risk classes are exposed to MCP clients. Destructive and privileged operations are hidden unless enabled and still require one-time approval here before execution.',
                     'wp-nerve'
                 );
                 ?>
@@ -434,6 +503,45 @@ final class AdminPage
                 ? __('WPNerve credential revoked.', 'wp-nerve')
                 : $message,
         );
+    }
+
+    private function decideConfirmation(int $challengeId, bool $approved): void
+    {
+        $decided = $this->confirmations->decide($challengeId, get_current_user_id(), $approved);
+
+        $this->requestNotice = array(
+            'type'    => $decided ? 'notice-success' : 'notice-error',
+            'message' => $decided
+                ? ($approved
+                    ? __('High-risk operation approved. The MCP client may now retry the exact call.', 'wp-nerve')
+                    : __('High-risk operation denied.', 'wp-nerve'))
+                : __('The confirmation could not be changed because it is missing, expired, or already decided.', 'wp-nerve'),
+        );
+    }
+
+    private function confirmationActor(int $userId): string
+    {
+        $user = get_userdata($userId);
+
+        return $user instanceof \WP_User
+            ? sprintf(
+                /* translators: 1: display name, 2: username. */
+                __('%1$s (%2$s)', 'wp-nerve'),
+                $user->display_name,
+                $user->user_login
+            )
+            : sprintf(
+                /* translators: %d: WordPress user ID. */
+                __('User #%d', 'wp-nerve'),
+                $userId
+            );
+    }
+
+    private function formatDatabaseTime(string $value): string
+    {
+        $timestamp = strtotime($value . ' UTC');
+
+        return false === $timestamp ? '—' : $this->formatTimestamp($timestamp);
     }
 
     /**

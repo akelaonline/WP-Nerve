@@ -2,7 +2,7 @@
 
 ## Status
 
-This document describes the alpha.4 attack surface. WPNerve is not approved for
+This document describes the alpha.7 attack surface. WPNerve is not approved for
 production until the P0 gates in [the beta-readiness plan](roadmap/beta-readiness.md)
 pass.
 
@@ -49,8 +49,8 @@ core product scope.
 | OAuth redirect or consent abuse | Registered redirect URI, PKCE S256, state and consent nonce | Full OAuth threat review and client quotas |
 | Privilege escalation | Policy gate plus WordPress capability callbacks | Per-object adversarial review for every privileged ability |
 | Excessive agent authority | Least-privilege discovery; destructive and privileged classes off by default | Per-ability grants instead of class-only opt-in |
-| Duplicate mutation after retry | Recovery data on many operations | Persistent idempotency and atomic replay protection |
-| Accidental destructive action | Destructive class disabled by default | Bound, expiring, single-use confirmations |
+| Duplicate mutation after retry | Persistent, credential-bound idempotency with atomic claim and replay | Real WordPress database and crash-path evidence |
+| Accidental destructive action | Risk class off by default plus bound, expiring, single-operation admin confirmation | Real admin/browser and MCP wire E2E evidence |
 | Endpoint abuse or registration flood | Request-size ceiling | MCP/OAuth rate limiting and dynamic registration quotas |
 | Header/body request smuggling | Mirrored MCP headers checked against JSON body | Fuzzing and proxy matrix |
 | DNS rebinding from browser clients | Same-origin validation when Origin is present | Real proxy/browser tests |
@@ -67,8 +67,9 @@ core product scope.
 
 ## P0 requirements before beta
 
-- Persistent idempotency with atomic claim/complete behavior and replay tests.
-- Single-use confirmation tokens bound to actor, ability and canonical arguments.
+- Real-runtime evidence for persistent idempotency claim/complete and replay behavior.
+- Real-runtime evidence for expiring confirmation tokens bound to actor,
+  authoritative credential, ability, canonical arguments and idempotency key.
 - Independent rate limits for MCP, OAuth registration, authorization and token
   routes, with explicit trusted-proxy behavior.
 - Per-ability review of users, plugins, options and system diagnostics.
@@ -96,7 +97,8 @@ core product scope.
 3. Every mutation is authorized again immediately before execution.
 4. Retries cannot duplicate a completed mutation.
 5. Destructive and privileged operations require explicit, narrow authorization.
-6. Confirmation tokens cannot be reused, transferred or applied to changed input.
+6. Confirmation tokens cannot authorize a second logical operation, be
+   transferred, outlive their expiry or be applied to changed input.
 7. Secrets never enter audit records or normal error messages.
 8. Unsupported or unknown risk states fail closed.
 9. Runtime-double success is not accepted as proof of WordPress compatibility.

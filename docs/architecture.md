@@ -13,11 +13,12 @@ flowchart TD
     A["MCP request"] --> B["Transport validation"]
     B --> C["WordPress authentication"]
     C --> D["Tool discovery or lookup"]
-    D --> E["Idempotency guard"]
-    E --> F["WPNerve policy decision"]
-    F --> G["WP_Ability::execute"]
-    G --> H["Structured MCP result"]
-    F --> I["Metadata-only audit event"]
+    D --> E["High-risk confirmation gate"]
+    E --> F["Idempotency guard"]
+    F --> G["WPNerve policy decision"]
+    G --> H["WP_Ability::execute"]
+    H --> I["Structured MCP result"]
+    G --> J["Metadata-only audit event"]
 ```
 
 ### Transport
@@ -45,6 +46,16 @@ classification is treated as privileged.
 reads and atomically claims every mutation using an authoritative credential
 identity and canonical argument digest. A completed retry returns the stored
 outcome; conflicting, concurrent, ambiguous, or unavailable states fail closed.
+
+### High-risk confirmations
+
+`ConfirmedToolRegistry` is the outer execution decorator. Destructive and
+privileged calls first receive a short-lived challenge and cannot reach the
+idempotency or ability layers until an administrator approves the matching code
+in Tools → WPNerve. The token is bound to the authenticated user, authoritative
+Application Password, OAuth client or hashed WordPress session identity, tool,
+canonical arguments and idempotency key, then atomically consumed on the first
+authorized retry.
 
 ### Abilities
 
@@ -75,14 +86,17 @@ the exposed tools are stateless from the protocol's perspective.
 3. The transport validates JSON and selects the protocol era.
 4. Modern mirrored headers are compared with body values.
 5. The handler discovers or invokes a tool.
-6. The idempotency decorator atomically claims every mutating request key.
-7. The policy engine makes an independent authorization decision.
-8. `WP_Ability::execute()` validates input, checks object permissions, executes,
+6. The confirmation decorator gates destructive and privileged calls.
+7. The idempotency decorator atomically claims every mutating request key.
+8. The policy engine makes an independent authorization decision.
+9. `WP_Ability::execute()` validates input, checks object permissions, executes,
    and validates output.
-9. WPNerve persists the mutation outcome and records a metadata-only audit event.
+10. WPNerve persists the mutation outcome and records a metadata-only audit event.
 
 See [mutation idempotency](security/idempotency.md) for the request contract,
-replay behavior, crash-safety policy, and storage guarantees.
+replay behavior, crash-safety policy, and storage guarantees. See
+[high-risk confirmations](security/confirmations.md) for the approval handshake,
+binding rules and stable errors.
 
 ## Extensibility
 
