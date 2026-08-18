@@ -57,4 +57,29 @@ final class IdempotentToolRegistryTest extends TestCase
 
         self::assertSame('not_found', $result->get_error_code());
     }
+
+    public function testReplayWithInvalidRegistryShapeFailsClosed(): void
+    {
+        $inner = $this->createMock(ToolRegistry::class);
+        $inner->method('risk')->with('create')->willReturn('write');
+        $inner->expects(self::never())->method('execute');
+
+        $repository = $this->createMock(Repository::class);
+        $repository->method('claim')->willReturn(
+            Claim::replay(array('kind' => 'success', 'value' => array('result' => array('id' => 1))))
+        );
+
+        $registry = new IdempotentToolRegistry($inner, new Service($repository, new CanonicalJson()));
+        $result   = $registry->execute(
+            'create',
+            array('title' => 'A'),
+            array(
+                'idempotency_key' => 'request-123',
+                'credential_id'   => 'application-password:test',
+            )
+        );
+
+        self::assertInstanceOf(\WP_Error::class, $result);
+        self::assertSame('wp_nerve_idempotency_corrupt', $result->get_error_code());
+    }
 }

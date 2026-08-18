@@ -45,13 +45,29 @@ final class IdempotentToolRegistry implements ToolRegistry
             return $this->inner->execute($toolName, $arguments, $context);
         }
 
-        return $this->service->execute(
+        $result = $this->service->execute(
             $toolName,
             $risk,
             $arguments,
             $context['idempotency_key'] ?? null,
             is_string($context['credential_id'] ?? null) ? $context['credential_id'] : '',
             fn (): array|WP_Error => $this->inner->execute($toolName, $arguments, $context)
+        );
+
+        if ($result instanceof WP_Error) {
+            return $result;
+        }
+
+        if (! array_key_exists('result', $result) || $risk !== ($result['risk'] ?? null)) {
+            return new WP_Error(
+                'wp_nerve_idempotency_corrupt',
+                __('The stored idempotency outcome is invalid.', 'wp-nerve')
+            );
+        }
+
+        return array(
+            'result' => $result['result'],
+            'risk'   => $risk,
         );
     }
 }
