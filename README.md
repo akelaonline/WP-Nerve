@@ -45,8 +45,8 @@ manage in the admin.
 ### Why WPNerve
 
 - WordPress 6.9+ native Abilities API, not a parallel action registry.
-- MCP `2026-07-28` stateless HTTP plus compatibility with `2025-11-25` and
-  `2025-06-18` clients.
+- MCP `2026-07-28` stateless HTTP plus compatibility with clients `2025-11-25` and
+  `2025-06-18`.
 - WordPress Application Password authentication over HTTPS.
 - A central policy gate separate from ability business logic.
 - Least-privilege tool discovery: each user sees only the abilities they can
@@ -343,9 +343,41 @@ GPL-2.0-or-later. Ver [LICENSE](LICENSE).
 
 ---
 
-## Autor
+## Akela WordPress
 
-Creado por **Akela** · [@akelaonline](https://www.instagram.com/akelaonline/) · [akela.dev](https://akela.dev/seo)
+> **Production-grade WordPress infrastructure for performance, SEO, automation and AI agents.**
 
-- **Instagram:** [@akelaonline](https://www.instagram.com/akelaonline/)
-- **Email:** [adjose@gmail.com](mailto:adjose@gmail.com)
+WPNerve forma parte de la familia **Akela WordPress**:
+
+- **[WP-Nerve](https://github.com/akelaonline/WP-Nerve)** — native control layer / MCP gateway para agentes y WordPress.
+- **Akela SEO** — SEO técnico y automatizable para WordPress.
+- **PageRelay** — AI-to-WordPress deployment layer para páginas nativas, editables y reversibles.
+- **[NO Comments](https://github.com/akelaonline/No-comments)** — cierre y limpieza integral de comentarios, con REST y WP-CLI.
+- **Tucho Performance** — performance, caché y optimización WordPress 100% local.
+
+Los productos son independientes, pero comparten los mismos principios: **self-hosted cuando importa, APIs explícitas, seguridad por diseño, observabilidad y operación real en producción.**
+
+### Professional ecosystem
+
+- **[MKT Marketing Digital](https://mktmarketingdigital.com)** — agencia de marketing digital, implementación y growth.
+- **[The Thing](https://thethingapp.com)** — producto de MKT para atención y ventas con IA.
+- **[Marketing Digital Experience](https://marketingdigitalexperience.com)** — consultoría, formación y transferencia de conocimiento en IA aplicada.
+- **[Nubelytics](https://nubelytics.com)** — analytics + AI para ecommerce.
+- **[Zantal](https://zantal.ai)** — agentic commerce intelligence.
+
+---
+
+## Autor, soporte y contacto
+
+Built by **Alejandro Daniel José · Akela**.
+
+[![GitHub](https://img.shields.io/badge/GitHub-akelaonline-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/akelaonline)
+[![Instagram](https://img.shields.io/badge/Instagram-%40akelaonline-E4405F?style=for-the-badge&logo=instagram&logoColor=white)](https://www.instagram.com/akelaonline/)
+[![MKT](https://img.shields.io/badge/MKT-Marketing_Digital-4285F4?style=for-the-badge)](https://mktmarketingdigital.com)
+[![MDE](https://img.shields.io/badge/MDE-AI_Consulting-111111?style=for-the-badge&logo=openai&logoColor=white)](https://marketingdigitalexperience.com)
+[![Email](https://img.shields.io/badge/Email-alejandro%40mktmarketingdigital.com-0A66C2?style=for-the-badge&logo=gmail&logoColor=white)](mailto:alejandro@mktmarketingdigital.com)
+
+- Para bugs y mejoras técnicas: [GitHub Issues](https://github.com/akelaonline/WP-Nerve/issues).
+- Para vulnerabilidades: [SECURITY.md](SECURITY.md).
+- Para implementación, integraciones o trabajo profesional: [MKT Marketing Digital](https://mktmarketingdigital.com).
+- Para consultoría y capacitación en IA: [Marketing Digital Experience](https://marketingdigitalexperience.com).
