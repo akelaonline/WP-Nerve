@@ -424,11 +424,15 @@ final class AdminPage
     {
         $result = $this->applicationPasswords->revoke($userId, $uuid);
 
+        $message = $result instanceof \WP_Error
+            ? $result->get_error_message()
+            : __('WordPress could not revoke the selected WPNerve credential.', 'wp-nerve');
+
         $this->requestNotice = array(
             'type'    => true === $result ? 'notice-success' : 'notice-error',
             'message' => true === $result
                 ? __('WPNerve credential revoked.', 'wp-nerve')
-                : $result->get_error_message(),
+                : $message,
         );
     }
 
@@ -458,7 +462,13 @@ final class AdminPage
 
     private function formatTimestamp(int $timestamp): string
     {
-        return $timestamp > 0 ? wp_date('Y-m-d H:i:s T', $timestamp) : '—';
+        if ($timestamp <= 0) {
+            return '—';
+        }
+
+        $formatted = wp_date('Y-m-d H:i:s T', $timestamp);
+
+        return is_string($formatted) ? $formatted : '—';
     }
 
     /** @return array<int, string> */
