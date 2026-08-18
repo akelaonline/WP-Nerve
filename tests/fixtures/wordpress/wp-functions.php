@@ -30,6 +30,15 @@ if (! function_exists('current_user_can')) {
     }
 }
 
+if (! function_exists('user_can')) {
+    function user_can(WP_User|int $user, string $capability, mixed ...$args): bool
+    {
+        unset($user);
+
+        return current_user_can($capability, ...$args);
+    }
+}
+
 if (! function_exists('is_user_logged_in')) {
     function is_user_logged_in(): bool
     {
@@ -448,14 +457,111 @@ if (! class_exists('WP_Application_Passwords')) {
 
         /**
          * @param array<string, mixed> $args
-         * @return array{password: string}|WP_Error
+         * @return array{string, array<string, mixed>}|WP_Error
          */
         public static function create_new_application_password(int $user_id, array $args = array()): array|WP_Error
         {
             self::$lastUserId = $user_id;
 
-            return array('password' => 'xxxx xxxx xxxx xxxx xxxx xxxx');
+            $item = array(
+                'uuid'      => '11111111-2222-4333-8444-555555555555',
+                'app_id'    => (string) ($args['app_id'] ?? ''),
+                'name'      => (string) ($args['name'] ?? ''),
+                'created'   => 1_787_000_000,
+                'last_used' => null,
+                'last_ip'   => '',
+            );
+
+            WPState::$applicationPasswords[$user_id][] = $item;
+
+            return array('xxxx xxxx xxxx xxxx xxxx xxxx', $item);
         }
+
+        /** @return array<int, array<string, mixed>> */
+        public static function get_user_application_passwords(int $user_id): array
+        {
+            return WPState::$applicationPasswords[$user_id] ?? array();
+        }
+
+        public static function delete_application_password(int $user_id, string $uuid): bool|WP_Error
+        {
+            foreach (WPState::$applicationPasswords[$user_id] ?? array() as $index => $item) {
+                if ($uuid === ($item['uuid'] ?? null)) {
+                    unset(WPState::$applicationPasswords[$user_id][$index]);
+                    WPState::$applicationPasswords[$user_id] = array_values(WPState::$applicationPasswords[$user_id]);
+
+                    return true;
+                }
+            }
+
+            return false;
+        }
+    }
+}
+
+if (! function_exists('wp_is_application_passwords_available_for_user')) {
+    function wp_is_application_passwords_available_for_user(WP_User $user): bool
+    {
+        unset($user);
+
+        return WPState::$applicationPasswordsAvailable;
+    }
+}
+
+if (! function_exists('wp_remote_post')) {
+    /**
+     * @param array<string, mixed> $args
+     * @return array<string, mixed>|WP_Error
+     */
+    function wp_remote_post(string $url, array $args = array()): array|WP_Error
+    {
+        WPState::$lastRemotePost = array('url' => $url, 'args' => $args);
+
+        return WPState::$remotePostResponse;
+    }
+}
+
+if (! function_exists('wp_remote_retrieve_response_code')) {
+    /** @param array<string, mixed>|WP_Error $response */
+    function wp_remote_retrieve_response_code(array|WP_Error $response): int
+    {
+        return $response instanceof WP_Error ? 0 : (int) ($response['response']['code'] ?? 0);
+    }
+}
+
+if (! function_exists('wp_remote_retrieve_body')) {
+    /** @param array<string, mixed>|WP_Error $response */
+    function wp_remote_retrieve_body(array|WP_Error $response): string
+    {
+        return $response instanceof WP_Error ? '' : (string) ($response['body'] ?? '');
+    }
+}
+
+if (! function_exists('wp_date')) {
+    function wp_date(string $format, ?int $timestamp = null, ?DateTimeZone $timezone = null): string
+    {
+        unset($timezone);
+
+        return gmdate($format, $timestamp ?? time());
+    }
+}
+
+if (! function_exists('nocache_headers')) {
+    function nocache_headers(): void
+    {
+    }
+}
+
+if (! function_exists('selected')) {
+    function selected(mixed $selected, mixed $current = true, bool $display = true): string
+    {
+        $result = $selected === $current ? 'selected="selected"' : '';
+
+        if ($display) {
+            echo $result; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- fixture markup.
+        }
+
+        return $result;
     }
 }
 

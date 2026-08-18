@@ -4,7 +4,7 @@ Tags: mcp, ai, agents, abilities, automation
 Requires at least: 6.9
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 0.1.0-alpha.5
+Stable tag: 0.1.0-alpha.6
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -28,8 +28,10 @@ This version is an early alpha for development and security review.
 1. Upload the WPNerve plugin directory to `/wp-content/plugins/`.
 2. Activate WPNerve.
 3. Open Tools > WPNerve.
-4. Create a dedicated Application Password for the WordPress user the agent uses.
-5. Configure the MCP client with the displayed endpoint.
+4. Select a dedicated, least-privilege agent user and generate its WPNerve
+   credential. The plugin verifies the connection without persisting the secret.
+5. Copy the generated client configuration and revoke the credential from the
+   same screen when it is no longer needed.
 
 == Frequently Asked Questions ==
 
@@ -56,6 +58,13 @@ retrying the exact same call. This prevents network retries from duplicating
 changes.
 
 == Changelog ==
+
+= 0.1.0-alpha.6 =
+* Added least-privilege user selection, copy-ready client configuration,
+  automatic MCP connection testing, and WPNerve credential revocation.
+* Fixed Application Password parsing to use WordPress core's tuple response.
+* Newly generated secrets exist only in the current admin response and are no
+  longer stored in a transient.
 
 = 0.1.0-alpha.5 =
 * Added persistent, atomic idempotency for every mutating MCP tool.

@@ -76,11 +76,12 @@ without rewriting content operations. See
 1. **Install and activate** the plugin on a WordPress 6.9+ site (PHP 8.1+).
 2. Open **Tools → WPNerve** to see your MCP endpoint:
    `https://your-site.com/wp-json/wp-nerve/v1/mcp`
-3. **Create a dedicated Application Password** (Users → Profile → Application
-   Passwords) for the WordPress user the agent will act as. Name it `WPNerve`.
-4. **Configure your MCP client** with the endpoint, the username, and the
-   generated Application Password.
-5. **Test the connection** with the examples below.
+3. In **Tools → WPNerve**, select a dedicated WordPress user with only the
+   capabilities the agent needs and click **Generate WPNerve credential**.
+4. Copy the one-time secret or the ready-to-use client configuration. WPNerve
+   verifies the credential against its MCP endpoint without persisting it.
+5. Revoke WPNerve credentials from the same screen when a client is retired or
+   a device is lost.
 
 Never commit or share the Application Password. If a client or device is lost,
 revoke the password immediately.
@@ -280,11 +281,12 @@ dispatcher sin reescribir las operaciones de contenido. Ver
 1. **Instalá y activá** el plugin en un sitio con WordPress 6.9+ (PHP 8.1+).
 2. Abrí **Herramientas → WPNerve** para ver tu endpoint MCP:
    `https://tu-sitio.com/wp-json/wp-nerve/v1/mcp`
-3. **Creá una Application Password dedicada** (Usuarios → Perfil → Application
-   Passwords) para el usuario de WordPress que usará el agente. Ponele `WPNerve`.
-4. **Configurá tu cliente MCP** con el endpoint, el nombre de usuario y la
-   contraseña generada.
-5. **Probá la conexión** con los ejemplos de arriba.
+3. En **Herramientas → WPNerve**, seleccioná un usuario de WordPress dedicado
+   con sólo las capacidades necesarias y pulsá **Generate WPNerve credential**.
+4. Copiá el secreto de única visualización o la configuración lista para usar.
+   WPNerve verifica la credencial sin persistirla.
+5. Revocá las credenciales desde la misma pantalla cuando retires un cliente o
+   pierdas un dispositivo.
 
 Nunca commitees ni compartas la Application Password. Si perdés un cliente o
 dispositivo, revocá la contraseña de inmediato.

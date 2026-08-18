@@ -2,6 +2,25 @@
 
 All notable changes to WPNerve will be documented here.
 
+## [0.1.0-alpha.6] - 2026-08-18
+
+### Added
+
+- Least-privilege WordPress user selection for MCP credentials.
+- WPNerve-owned Application Password inventory and scoped revocation controls.
+- Copy-ready Basic authentication configuration shown only after generation.
+- Immediate authenticated loopback test against the MCP discovery endpoint.
+
+### Fixed
+
+- Parse the numeric tuple returned by WordPress core when creating an
+  Application Password; the previous associative lookup could display an empty
+  secret after successful creation.
+- Newly generated secrets remain only in the current admin request instead of
+  being persisted in a WordPress transient.
+- The placeholder Claude configuration no longer base64-encodes literal
+  placeholder text.
+
 ## [0.1.0-alpha.5] - 2026-08-17
 
 ### Added

@@ -2,9 +2,9 @@
 # This file is distributed under the GPL-2.0-or-later license.
 msgid ""
 msgstr ""
-"Project-Id-Version: WPNerve 0.1.0-alpha.5\n"
+"Project-Id-Version: WPNerve 0.1.0-alpha.6\n"
 "Report-Msgid-Bugs-To: https://github.com/akelaonline/WP-Nerve/issues\n"
-"POT-Creation-Date: 2026-08-16 12:00+0000\n"
+"POT-Creation-Date: 2026-08-18 00:00+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -1061,4 +1061,121 @@ msgstr ""
 
 #: src/OAuth/OAuthServer.php:288
 msgid "to access"
+msgstr ""
+
+#: src/Admin/AdminPage.php:112
+msgid "Username:"
+msgstr ""
+
+#: src/Admin/AdminPage.php:119
+msgid "Copy this password now — WPNerve keeps it only for this response and it will not be shown again."
+msgstr ""
+
+#: src/Admin/AdminPage.php:154
+msgid "Create a dedicated credential for the WordPress user the agent will act as. Prefer a separate user with only the capabilities the agent needs."
+msgstr ""
+
+#: src/Admin/AdminPage.php:162
+msgid "No editable user with the edit_posts capability can use Application Passwords."
+msgstr ""
+
+#: src/Admin/AdminPage.php:169
+msgid "Agent user"
+msgstr ""
+
+#. translators: 1: display name, 2: username.
+#: src/Admin/AdminPage.php:178
+msgid "%1$s (%2$s)"
+msgstr ""
+
+#: src/Admin/AdminPage.php:188
+msgid "Generate WPNerve credential"
+msgstr ""
+
+#: src/Admin/AdminPage.php:187
+msgid "View credentials"
+msgstr ""
+
+#: src/Admin/AdminPage.php:194
+msgid "Copy-ready client configuration"
+msgstr ""
+
+#: src/Admin/AdminPage.php:209
+msgid "Managed WPNerve credentials"
+msgstr ""
+
+#: src/Admin/AdminPage.php:211
+msgid "No WPNerve credentials exist for this user."
+msgstr ""
+
+#: src/Admin/AdminPage.php:216
+msgid "Name"
+msgstr ""
+
+#: src/Admin/AdminPage.php:217
+msgid "Created"
+msgstr ""
+
+#: src/Admin/AdminPage.php:218
+msgid "Last used"
+msgstr ""
+
+#: src/Admin/AdminPage.php:219
+msgid "Last IP"
+msgstr ""
+
+#: src/Admin/AdminPage.php:220
+msgid "Action"
+msgstr ""
+
+#: src/Admin/AdminPage.php:235
+msgid "Never"
+msgstr ""
+
+#: src/Admin/AdminPage.php:291
+msgid "Generate a credential above for a copy-ready configuration. Otherwise, base64-encode USERNAME:APPLICATION_PASSWORD and replace the placeholder below."
+msgstr ""
+
+#: src/Admin/AdminPage.php:350
+msgid "WPNerve displays a newly generated secret once and never persists it. Tool arguments and credentials are excluded from the audit log."
+msgstr ""
+
+#: src/Admin/AdminPage.php:398
+msgid "Application Password created and the MCP connection test passed."
+msgstr ""
+
+#: src/Admin/AdminPage.php:420
+msgid "WPNerve credential revoked."
+msgstr ""
+
+#: src/Admin/ApplicationPasswords.php:48
+msgid "Application Passwords are not available for the selected user."
+msgstr ""
+
+#: src/Admin/ApplicationPasswords.php:71
+msgid "WordPress created an invalid Application Password response."
+msgstr ""
+
+#: src/Admin/ApplicationPasswords.php:132
+msgid "The selected WPNerve credential does not exist."
+msgstr ""
+
+#: src/Admin/ApplicationPasswords.php:151
+msgid "WordPress could not revoke the selected WPNerve credential."
+msgstr ""
+
+#: src/Admin/ApplicationPasswords.php:162
+msgid "The connection test request could not be encoded."
+msgstr ""
+
+#: src/Admin/ApplicationPasswords.php:185
+msgid "The credential was created, but the local connection test could not reach the MCP endpoint."
+msgstr ""
+
+#: src/Admin/ApplicationPasswords.php:195
+msgid "The credential was created, but the MCP endpoint rejected the connection test."
+msgstr ""
+
+#: src/Admin/ApplicationPasswords.php:214
+msgid "You cannot manage Application Passwords for the selected user."
 msgstr ""
