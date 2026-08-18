@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WPNerve 0.1.0-alpha.7\n"
 "Report-Msgid-Bugs-To: https://github.com/akelaonline/WP-Nerve/issues\n"
-"POT-Creation-Date: 2026-08-18 08:12-0300\n"
+"POT-Creation-Date: 2026-08-18 08:20-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,7 +16,7 @@ msgstr ""
 "X-Generator: GNU xgettext\n"
 
 #. translators: 1: display name, 2: username.
-#: src/Admin/AdminPage.php:246 src/Admin/AdminPage.php:529
+#: src/Admin/AdminPage.php:246 src/Admin/AdminPage.php:530
 #, php-format
 msgid "%1$s (%2$s)"
 msgstr ""
@@ -78,7 +78,7 @@ msgstr ""
 msgid "An authenticated user is required."
 msgstr ""
 
-#: src/Admin/AdminPage.php:477
+#: src/Admin/AdminPage.php:478
 msgid "Application Password created and the MCP connection test passed."
 msgstr ""
 
@@ -145,7 +145,7 @@ msgstr ""
 msgid "Changing roles requires the promote_users capability."
 msgstr ""
 
-#: src/Admin/AdminPage.php:365
+#: src/Admin/AdminPage.php:366
 msgid "Client configuration"
 msgstr ""
 
@@ -153,7 +153,7 @@ msgstr ""
 msgid "Code"
 msgstr ""
 
-#: src/Admin/AdminPage.php:410
+#: src/Admin/AdminPage.php:411
 msgid ""
 "Configure the MCP client with the endpoint, username, and generated "
 "Application Password."
@@ -336,7 +336,13 @@ msgstr ""
 msgid "Deny"
 msgstr ""
 
-#: src/Admin/AdminPage.php:598
+#: src/Admin/AdminPage.php:343
+msgid ""
+"Destructive and privileged operations stay hidden unless enabled and still "
+"require one-time approval here."
+msgstr ""
+
+#: src/Admin/AdminPage.php:599
 msgid "Destructive — delete, publish, restore"
 msgstr ""
 
@@ -350,11 +356,8 @@ msgid ""
 "anything."
 msgstr ""
 
-#: src/Admin/AdminPage.php:342
-msgid ""
-"Enabled risk classes are exposed to MCP clients. Destructive and privileged "
-"operations are hidden unless enabled and still require one-time approval "
-"here before execution."
+#: src/Admin/AdminPage.php:340
+msgid "Enabled risk classes are exposed to MCP clients."
 msgstr ""
 
 #: src/Admin/AdminPage.php:182
@@ -365,14 +368,14 @@ msgstr ""
 msgid "Generate WPNerve credential"
 msgstr ""
 
-#: src/Admin/AdminPage.php:370
+#: src/Admin/AdminPage.php:371
 msgid ""
 "Generate a credential above for a copy-ready configuration. Otherwise, "
 "base64-encode USERNAME:APPLICATION_PASSWORD and replace the placeholder "
 "below."
 msgstr ""
 
-#: src/Admin/AdminPage.php:406
+#: src/Admin/AdminPage.php:407
 msgid "Generate or create a dedicated Application Password named WPNerve."
 msgstr ""
 
@@ -416,12 +419,12 @@ msgstr ""
 msgid "Get user"
 msgstr ""
 
-#: src/Admin/AdminPage.php:516
+#: src/Admin/AdminPage.php:517
 msgid ""
 "High-risk operation approved. The MCP client may now retry the exact call."
 msgstr ""
 
-#: src/Admin/AdminPage.php:517
+#: src/Admin/AdminPage.php:518
 msgid "High-risk operation denied."
 msgstr ""
 
@@ -616,7 +619,7 @@ msgstr ""
 msgid "Preview content update"
 msgstr ""
 
-#: src/Admin/AdminPage.php:597
+#: src/Admin/AdminPage.php:598
 msgid "Privileged — administration (users, plugins, options)"
 msgstr ""
 
@@ -642,7 +645,7 @@ msgstr ""
 msgid "Read debug log"
 msgstr ""
 
-#: src/Admin/AdminPage.php:595
+#: src/Admin/AdminPage.php:596
 msgid "Read — safe information abilities"
 msgstr ""
 
@@ -742,7 +745,7 @@ msgstr ""
 msgid "Revoke"
 msgstr ""
 
-#: src/Admin/AdminPage.php:418
+#: src/Admin/AdminPage.php:419
 msgid ""
 "Revoke that Application Password immediately if the client or device is lost."
 msgstr ""
@@ -751,11 +754,11 @@ msgstr ""
 msgid "Risk"
 msgstr ""
 
-#: src/Admin/AdminPage.php:337 src/Admin/AdminPage.php:351
+#: src/Admin/AdminPage.php:337 src/Admin/AdminPage.php:352
 msgid "Risk classes"
 msgstr ""
 
-#: src/Admin/AdminPage.php:457
+#: src/Admin/AdminPage.php:458
 msgid "Risk classes updated."
 msgstr ""
 
@@ -763,7 +766,7 @@ msgstr ""
 msgid "Safe site information abilities exposed by WPNerve."
 msgstr ""
 
-#: src/Admin/AdminPage.php:361
+#: src/Admin/AdminPage.php:362
 msgid "Save risk classes"
 msgstr ""
 
@@ -784,7 +787,7 @@ msgstr ""
 msgid "Secure MCP access to the native WordPress Abilities API."
 msgstr ""
 
-#: src/Admin/AdminPage.php:404
+#: src/Admin/AdminPage.php:405
 msgid "Secure setup"
 msgstr ""
 
@@ -817,7 +820,7 @@ msgstr ""
 msgid "The comment could not be deleted."
 msgstr ""
 
-#: src/Admin/AdminPage.php:518
+#: src/Admin/AdminPage.php:519
 msgid ""
 "The confirmation could not be changed because it is missing, expired, or "
 "already decided."
@@ -1184,7 +1187,7 @@ msgid ""
 msgstr ""
 
 #. translators: %d: WordPress user ID.
-#: src/Admin/AdminPage.php:535
+#: src/Admin/AdminPage.php:536
 #, php-format
 msgid "User #%d"
 msgstr ""
@@ -1202,11 +1205,11 @@ msgstr ""
 msgid "WPNerve"
 msgstr ""
 
-#: src/Admin/AdminPage.php:503
+#: src/Admin/AdminPage.php:504
 msgid "WPNerve credential revoked."
 msgstr ""
 
-#: src/Admin/AdminPage.php:428
+#: src/Admin/AdminPage.php:429
 msgid ""
 "WPNerve displays a newly generated secret once and never persists it. Tool "
 "arguments and credentials are excluded from the audit log."
@@ -1238,7 +1241,7 @@ msgstr ""
 msgid "WordPress Application Password over HTTPS"
 msgstr ""
 
-#: src/Admin/AdminPage.php:498 src/Admin/ApplicationPasswords.php:157
+#: src/Admin/AdminPage.php:499 src/Admin/ApplicationPasswords.php:157
 msgid "WordPress could not revoke the selected WPNerve credential."
 msgstr ""
 
@@ -1246,7 +1249,7 @@ msgstr ""
 msgid "WordPress created an invalid Application Password response."
 msgstr ""
 
-#: src/Admin/AdminPage.php:596
+#: src/Admin/AdminPage.php:597
 msgid "Write — recoverable mutations"
 msgstr ""
 

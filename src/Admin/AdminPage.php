@@ -337,9 +337,10 @@ final class AdminPage
             <h2><?php echo esc_html__('Risk classes', 'wp-nerve'); ?></h2>
             <p class="description">
                 <?php
+                echo esc_html__('Enabled risk classes are exposed to MCP clients.', 'wp-nerve');
+                echo ' ';
                 echo esc_html__(
-                    // phpcs:ignore Generic.Files.LineLength.TooLong -- translatable sentence remains intact.
-                    'Enabled risk classes are exposed to MCP clients. Destructive and privileged operations are hidden unless enabled and still require one-time approval here before execution.',
+                    'Destructive and privileged operations stay hidden unless enabled and still require one-time approval here.',
                     'wp-nerve'
                 );
                 ?>
