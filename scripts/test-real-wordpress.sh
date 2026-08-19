@@ -5,6 +5,7 @@ MODE="${1:-single}"
 WP_PATH="${WP_PATH:-}"
 ALLOW_PRODUCTION="${WP_NERVE_ALLOW_PRODUCTION_RUNTIME_TEST:-0}"
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+PLATFORM_GATE="${ROOT_DIR}/tests/real-wordpress/platform-security.php"
 SINGLE_GATE="${ROOT_DIR}/tests/real-wordpress/single-site.php"
 MULTISITE_GATE="${ROOT_DIR}/tests/real-wordpress/multisite.php"
 
@@ -45,6 +46,7 @@ run_gate() {
 
 case "${MODE}" in
   single)
+    run_gate "" "${PLATFORM_GATE}"
     run_gate "" "${SINGLE_GATE}"
     ;;
 
@@ -54,7 +56,11 @@ case "${MODE}" in
       exit 2
     fi
 
-    mapfile -t SITE_URLS < <(wp --path="${WP_PATH}" site list --field=url | head -n 10)
+    SITE_URLS=()
+    while IFS= read -r site_url; do
+      [[ -n "${site_url}" ]] && SITE_URLS[${#SITE_URLS[@]}]="${site_url}"
+    done < <(wp --path="${WP_PATH}" site list --field=url | head -n 10)
+
     if [[ "${#SITE_URLS[@]}" -eq 0 ]]; then
       echo "ERROR: no Multisite URLs found." >&2
       exit 2
@@ -63,6 +69,7 @@ case "${MODE}" in
     # Each URL runs in a fresh WP-CLI process. This matters because WPNerve's
     # composition root is intentionally boot-once per PHP request.
     for site_url in "${SITE_URLS[@]}"; do
+      run_gate "${site_url}" "${PLATFORM_GATE}"
       run_gate "${site_url}" "${SINGLE_GATE}"
     done
 
@@ -70,7 +77,7 @@ case "${MODE}" in
     ;;
 
   *)
-    echo "Usage: WP_PATH=/path/to/wordpress $0 [single|multisite]" >&2
+    echo "Usage: WP_PATH=/path/to/wordpress bash $0 [single|multisite]" >&2
     exit 2
     ;;
 esac
