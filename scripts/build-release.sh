@@ -27,8 +27,11 @@ archive="dist/wp-nerve-${version}.zip"
 checksum_file="dist/SHA256SUMS"
 manifest="dist/RELEASE-MANIFEST.txt"
 
-tmp1="$(mktemp "${TMPDIR:-/tmp}/wp-nerve-release.XXXXXX.zip")"
-tmp2="$(mktemp "${TMPDIR:-/tmp}/wp-nerve-release.XXXXXX.zip")"
+# Keep the XXXXXX suffix at the end of the template for BSD/macOS mktemp.
+# git archive receives --format=zip explicitly, so the temporary filename does
+# not need a .zip suffix.
+tmp1="$(mktemp "${TMPDIR:-/tmp}/wp-nerve-release.XXXXXX")"
+tmp2="$(mktemp "${TMPDIR:-/tmp}/wp-nerve-release.XXXXXX")"
 trap 'rm -f "${tmp1}" "${tmp2}"' EXIT
 
 git archive --format=zip --prefix=wp-nerve/ --output="${tmp1}" HEAD
