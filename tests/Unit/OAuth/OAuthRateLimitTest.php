@@ -52,6 +52,25 @@ final class OAuthRateLimitTest extends TestCase
         self::assertSame('no-store', $response->get_headers()['cache-control']);
     }
 
+    public function testRevocationHasIndependentBudget(): void
+    {
+        WPState::$wpdb->queryResults = array(0, 0);
+        WPState::$wpdb->rows         = array(array('request_count' => '30'));
+        $_SERVER['REMOTE_ADDR']      = '198.51.100.32';
+
+        $server  = $this->server();
+        $request = new WP_REST_Request('POST', '/wp-nerve/v1/oauth/revoke');
+        $request->set_param('client_id', 'client');
+        $request->set_param('token', 'token');
+
+        $response = $server->revoke($request);
+
+        self::assertSame(429, $response->get_status());
+        self::assertSame('slow_down', $response->get_data()['error']);
+        self::assertSame('30', $response->get_headers()['x-ratelimit-limit']);
+        self::assertSame('0', $response->get_headers()['x-ratelimit-remaining']);
+    }
+
     private function server(): OAuthServer
     {
         return new OAuthServer(
