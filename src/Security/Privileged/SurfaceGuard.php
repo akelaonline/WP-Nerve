@@ -154,9 +154,11 @@ final class SurfaceGuard
 
     public function redactLog(string $content): string
     {
+        $credentialPattern = '/(["\']?(?:password|passwd|pwd|secret|token|api[_-]?key|client[_-]?secret|'
+            . 'access[_-]?token|refresh[_-]?token|credential)["\']?\s*[:=]\s*["\']?)[^\s,;"\']+/i';
         $patterns = array(
             '/(Authorization\s*:\s*)(?:Bearer|Basic)\s+[^\s]+/i' => '$1[REDACTED]',
-            '/(["\']?(?:password|passwd|pwd|secret|token|api[_-]?key|client[_-]?secret|access[_-]?token|refresh[_-]?token|credential)["\']?\s*[:=]\s*["\']?)[^\s,;"\']+/i' => '$1[REDACTED]',
+            $credentialPattern => '$1[REDACTED]',
             '#(https?://)[^/\s:@]+:[^@\s/]+@#i' => '$1[REDACTED]@',
         );
 
