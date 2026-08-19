@@ -32,7 +32,7 @@ final class PluginArchiveInspector
             );
         }
 
-        $zip = new \ZipArchive();
+        $zip    = new \ZipArchive();
         $opened = $zip->open($archivePath, \ZipArchive::CHECKCONS);
 
         if (true !== $opened) {
@@ -154,8 +154,11 @@ final class PluginArchiveInspector
      */
     public function rollback(array $entries, string $pluginsDir): void
     {
+        global $wp_filesystem;
+
         $files       = array();
         $directories = array();
+        $root        = rtrim($pluginsDir, '/\\');
 
         foreach ($entries as $entry) {
             $relative = rtrim($entry, '/');
@@ -171,7 +174,6 @@ final class PluginArchiveInspector
             }
 
             $parent = dirname($target);
-            $root   = rtrim($pluginsDir, '/\\');
 
             while ($parent !== $root && str_starts_with($parent, $root . DIRECTORY_SEPARATOR)) {
                 $directories[$parent] = true;
@@ -190,7 +192,11 @@ final class PluginArchiveInspector
         }
 
         foreach (array_unique($files) as $file) {
-            wp_delete_file($file);
+            if (is_object($wp_filesystem) && method_exists($wp_filesystem, 'delete')) {
+                $wp_filesystem->delete($file, false, 'f');
+            } else {
+                wp_delete_file($file);
+            }
         }
 
         $directories = array_keys($directories);
@@ -199,9 +205,13 @@ final class PluginArchiveInspector
             static fn (string $left, string $right): int => strlen($right) <=> strlen($left)
         );
 
+        if (! is_object($wp_filesystem) || ! method_exists($wp_filesystem, 'delete')) {
+            return;
+        }
+
         foreach ($directories as $directory) {
             if (is_dir($directory)) {
-                rmdir($directory);
+                $wp_filesystem->delete($directory, false, 'd');
             }
         }
     }
