@@ -3,7 +3,9 @@
 /**
  * Option abilities (privileged, opt-in).
  *
- * Listing options returns keys only; values are never exposed in bulk.
+ * Only explicitly safe option keys can be read or changed. Security-sensitive
+ * and credential-like options remain inaccessible even when filters extend the
+ * allowlists.
  *
  * @package WPNerve
  */
@@ -13,6 +15,7 @@ declare(strict_types=1);
 namespace WPNerve\Abilities;
 
 use WP_Error;
+use WPNerve\Security\Privileged\SurfaceGuard;
 
 final class OptionAbilities extends AbstractAbilityRegistrar
 {
@@ -32,16 +35,31 @@ final class OptionAbilities extends AbstractAbilityRegistrar
     public function getOption(mixed $input = null): array|WP_Error
     {
         $input = is_array($input) ? $input : array();
-        $key   = (string) ($input['key'] ?? '');
+        $key   = strtolower(trim((string) ($input['key'] ?? '')));
+        $guard = new SurfaceGuard();
 
         if ('' === $key) {
             return new WP_Error('wp_nerve_invalid_key', __('The key parameter is required.', 'wp-nerve'));
+        }
+
+        if (! $guard->canReadOption($key)) {
+            return new WP_Error(
+                'wp_nerve_protected_option',
+                __('This option is not allowed through WPNerve.', 'wp-nerve')
+            );
         }
 
         $value = get_option($key, '__wp_nerve_missing__');
 
         if ('__wp_nerve_missing__' === $value) {
             return new WP_Error('wp_nerve_option_not_found', __('The requested option does not exist.', 'wp-nerve'));
+        }
+
+        if (! $guard->valueIsSafe($value)) {
+            return new WP_Error(
+                'wp_nerve_unsafe_option_value',
+                __('The option value cannot be safely represented through WPNerve.', 'wp-nerve')
+            );
         }
 
         return array('key' => $key, 'value' => $value);
@@ -54,13 +72,35 @@ final class OptionAbilities extends AbstractAbilityRegistrar
     public function updateOption(mixed $input = null): array|WP_Error
     {
         $input = is_array($input) ? $input : array();
-        $key   = (string) ($input['key'] ?? '');
+        $key   = strtolower(trim((string) ($input['key'] ?? '')));
+        $guard = new SurfaceGuard();
 
         if ('' === $key || ! array_key_exists('value', $input)) {
             return new WP_Error('wp_nerve_invalid_key', __('The key and value parameters are required.', 'wp-nerve'));
         }
 
+        if (! $guard->canWriteOption($key)) {
+            return new WP_Error(
+                'wp_nerve_protected_option',
+                __('This option cannot be changed through WPNerve.', 'wp-nerve')
+            );
+        }
+
+        if (! $guard->valueIsSafe($input['value'])) {
+            return new WP_Error(
+                'wp_nerve_unsafe_option_value',
+                __('The proposed option value cannot be safely represented through WPNerve.', 'wp-nerve')
+            );
+        }
+
         $previous = get_option($key, '__wp_nerve_missing__');
+
+        if ('__wp_nerve_missing__' !== $previous && ! $guard->valueIsSafe($previous)) {
+            return new WP_Error(
+                'wp_nerve_unsafe_option_value',
+                __('The existing option value cannot be safely returned for recovery.', 'wp-nerve')
+            );
+        }
 
         update_option($key, $input['value']);
 
@@ -79,7 +119,9 @@ final class OptionAbilities extends AbstractAbilityRegistrar
     {
         unset($input);
 
-        $keys = array_keys(wp_load_alloptions());
+        $guard     = new SurfaceGuard();
+        $available = array_map('strtolower', array_keys(wp_load_alloptions()));
+        $keys      = array_values(array_intersect($guard->readableOptionKeys(), $available));
         sort($keys);
 
         return array('options' => $keys, 'total' => count($keys));
@@ -90,7 +132,7 @@ final class OptionAbilities extends AbstractAbilityRegistrar
         $this->registerAbility(
             'wp-nerve/get-option',
             __('Get option', 'wp-nerve'),
-            __('Returns a named option and its value. Requires manage_options.', 'wp-nerve'),
+            __('Returns an allowlisted option value. Security-sensitive options are always blocked.', 'wp-nerve'),
             $this->optionKeySchema(),
             array(
                 '$schema'              => 'https://json-schema.org/draft/2020-12/schema',
@@ -114,7 +156,7 @@ final class OptionAbilities extends AbstractAbilityRegistrar
         $this->registerAbility(
             'wp-nerve/update-option',
             __('Update option', 'wp-nerve'),
-            __('Updates a named option. The previous value is returned for recovery. Requires manage_options.', 'wp-nerve'),
+            __('Updates an allowlisted option and returns its previous safe value for recovery.', 'wp-nerve'),
             array(
                 '$schema'              => 'https://json-schema.org/draft/2020-12/schema',
                 'type'                 => 'object',
@@ -149,7 +191,7 @@ final class OptionAbilities extends AbstractAbilityRegistrar
         $this->registerAbility(
             'wp-nerve/list-options',
             __('List options', 'wp-nerve'),
-            __('Lists option keys only, without values. Requires manage_options.', 'wp-nerve'),
+            __('Lists only option keys that are allowlisted for WPNerve access.', 'wp-nerve'),
             $this->emptyInputSchema(),
             array(
                 '$schema'              => 'https://json-schema.org/draft/2020-12/schema',
