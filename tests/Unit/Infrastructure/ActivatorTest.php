@@ -21,7 +21,8 @@ final class ActivatorTest extends TestCase
         Activator::activate();
 
         self::assertCount(6, WPState::$schemaCalls);
-        self::assertSame('5', WPState::$options['wp_nerve_schema_version']);
+        self::assertSame(Activator::SCHEMA_VERSION, WPState::$options['wp_nerve_schema_version']);
+        self::assertSame('6', Activator::SCHEMA_VERSION);
         self::assertTrue(
             (bool) array_filter(
                 WPState::$schemaCalls,
@@ -29,6 +30,22 @@ final class ActivatorTest extends TestCase
             )
         );
         self::assertSame(array(), WPState::$deactivatedPlugins);
+    }
+
+    public function testInstallSchemaCanMigrateAnExistingSite(): void
+    {
+        WPState::$options['wp_nerve_schema_version'] = '5';
+
+        Activator::installSchema();
+
+        self::assertCount(6, WPState::$schemaCalls);
+        self::assertSame('6', WPState::$options['wp_nerve_schema_version']);
+        self::assertTrue(
+            (bool) array_filter(
+                WPState::$schemaCalls,
+                static fn (string $sql): bool => str_contains($sql, 'wp_nerve_oauth_tokens')
+            )
+        );
     }
 
     public function testActivateRejectsOldWordPress(): void
