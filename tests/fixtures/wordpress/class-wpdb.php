@@ -30,8 +30,14 @@ final class WpDb
     /** @var array<int, string> */
     public array $queries = array();
 
+    /** @var array<int, int|false> Results queued for insert(). */
+    public array $insertResults = array();
+
     /** @var array<int, int|false> Results queued for query(). */
     public array $queryResults = array();
+
+    /** @var array<int, scalar|null|false> Results queued for get_var(). */
+    public array $varResults = array();
 
     /** @var array<int, array<string, mixed>> Rows queued for get_row(). */
     public array $rows = array();
@@ -51,7 +57,7 @@ final class WpDb
     }
 
     /** @param array<string, mixed> $data */
-    public function insert(string $table, array $data = array(), array $format = array()): int
+    public function insert(string $table, array $data = array(), array $format = array()): int|false
     {
         $call = array(
             'table'  => $table,
@@ -61,6 +67,15 @@ final class WpDb
 
         $this->insertCalls[] = $call;
         $this->lastInsert    = $call;
+
+        if (array() !== $this->insertResults) {
+            $result = array_shift($this->insertResults);
+
+            if (false === $result || $result < 1) {
+                return $result;
+            }
+        }
+
         $this->tables[$table][] = $data;
 
         return count($this->tables[$table]);
@@ -117,6 +132,23 @@ final class WpDb
         }
 
         return 1;
+    }
+
+    public function get_var(?string $query = null, int $x = 0, int $y = 0): string|int|float|bool|null
+    {
+        unset($x, $y);
+
+        $this->lastQuery = (string) $query;
+
+        if (array() !== $this->varResults) {
+            return array_shift($this->varResults);
+        }
+
+        if (preg_match('/SELECT COUNT\(\*\) FROM `?(\w+_oauth_clients)`?/', (string) $query, $matches)) {
+            return count($this->tables[$matches[1]] ?? array());
+        }
+
+        return null;
     }
 
     public function get_row(?string $query = null, string $output = OBJECT, int $y = 0): object|array|null
@@ -184,27 +216,32 @@ final class WpDb
 
         $this->deletes[] = array('table' => $table, 'where' => $where);
 
-        if (isset($this->tables[$table])) {
-            $kept = array();
+        if (! isset($this->tables[$table])) {
+            return 1;
+        }
 
-            foreach ($this->tables[$table] as $row) {
-                $match = true;
+        $kept    = array();
+        $removed = 0;
 
-                foreach ($where as $column => $value) {
-                    if ((string) ($row[$column] ?? '') !== (string) $value) {
-                        $match = false;
-                        break;
-                    }
-                }
+        foreach ($this->tables[$table] as $row) {
+            $match = true;
 
-                if (! $match) {
-                    $kept[] = $row;
+            foreach ($where as $column => $value) {
+                if ((string) ($row[$column] ?? '') !== (string) $value) {
+                    $match = false;
+                    break;
                 }
             }
 
-            $this->tables[$table] = $kept;
+            if ($match) {
+                ++$removed;
+            } else {
+                $kept[] = $row;
+            }
         }
 
-        return 1;
+        $this->tables[$table] = $kept;
+
+        return $removed;
     }
 }
