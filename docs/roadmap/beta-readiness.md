@@ -18,7 +18,8 @@ verified controls around every exposed operation.
 - Application Password and OAuth 2.1 authentication.
 - Central policy engine with read, write, destructive, and privileged classes.
 - Destructive and privileged classes disabled by default.
-- 229 tests and 900 assertions reported at the alpha.4 baseline.
+- Persistent mutation idempotency, out-of-band high-risk confirmation and
+  independent MCP/OAuth rate-limit boundaries are implemented.
 
 The code is alpha quality. It is not approved for production until every P0 gate
 in this document passes.
@@ -30,9 +31,14 @@ in this document passes.
 - **G2 implementation:** alpha.7 added an out-of-band WordPress admin decision,
   expiring single-operation tokens, canonical argument binding and tamper,
   expiry, replay, cross-user and cross-credential unit coverage.
+- **G3 implementation:** alpha.8 added independent fixed-window budgets for MCP,
+  OAuth authorization, token exchange and dynamic registration. Network subjects
+  are hashed, arbitrary forwarding headers are ignored, database failure fails
+  closed, and deterministic/exhaustion/proxy-spoof boundary tests are included.
 
-These controls are code-complete, but G1 and G2 remain open until their real
-WordPress database, browser and MCP wire evidence is recorded under G6/G7.
+These controls are code-complete, but G1, G2 and G3 still require their real
+WordPress database, reverse-proxy/browser and MCP wire evidence under G6/G7
+before WPNerve can make a production-readiness claim.
 
 ## Release gates
 
