@@ -14,6 +14,7 @@ use WPNerve\Abilities\AbilityRegistrar;
 use WPNerve\Admin\AdminPage;
 use WPNerve\Audit\AuditRepository;
 use WPNerve\Infrastructure\Activator;
+use WPNerve\Maintenance\RetentionManager;
 use WPNerve\OAuth\OAuthServer;
 use WPNerve\OAuth\OAuthStore;
 use WPNerve\Policy\PolicyEngine;
@@ -85,6 +86,7 @@ final class Plugin
         );
         $admin                  = new AdminPage(null, $confirmationRepository);
         $oauth                  = new OAuthServer(new OAuthStore(), $rateLimiter, $clientAddress);
+        $retention              = new RetentionManager();
 
         add_action('init', array($this, 'loadTextdomain'));
         add_action('wp_abilities_api_categories_init', array($abilities, 'registerCategory'));
@@ -93,6 +95,7 @@ final class Plugin
         add_action('rest_api_init', array($oauth, 'registerRoutes'));
         add_action('admin_init', array($admin, 'handleActions'));
         add_action('admin_menu', array($admin, 'registerMenu'));
+        add_action('wp_scheduled_delete', array($retention, 'cleanup'), 20, 0);
         add_filter('rest_allowed_cors_headers', array($transport, 'allowedCorsHeaders'), 10, 2);
     }
 
