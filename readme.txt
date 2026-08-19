@@ -4,7 +4,7 @@ Tags: mcp, ai, agents, abilities, automation
 Requires at least: 6.9
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 0.1.0-alpha.9
+Stable tag: 0.1.0-alpha.10
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -31,6 +31,10 @@ security-sensitive options are not exposed, transient reads require explicit
 key allowlisting, debug logs are redacted, administrator account management has
 a separate opt-in, and WPNerve protects its own plugin from agent deactivation
 or deletion.
+
+OAuth public clients use authorization code + PKCE S256, exact redirect URIs,
+single-use authorization codes, refresh-token rotation, bounded dynamic client
+registration and token revocation. OAuth responses are explicitly non-cacheable.
 
 This version is an early alpha for development and security review.
 
@@ -92,7 +96,31 @@ per-key allowlist. Administrator account management, existing-user password
 changes and existing-user email changes each require separate opt-ins. WPNerve
 itself cannot be deactivated or deleted through its MCP plugin tools.
 
+= How is OAuth constrained? =
+
+OAuth is a public-client profile for MCP clients that cannot send a WordPress
+Application Password. It requires PKCE S256, exact pre-registered redirect URIs,
+a non-empty state value and explicit WordPress consent. Remote redirects require
+HTTPS; plain HTTP is accepted only for loopback IP clients. Authorization codes
+and refresh tokens are single-use at their rotation boundary, and clients can
+revoke their own access or refresh tokens.
+
 == Changelog ==
+
+= 0.1.0-alpha.10 =
+* Hardened the OAuth lifecycle with strict PKCE/state validation, exact HTTPS or
+  loopback redirect rules and bounded public-client dynamic registration.
+* Added a real OAuth revocation endpoint with an independent request budget.
+* Authorization codes are single-use, refresh tokens rotate on use, access and
+  refresh lifetimes are separate, and expired token rows are cleaned in bounded
+  batches.
+* OAuth storage failures fail closed; access, refresh and authorization-code
+  values remain hashed at rest.
+* OAuth responses and redirects send no-store/no-cache/nosniff headers.
+* Database schema advanced to v6 so existing alpha installs migrate the hardened
+  OAuth token/client schema during normal plugin boot.
+* Automatic GitHub Actions triggers are paused; repository workflows remain
+  available for explicit manual runs only.
 
 = 0.1.0-alpha.9 =
 * Hardened user, plugin, option and system diagnostic abilities with additional

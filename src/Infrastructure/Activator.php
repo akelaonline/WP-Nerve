@@ -18,6 +18,8 @@ use WPNerve\Security\RateLimit\WpdbRepository as RateLimitRepository;
 
 final class Activator
 {
+    public const SCHEMA_VERSION = '6';
+
     public static function activate(): void
     {
         if (version_compare(PHP_VERSION, '8.1', '<')) {
@@ -40,11 +42,16 @@ final class Activator
             );
         }
 
+        self::installSchema();
+    }
+
+    public static function installSchema(): void
+    {
         AuditRepository::installSchema();
         OAuthStore::installSchema();
         WpdbRepository::installSchema();
         ConfirmationRepository::installSchema();
         RateLimitRepository::installSchema();
-        update_option('wp_nerve_schema_version', '5', false);
+        update_option('wp_nerve_schema_version', self::SCHEMA_VERSION, false);
     }
 }

@@ -2,7 +2,7 @@
 
 ## Status
 
-This document describes the alpha.9 attack surface. WPNerve is not approved for
+This document describes the alpha.10 attack surface. WPNerve is not approved for
 production until the P0 gates in [the beta-readiness plan](roadmap/beta-readiness.md)
 pass.
 
@@ -39,8 +39,10 @@ budgets are required.
 The alpha includes content, taxonomy, media, comments, menus, widgets, users,
 plugins, options and system-diagnostic abilities. User, plugin, option and
 system operations are part of the current attack surface even though they are
-disabled by default. Alpha.9 adds object/input-specific protections on top of the
-existing ability, risk, capability, idempotency and confirmation layers.
+disabled by default. Alpha.9 added object/input-specific protections on top of
+the existing ability, risk, capability, idempotency and confirmation layers.
+Alpha.10 hardens the OAuth lifecycle, redirect policy, registration limits,
+rotation/replay behavior, revocation and storage-failure handling.
 
 Arbitrary SQL, PHP, shell and WP-CLI execution are not implemented. Theme
 management, arbitrary filesystem editing and wp-config editing are outside the
@@ -51,16 +53,18 @@ core product scope.
 | Threat | Current control | Beta gap |
 |---|---|---|
 | Stolen Application Password | Dedicated revocable credential; HTTPS required | Client guidance and revocation E2E |
-| Stolen OAuth token | Hashed token store, short-lived access token, refresh rotation | Cleanup, replay and lifecycle review |
-| OAuth redirect or consent abuse | Registered redirect URI, PKCE S256, state and consent nonce | Full OAuth threat review and client quotas |
+| Stolen OAuth token | Hashed token store, short-lived access token, separately bounded refresh lifetime, refresh rotation and revocation | Real-client/browser lifecycle and intermediary evidence |
+| OAuth code or refresh replay | Authorization codes are single-use; refresh tokens rotate and consumed values cannot be reused | Real database concurrency/crash-path evidence |
+| OAuth redirect or consent abuse | Exact redirect URI, HTTPS remote callbacks, loopback-only HTTP, PKCE S256, bounded non-empty state and consent nonce | Browser/proxy interoperability and independent review |
+| OAuth registration flood | Independent registration rate limit plus bounded total client capacity and max five redirects per client | Real deployment/load evidence and lifecycle policy for retired clients |
 | Privilege escalation | Policy/risk gates, confirmation, execution-time WordPress capability checks and alpha.9 object/input guards | Real WordPress/Multisite adversarial matrix and independent review |
 | Excessive agent authority | Least-privilege discovery; destructive and privileged classes off by default; per-ability opt-in | Validate all supported deployment/user-role combinations |
 | Duplicate mutation after retry | Persistent, credential-bound idempotency with atomic claim and replay | Real WordPress database and crash-path evidence |
 | Accidental destructive action | Risk class off by default plus bound, expiring, single-operation admin confirmation | Real admin/browser and MCP wire E2E evidence |
-| Endpoint abuse or registration flood | Independent fail-closed MCP/OAuth budgets with hashed transport-peer subjects; untrusted forwarding headers ignored | Real reverse-proxy matrix, OAuth lifecycle quotas and broader response/payload budgets |
+| Endpoint abuse | Independent fail-closed MCP/OAuth authorization/token/revocation/registration budgets with hashed transport-peer subjects; untrusted forwarding headers ignored | Real reverse-proxy matrix and broader response/payload budgets |
 | Header/body request smuggling | Mirrored MCP headers checked against JSON body | Fuzzing and proxy matrix |
 | DNS rebinding from browser clients | Same-origin validation when Origin is present | Real proxy/browser tests |
-| SSRF through uploads or URLs | Current upload paths avoid arbitrary remote fetching | Verify every archive/media path and redirect behavior |
+| SSRF through uploads or URLs | Current upload paths avoid arbitrary remote fetching; OAuth redirects are registration-bound | Verify every archive/media path and browser redirect behavior |
 | Malicious plugin archive | Capability/risk/confirmation gates; filename/size/ZIP/checksum validation; no matching-slug replacement | Malformed ZIP/path traversal/upgrader/filesystem fuzzing and rollback tests |
 | Protected option disclosure or mutation | Conservative allowlists plus permanent security/credential/WPNerve/transient protections; unsafe structures refused | Real plugin option corpus and serialized-value abuse tests |
 | User privilege escalation | Target capability checks; admin management separate opt-in; sensitive self-change/self-delete blocked; password/email separate opt-ins | Cross-user and Multisite/network-admin runtime tests |
@@ -70,23 +74,23 @@ core product scope.
 | Secret leakage in audit | Tool arguments and authorization data are not persisted | Retention, export, deletion and metadata injection tests |
 | Tool-name confusion | Deterministic one-to-one mapping and WPNerve namespace | Encoded-name fuzzing |
 | Untrusted third-party ability | Only WPNerve namespace exposed | Reviewed opt-in SDK remains post-beta |
-| Cache disclosure | Authenticated and OAuth token responses use no-store headers | End-to-end intermediary tests |
-| Database growth | Bounded rate-limit cleanup; no sufficient lifecycle policy yet for idempotency, OAuth and audit storage | Retention and cleanup jobs with failure tests |
+| Cache disclosure | Authenticated and OAuth responses/redirects use no-store/no-cache; OAuth adds nosniff | End-to-end intermediary tests |
+| Database growth | Bounded rate-limit and OAuth-expiry cleanup; no sufficient lifecycle policy yet for idempotency, audit and retired OAuth clients | Retention and cleanup jobs with failure tests |
 
 ## P0 requirements before beta
 
 - Real-runtime evidence for persistent idempotency claim/complete and replay behavior.
 - Real-runtime evidence for expiring confirmation tokens bound to actor,
   authoritative credential, ability, canonical arguments and idempotency key.
-- Real reverse-proxy and WordPress evidence for the implemented independent MCP,
-  OAuth registration, authorization and token rate limits and their trusted-peer
-  behavior.
-- Real WordPress and Multisite validation of alpha.9 privileged-surface guards,
-  including user-role boundaries, protected options/transients, log redaction and
-  plugin lifecycle behavior.
+- Real reverse-proxy and WordPress evidence for the implemented independent MCP
+  and OAuth rate limits and their trusted-peer behavior.
+- Real WordPress and Multisite validation of privileged-surface guards, including
+  user-role boundaries, protected options/transients, log redaction and plugin
+  lifecycle behavior.
 - Malformed plugin archive, path-traversal, overwrite and rollback abuse tests.
-- OAuth lifecycle cleanup, registration quotas and complete negative E2E tests.
-- Audit retention and privacy controls.
+- Real-browser/strict-client OAuth PKCE, redirect, consent, rotation, replay,
+  revocation, expiry and database-failure evidence.
+- Audit/idempotency/OAuth-client retention and privacy controls.
 - Multisite authorization and storage behavior.
 - Contract tests against supported MCP clients and protocol eras.
 - Fuzzing of JSON-RPC envelopes, headers, schemas, archives and encoded names.
@@ -116,6 +120,10 @@ core product scope.
 9. Protected option/transient and administrator-account boundaries cannot be
    bypassed merely by enabling a broad WPNerve risk class.
 10. WPNerve cannot deactivate or delete its own MCP control plugin.
-11. Secrets never enter audit records or normal error messages.
-12. Unsupported or unknown risk states fail closed.
-13. Runtime-double success is not accepted as proof of WordPress compatibility.
+11. OAuth authorization codes and rotated refresh tokens cannot authorize a
+   second exchange after successful consumption.
+12. OAuth persistence failure cannot produce credentials whose lifecycle WPNerve
+   cannot track.
+13. Secrets never enter audit records or normal error messages.
+14. Unsupported or unknown risk states fail closed.
+15. Runtime-double success is not accepted as proof of WordPress compatibility.

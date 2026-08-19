@@ -13,6 +13,7 @@ namespace WPNerve;
 use WPNerve\Abilities\AbilityRegistrar;
 use WPNerve\Admin\AdminPage;
 use WPNerve\Audit\AuditRepository;
+use WPNerve\Infrastructure\Activator;
 use WPNerve\OAuth\OAuthServer;
 use WPNerve\OAuth\OAuthStore;
 use WPNerve\Policy\PolicyEngine;
@@ -59,13 +60,8 @@ final class Plugin
             return;
         }
 
-        if ('5' !== get_option('wp_nerve_schema_version')) {
-            AuditRepository::installSchema();
-            OAuthStore::installSchema();
-            WpdbRepository::installSchema();
-            ConfirmationRepository::installSchema();
-            RateLimitRepository::installSchema();
-            update_option('wp_nerve_schema_version', '5', false);
+        if (Activator::SCHEMA_VERSION !== get_option('wp_nerve_schema_version')) {
+            Activator::installSchema();
         }
 
         $abilities              = new AbilityRegistrar();
