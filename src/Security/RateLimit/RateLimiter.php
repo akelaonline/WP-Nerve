@@ -92,7 +92,7 @@ final class RateLimiter
             $limit = $defaults['limit'];
         }
 
-        if (! is_int($window) || $window < 1 || $window > DAY_IN_SECONDS) {
+        if (! is_int($window) || $window < 1 || $window > 86400) {
             $window = $defaults['window'];
         }
 
