@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+MODE="${1:-all}"
 WP_PATH="${WP_PATH:-}"
 ALLOW_PRODUCTION="${WP_NERVE_ALLOW_PRODUCTION_RUNTIME_TEST:-0}"
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-GATE="${ROOT_DIR}/tests/real-wordpress/abuse-resistance.php"
+ARCHIVE_GATE="${ROOT_DIR}/tests/real-wordpress/abuse-resistance.php"
+RETENTION_GATE="${ROOT_DIR}/tests/real-wordpress/retention-scale.php"
 
 if ! command -v wp >/dev/null 2>&1; then
   echo "ERROR: wp (WP-CLI) is required." >&2
@@ -39,6 +41,21 @@ if ($affected69 || $affected70 || version_compare($v, "6.9", "<")) {
 echo "PASS: patched WordPress baseline {$v}\n";
 '
 
-wp --path="${WP_PATH}" eval-file "${GATE}"
+case "${MODE}" in
+  archive)
+    wp --path="${WP_PATH}" eval-file "${ARCHIVE_GATE}"
+    ;;
+  retention)
+    wp --path="${WP_PATH}" eval-file "${RETENTION_GATE}"
+    ;;
+  all)
+    wp --path="${WP_PATH}" eval-file "${ARCHIVE_GATE}"
+    wp --path="${WP_PATH}" eval-file "${RETENTION_GATE}"
+    ;;
+  *)
+    echo "Usage: WP_PATH=/path/to/wordpress bash $0 [archive|retention|all]" >&2
+    exit 2
+    ;;
+esac
 
-echo "WPNERVE_REAL_WORDPRESS_G8_RUNTIME_OK"
+echo "WPNERVE_REAL_WORDPRESS_G8_RUNTIME_OK mode=${MODE}"
