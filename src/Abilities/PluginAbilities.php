@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace WPNerve\Abilities;
 
 use WP_Error;
+use WPNerve\Security\Privileged\PluginArchiveInspector;
 
 final class PluginAbilities extends AbstractAbilityRegistrar
 {
@@ -178,10 +179,13 @@ final class PluginAbilities extends AbstractAbilityRegistrar
         }
 
         $this->ensureAdminIncludes();
-        $slug = strtolower(substr($name, 0, -4));
+        $pluginsDir = defined('WP_PLUGIN_DIR') ? WP_PLUGIN_DIR : WP_CONTENT_DIR . '/plugins';
+        $slug       = strtolower(substr($name, 0, -4));
 
         foreach (array_keys(get_plugins()) as $installedPlugin) {
-            if (str_starts_with(strtolower((string) $installedPlugin), $slug . '/')) {
+            $installedPlugin = strtolower((string) $installedPlugin);
+
+            if ($installedPlugin === $slug . '.php' || str_starts_with($installedPlugin, $slug . '/')) {
                 return new WP_Error(
                     'wp_nerve_plugin_exists',
                     __('A plugin matching this archive slug is already installed; WPNerve will not replace it.', 'wp-nerve')
@@ -189,28 +193,69 @@ final class PluginAbilities extends AbstractAbilityRegistrar
             }
         }
 
-        $upload = wp_upload_bits($name, null, $bits);
+        $temporary = tempnam(sys_get_temp_dir(), 'wpnerve-install-');
 
-        if (false !== $upload['error']) {
-            return new WP_Error('wp_nerve_upload_failed', (string) $upload['error']);
+        if (false === $temporary) {
+            return new WP_Error(
+                'wp_nerve_upload_failed',
+                __('WPNerve could not allocate a private temporary plugin archive.', 'wp-nerve')
+            );
         }
 
-        $pluginsDir = defined('WP_PLUGIN_DIR') ? WP_PLUGIN_DIR : WP_CONTENT_DIR . '/plugins';
-        $result     = unzip_file((string) $upload['file'], $pluginsDir);
+        $written = file_put_contents($temporary, $bits);
 
-        if (is_wp_error($result)) {
-            return $result;
+        if (! is_int($written) || $written !== strlen($bits)) {
+            if (is_file($temporary)) {
+                unlink($temporary);
+            }
+
+            return new WP_Error(
+                'wp_nerve_upload_failed',
+                __('WPNerve could not stage the plugin archive for installation.', 'wp-nerve')
+            );
         }
 
-        return array(
-            'file'         => $name,
-            'installed_to' => 'wp-content/plugins',
-            'sha256'       => $actual,
-            'recovery'     => array(
-                'undo' => 'wp_nerve_delete_plugin',
-                'note' => __('Delete the newly installed plugin to undo after verifying its plugin file with list-plugins.', 'wp-nerve'),
-            ),
-        );
+        $inspector  = new PluginArchiveInspector();
+        $inspection = $inspector->inspect($temporary, $pluginsDir);
+
+        if (is_wp_error($inspection)) {
+            unlink($temporary);
+
+            return $inspection;
+        }
+
+        if (! function_exists('WP_Filesystem') || ! WP_Filesystem()) {
+            unlink($temporary);
+
+            return new WP_Error(
+                'wp_nerve_filesystem_unavailable',
+                __('WordPress could not initialize a safe filesystem transport for plugin installation.', 'wp-nerve')
+            );
+        }
+
+        try {
+            $result = unzip_file($temporary, $pluginsDir);
+
+            if (is_wp_error($result)) {
+                $inspector->rollback($inspection['entries'], $pluginsDir);
+
+                return $result;
+            }
+
+            return array(
+                'file'         => $name,
+                'installed_to' => 'wp-content/plugins',
+                'sha256'       => $actual,
+                'recovery'     => array(
+                    'undo' => 'wp_nerve_delete_plugin',
+                    'note' => __('Delete the newly installed plugin to undo after verifying its plugin file with list-plugins.', 'wp-nerve'),
+                ),
+            );
+        } finally {
+            if (is_file($temporary)) {
+                unlink($temporary);
+            }
+        }
     }
 
     /**
@@ -334,7 +379,7 @@ final class PluginAbilities extends AbstractAbilityRegistrar
         $this->registerAbility(
             'wp-nerve/upload-plugin',
             __('Upload plugin', 'wp-nerve'),
-            __('Installs a checksummed base64 ZIP without replacing a matching installed plugin slug.', 'wp-nerve'),
+            __('Installs a preflighted, checksummed ZIP without writing into existing plugin paths.', 'wp-nerve'),
             array(
                 '$schema'              => 'https://json-schema.org/draft/2020-12/schema',
                 'type'                 => 'object',
@@ -450,6 +495,14 @@ final class PluginAbilities extends AbstractAbilityRegistrar
     {
         if (! function_exists('get_plugins')) {
             require_once ABSPATH . 'wp-admin/includes/plugin.php';
+        }
+
+        if (! function_exists('WP_Filesystem')) {
+            $fileApi = ABSPATH . 'wp-admin/includes/file.php';
+
+            if (is_file($fileApi)) {
+                require_once $fileApi;
+            }
         }
     }
 
