@@ -7,11 +7,24 @@ The Abilities API is a WordPress Core API available in WordPress 6.9+, and a
 registered `WP_Ability` exposes public permission, schema and `execute()` behavior.
 The G6 harness uses those real Core objects plus the real WordPress database.
 
+## Security baseline
+
+G6 evidence must be collected only on patched WordPress Core releases. The
+runner executes `platform-security.php` before every stateful probe and refuses
+the known-vulnerable July 2026 ranges:
+
+- WordPress 6.9.0 through 6.9.4;
+- WordPress 7.0.0 through 7.0.1.
+
+Use **6.9.5 or newer on the 6.9 line**, or **7.0.2 or newer on the 7.0 line**.
+A unit/runtime result from an affected Core build is not accepted as release
+evidence.
+
 ## What this gate proves
 
 `single-site.php` runs inside a real WordPress request through WP-CLI and checks:
 
-- WordPress 6.9+ and PHP 8.1+ are actually running;
+- a patched WordPress 6.9+ runtime and PHP 8.1+ are actually running;
 - WPNerve alpha.10 is loaded;
 - the global schema contract is current;
 - audit, idempotency, confirmation, rate-limit and OAuth tables exist with the
@@ -33,9 +46,9 @@ The G6 harness uses those real Core objects plus the real WordPress database.
 - WPNerve cannot deactivate or delete its own plugin through the privileged MCP
   surface, including a network-active installation.
 
-The shell runner executes `single-site.php` in a **fresh WP-CLI process per
-Multisite URL**. This avoids masking per-blog boot/schema behavior behind the
-plugin's request-local singleton.
+The shell runner executes the Core-security baseline and `single-site.php` in a
+**fresh WP-CLI process per Multisite URL**. This avoids masking per-blog
+boot/schema behavior behind the plugin's request-local singleton.
 
 ## Safety
 
@@ -54,8 +67,8 @@ That override should not be needed for normal G6 evidence.
 
 ## Prerequisites
 
-- a real WordPress installation;
-- WordPress 6.9 or newer;
+- a real WordPress installation on a patched Core release (6.9.5+ or 7.0.2+ for
+  the currently supported branches);
 - PHP 8.1 or newer;
 - MySQL/MariaDB used by that WordPress installation;
 - WP-CLI available as `wp`;
@@ -70,9 +83,11 @@ WP_PATH=/absolute/path/to/wordpress \
   bash scripts/test-real-wordpress.sh single
 ```
 
-Expected final marker:
+Expected final markers include:
 
 ```text
+WPNERVE_PLATFORM_SECURITY_BASELINE_OK
+WPNERVE_REAL_WORDPRESS_SINGLE_SITE_OK
 WPNERVE_REAL_WORDPRESS_RUNTIME_OK
 ```
 
@@ -89,6 +104,7 @@ then executes the network-specific gate.
 Expected markers include:
 
 ```text
+WPNERVE_PLATFORM_SECURITY_BASELINE_OK
 WPNERVE_REAL_WORDPRESS_SINGLE_SITE_OK
 WPNERVE_REAL_WORDPRESS_MULTISITE_OK
 WPNERVE_REAL_WORDPRESS_RUNTIME_OK
@@ -100,11 +116,11 @@ Before G6 can be marked complete, record successful runs for at least:
 
 | WordPress | PHP | Mode |
 |---|---:|---|
-| 6.9.x | 8.1 | Single site |
-| 6.9.x | 8.3 | Single site |
-| current supported 7.x | 8.3 | Single site |
-| current supported 7.x | 8.5 | Single site |
-| current supported 7.x | 8.3+ | Multisite |
+| 6.9.5+ (6.9 line) | 8.1 | Single site |
+| 6.9.5+ (6.9 line) | 8.3 | Single site |
+| 7.0.2+ / current supported 7.x | 8.3 | Single site |
+| 7.0.2+ / current supported 7.x | 8.5 | Single site |
+| 7.0.2+ / current supported 7.x | 8.3+ | Multisite |
 
 Do not mark a matrix cell green merely because a unit test or runtime double
 passes. Keep the exact WordPress/PHP versions and command output with the release
