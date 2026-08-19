@@ -361,7 +361,8 @@ final class PluginAbilities extends AbstractAbilityRegistrar
             array($this, 'uploadPlugin'),
             'destructive',
             false,
-            'install_plugins'
+            'install_plugins',
+            array('upload_plugins')
         );
     }
 
