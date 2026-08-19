@@ -3,8 +3,9 @@
 ## Status
 
 This document describes the alpha.10 baseline plus the implemented G8
-abuse-resistance and retention controls. WPNerve is not approved for production
-until the P0 gates in [the beta-readiness plan](roadmap/beta-readiness.md) pass.
+abuse-resistance, retention, real-HTTP mutation and Multisite-isolation controls.
+WPNerve is not approved for production until the P0 gates in
+[the beta-readiness plan](roadmap/beta-readiness.md) pass.
 
 ## Assets
 
@@ -42,10 +43,13 @@ system operations are part of the current attack surface even though they are
 disabled by default. Alpha.9 added object/input-specific protections on top of
 the existing ability, risk, capability, idempotency and confirmation layers.
 Alpha.10 hardens the OAuth lifecycle, redirect policy, registration limits,
-rotation/replay behavior, revocation and storage-failure handling. G8 adds
-private plugin-package staging, structural ZIP preflight, archive-root overwrite
-protection, malformed-request mutation coverage, and bounded retention cleanup
-for audit/idempotency/confirmation/OAuth token data.
+rotation/replay behavior, revocation and storage-failure handling.
+
+G8 adds private plugin-package staging, structural ZIP preflight, single-root
+package rules, archive-root overwrite protection, special-file rejection,
+malformed-request mutation coverage, a real-HTTP mutation corpus, bounded
+retention cleanup, optional stale OAuth-client pruning, retention-scale evidence
+and Multisite prefix-isolation evidence harnesses.
 
 Arbitrary SQL, PHP, shell and WP-CLI execution are not implemented. Theme
 management, arbitrary filesystem editing and wp-config editing are outside the
@@ -59,48 +63,50 @@ core product scope.
 | Stolen OAuth token | Hashed token store, short-lived access token, separately bounded refresh lifetime, refresh rotation and revocation | Real-client/browser lifecycle and intermediary evidence |
 | OAuth code or refresh replay | Authorization codes are single-use; refresh tokens rotate and consumed values cannot be reused | Real database concurrency/crash-path evidence |
 | OAuth redirect or consent abuse | Exact redirect URI, HTTPS remote callbacks, loopback-only HTTP, PKCE S256, bounded non-empty state and consent nonce | Browser/proxy interoperability and independent review |
-| OAuth registration flood | Independent registration rate limit plus bounded total client capacity and max five redirects per client | Real deployment/load evidence and lifecycle policy for retired clients |
+| OAuth registration flood | Independent registration rate limit, bounded total client capacity, max five redirects/client, and optional bounded stale-client pruning that never removes a client with unexpired token/code rows | Real deployment/load evidence |
 | Privilege escalation | Policy/risk gates, confirmation, execution-time WordPress capability checks and alpha.9 object/input guards | Real WordPress/Multisite adversarial matrix and independent review |
 | Excessive agent authority | Least-privilege discovery; destructive and privileged classes off by default; per-ability opt-in | Validate all supported deployment/user-role combinations |
 | Duplicate mutation after retry | Persistent, credential-bound idempotency with atomic claim and replay | Real WordPress database and crash-path evidence |
 | Accidental destructive action | Risk class off by default plus bound, expiring, single-operation admin confirmation | Real admin/browser and MCP wire E2E evidence |
 | Endpoint abuse | Independent fail-closed MCP/OAuth authorization/token/revocation/registration budgets with hashed transport-peer subjects; untrusted forwarding headers ignored | Real reverse-proxy matrix and broader response/payload evidence |
-| Header/body request smuggling | Mirrored MCP headers checked against JSON body; deterministic malformed-input corpus and mutation sweep | Real HTTP/proxy fuzzing matrix |
+| Header/body request smuggling | Mirrored MCP headers checked against JSON body; deterministic malformed-input corpus; in-process mutation sweep; 60-case real-HTTP mutation fixture | Execute and retain real proxy/HTTP evidence |
 | DNS rebinding from browser clients | Same-origin validation when Origin is present | Real proxy/browser tests |
 | SSRF through uploads or URLs | Current upload paths avoid arbitrary remote fetching; OAuth redirects are registration-bound | Verify every media path and browser redirect behavior |
-| Malicious plugin archive | Capability/risk/confirmation gates; 50 MiB package limit; SHA-256; private staging; `ZipArchive` structural preflight; traversal/absolute/drive/control-path rejection; case-collision and symlink rejection; archive-root checks against installed/existing plugin paths; best-effort extraction rollback | Real filesystem/upgrader failure matrix, malformed ZIP/high-ratio corpus and runtime fuzzing |
+| Malicious plugin archive | Capability/risk/confirmation gates; 50 MiB package limit; SHA-256; private staging; `ZipArchive` consistency preflight; traversal/absolute/drive/control-path rejection; case-collision, symlink and Unix-special-file rejection; exactly one top-level root; at least one PHP plugin file; installed/existing-root protection; 200 MiB hard expansion ceiling; best-effort rollback | Execute real filesystem/upgrader failure matrix and retained archive-edge evidence |
 | Protected option disclosure or mutation | Conservative allowlists plus permanent security/credential/WPNerve/transient protections; unsafe structures refused | Real plugin option corpus and serialized-value abuse tests |
 | User privilege escalation | Target capability checks; admin management separate opt-in; sensitive self-change/self-delete blocked; password/email separate opt-ins | Cross-user and Multisite/network-admin runtime tests |
 | Debug log secret disclosure | Privileged/disabled by default; 64 KiB bound; relative path; common credential redaction | Real log corpus, unusual secret formats and operator-warning review |
 | Transient secret disclosure | Empty default allowlist, exact per-key opt-in and credential-like key blocking | Real plugin transient corpus and serialized-value tests |
-| Agent disables its own control layer | WPNerve plugin is permanently protected from MCP deactivation/deletion; network-active plugins protected | Real plugin lifecycle and Multisite runtime tests |
-| Secret leakage in audit | Tool arguments and authorization data are not persisted; audit retention is bounded by default | Metadata-injection, large-table and Multisite cleanup evidence |
-| Tool-name confusion | Deterministic one-to-one mapping and WPNerve namespace; encoded-name corpus coverage | Real HTTP encoded-name fuzzing |
+| Agent disables its own control layer | WPNerve plugin is permanently protected from MCP deactivation/deletion; network-active plugins protected | Execute real plugin lifecycle and Multisite runtime tests |
+| Secret leakage in audit | Tool arguments and authorization data are not persisted; audit retention is bounded by default | Execute metadata-injection, scale and Multisite cleanup evidence |
+| Tool-name confusion | Deterministic one-to-one mapping and WPNerve namespace; encoded-name corpus plus real-HTTP mutation coverage | Execute retained wire evidence |
 | Untrusted third-party ability | Only WPNerve namespace exposed | Reviewed opt-in SDK remains post-beta |
 | Cache disclosure | Authenticated and OAuth responses/redirects use no-store/no-cache; OAuth adds nosniff | End-to-end intermediary tests |
-| Database growth | Bounded rate-limit/OAuth expiry cleanup plus daily bounded audit, completed-idempotency and expired-confirmation retention; unresolved in-progress idempotency claims are never recycled | Large-table/Multisite cleanup evidence and an explicit stale OAuth-client lifecycle |
+| Database growth | Daily bounded audit/completed-idempotency/expired-confirmation/OAuth-token cleanup; optional bounded stale-client pruning; unresolved in-progress idempotency claims are never recycled; scale and Multisite-isolation harnesses committed | Execute and retain large-table/Multisite latency evidence |
 
 ## P0 requirements before beta
 
-- Real-runtime evidence for persistent idempotency claim/complete and replay behavior.
-- Real-runtime evidence for expiring confirmation tokens bound to actor,
+- Execute real-runtime idempotency claim/complete/replay evidence against the
+  supported WordPress/PHP matrix.
+- Execute real-runtime expiring confirmation evidence bound to actor,
   authoritative credential, ability, canonical arguments and idempotency key.
-- Real reverse-proxy and WordPress evidence for the implemented independent MCP
-  and OAuth rate limits and their trusted-peer behavior.
-- Real WordPress and Multisite validation of privileged-surface guards, including
-  user-role boundaries, protected options/transients, log redaction and plugin
-  lifecycle behavior.
-- Real malformed plugin archive, path-traversal, overwrite, symlink and rollback
-  abuse evidence against supported WordPress filesystem transports.
-- Real-browser/strict-client OAuth PKCE, redirect, consent, rotation, replay,
-  revocation, expiry and database-failure evidence.
-- Large-table and Multisite evidence for audit/idempotency/confirmation/OAuth
-  token retention plus an explicit lifecycle policy for retired OAuth clients.
-- Multisite authorization and storage behavior.
-- Contract tests against supported MCP clients and protocol eras.
-- Real HTTP fuzzing of JSON-RPC envelopes, headers, schemas, archives and encoded
-  names beyond the deterministic unit corpus.
-- Independent security review with no unresolved critical or high findings.
+- Execute reverse-proxy evidence for the independent MCP/OAuth rate limits and
+  their trusted-peer behavior.
+- Execute WordPress and Multisite validation of privileged-surface guards,
+  including user-role boundaries, protected options/transients, log redaction and
+  plugin lifecycle behavior.
+- Execute malformed archive, path-traversal, overwrite, symlink, special-file,
+  expansion and rollback evidence against supported WordPress filesystem
+  transports. The deterministic and real-runtime harnesses are committed.
+- Execute real-browser/strict-client OAuth PKCE, redirect, consent, rotation,
+  replay, revocation, expiry and database-failure evidence.
+- Execute retention-scale and Multisite prefix-isolation harnesses for audit,
+  idempotency, confirmation, OAuth token and optional stale-client cleanup.
+- Execute contract tests against supported MCP clients and protocol eras.
+- Execute and retain the real-HTTP mutation corpus with no crash, secret
+  reflection or unbounded response.
+- Complete an independent security review with no unresolved critical/high
+  findings.
 
 ## Explicitly outside the core product
 
@@ -134,6 +140,11 @@ core product scope.
 14. Unsupported or unknown risk states fail closed.
 15. Runtime-double success is not accepted as proof of WordPress compatibility.
 16. A plugin archive cannot escape the plugin directory, overwrite an existing
-   plugin root, or persist a symbolic-link/traversal path through accepted input.
+   plugin root, install multiple top-level packages, or persist a symbolic-link,
+   special-file or traversal path through accepted input.
 17. Retention cleanup cannot make an unresolved `in_progress` mutation silently
    retryable.
+18. Retention cleanup for one Multisite blog prefix cannot delete another site's
+   WPNerve-owned rows.
+19. Automatic OAuth-client pruning is disabled by default and, when explicitly
+   enabled, cannot delete a client with unexpired token/code rows.
