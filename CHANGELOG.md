@@ -2,6 +2,43 @@
 
 All notable changes to WPNerve will be documented here.
 
+## [0.1.0-alpha.10] - 2026-08-19
+
+### Added
+
+- OAuth token revocation at `POST /wp-json/wp-nerve/v1/oauth/revoke` with an
+  independent request budget.
+- Bounded expired-token cleanup and a bounded total dynamic-client capacity.
+- Adversarial OAuth coverage for redirect policy, state/PKCE validation,
+  authorization-code replay, refresh rotation/replay, cross-client revocation,
+  storage failure, client quotas, and revocation rate limiting.
+
+### Security
+
+- Authorization codes are short-lived and single-use at the storage boundary.
+- Refresh tokens rotate on use and cannot be replayed after successful rotation.
+- Access and refresh tokens have separate bounded lifetimes and remain hashed at
+  rest together with authorization codes.
+- Dynamic registration accepts only the documented public-client profile, at
+  most five exact redirect URIs, HTTPS for remote redirects, and plain HTTP only
+  for loopback IP clients.
+- Authorization requires a bounded non-empty `state` and strict PKCE S256
+  verifier/challenge syntax.
+- OAuth persistence and cleanup failures fail closed instead of issuing or
+  accepting credentials whose lifecycle cannot be tracked.
+- OAuth responses and redirects apply `Cache-Control: no-store`,
+  `Pragma: no-cache`, and `X-Content-Type-Options: nosniff`.
+
+### Changed
+
+- Database schema version increased to 6 so existing alpha installs run the
+  hardened OAuth schema migration during normal plugin boot.
+- Schema migration logic is centralized in the activator instead of duplicating
+  the version contract in the composition root.
+- Automatic GitHub Actions triggers are paused. CI and archive workflows remain
+  available only through explicit manual dispatch while hosted Actions usage is
+  intentionally disabled.
+
 ## [0.1.0-alpha.9] - 2026-08-19
 
 ### Security
