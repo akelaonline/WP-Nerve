@@ -42,13 +42,19 @@ final class PluginTest extends TestCase
     {
         Plugin::instance()->boot();
 
-        self::assertCount(5, WPState::$schemaCalls);
-        self::assertSame('4', WPState::$options['wp_nerve_schema_version']);
+        self::assertCount(6, WPState::$schemaCalls);
+        self::assertSame('5', WPState::$options['wp_nerve_schema_version']);
+        self::assertTrue(
+            (bool) array_filter(
+                WPState::$schemaCalls,
+                static fn (string $sql): bool => str_contains($sql, 'wp_nerve_rate_limits')
+            )
+        );
     }
 
     public function testBootSkipsSchemaWhenAlreadyInstalled(): void
     {
-        WPState::$options['wp_nerve_schema_version'] = '4';
+        WPState::$options['wp_nerve_schema_version'] = '5';
 
         Plugin::instance()->boot();
 
