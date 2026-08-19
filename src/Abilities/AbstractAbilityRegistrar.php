@@ -22,6 +22,7 @@ abstract class AbstractAbilityRegistrar
      * @param array<string, mixed>              $inputSchema
      * @param array<string, mixed>              $outputSchema
      * @param callable                          $execute
+     * @param array<int, non-empty-string>      $additionalCapabilities
      */
     protected function registerAbility(
         string $name,
@@ -32,8 +33,12 @@ abstract class AbstractAbilityRegistrar
         callable $execute,
         string $risk = 'read',
         bool $enabledByDefault = true,
-        string $capability = ''
+        string $capability = '',
+        array $additionalCapabilities = array()
     ): void {
+        $primaryCapability = '' !== $capability ? $capability : $this->transportCapability();
+        $capabilities      = array_values(array_unique(array_merge(array($primaryCapability), $additionalCapabilities)));
+
         wp_register_ability(
             $name,
             array(
@@ -50,7 +55,8 @@ abstract class AbstractAbilityRegistrar
                     'annotations'  => $this->annotations($risk),
                     'wp_nerve'     => array(
                         'risk'               => $risk,
-                        'capability'         => '' !== $capability ? $capability : $this->transportCapability(),
+                        'capability'         => $primaryCapability,
+                        'capabilities'       => $capabilities,
                         'enabled_by_default' => $enabledByDefault,
                     ),
                 ),
@@ -128,8 +134,8 @@ abstract class AbstractAbilityRegistrar
         );
 
         if ($withContent) {
-            $schema['required'][]               = 'content';
-            $schema['properties']['content']    = array('type' => 'string');
+            $schema['required'][]            = 'content';
+            $schema['properties']['content'] = array('type' => 'string');
         }
 
         return $schema;
