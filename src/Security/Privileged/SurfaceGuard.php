@@ -163,11 +163,7 @@ final class SurfaceGuard
         );
 
         foreach ($patterns as $pattern => $replacement) {
-            $redacted = preg_replace($pattern, $replacement, $content);
-
-            if (is_string($redacted)) {
-                $content = $redacted;
-            }
+            $content = preg_replace($pattern, $replacement, $content) ?? $content;
         }
 
         return $content;
@@ -175,6 +171,7 @@ final class SurfaceGuard
 
     /**
      * @param array<int, string> $defaults
+     * @param non-empty-string  $filter
      */
     private function optionAllowed(string $key, array $defaults, string $filter): bool
     {
@@ -189,6 +186,7 @@ final class SurfaceGuard
 
     /**
      * @param array<int, string> $defaults
+     * @param non-empty-string  $filter
      * @return array<int, string>
      */
     private function allowedOptionKeys(array $defaults, string $filter): array
