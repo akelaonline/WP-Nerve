@@ -1,7 +1,7 @@
 # WPNerve beta-readiness plan
 
 This document is the executable release contract for the first public beta.
-Feature work is frozen until the security gates below are complete.
+Feature work is frozen until the security and release gates below are complete.
 
 ## Objective
 
@@ -14,138 +14,217 @@ verified controls around every exposed operation.
 
 - 53 implemented abilities across content, taxonomy, media, comments, menus,
   widgets, users, plugins, options, and system diagnostics.
-- MCP 2026-07-28 with bounded compatibility for 2025-11-25 and 2025-06-18.
+- MCP `2026-07-28` with bounded compatibility for `2025-11-25` and
+  `2025-06-18`.
 - Application Password and OAuth 2.1-style public-client authentication.
 - Central policy engine with read, write, destructive, and privileged classes.
 - Destructive and privileged classes disabled by default.
-- Persistent mutation idempotency, out-of-band high-risk confirmation,
-  independent MCP/OAuth rate-limit boundaries, privileged-surface guards, and
-  hardened OAuth lifecycle controls are implemented.
-- Automatic hosted GitHub Actions triggers are intentionally paused; workflows
-  remain available for explicit manual dispatch. Runtime evidence must therefore
-  be gathered without silently treating an absent CI run as a passing check.
+- Persistent mutation idempotency and out-of-band high-risk confirmation.
+- Independent MCP/OAuth rate limits with fail-closed storage behavior.
+- Privileged user/plugin/option/log/transient hardening.
+- Hardened OAuth code/token/refresh/revocation lifecycle.
+- Fail-closed plugin ZIP preflight, private staging and bounded expansion.
+- Bounded persistence retention plus optional stale OAuth-client pruning.
+- Real WordPress, Multisite, HTTP wire, mutation, archive, retention and release
+  evidence harnesses committed on the consolidated beta-candidate branch.
+- Independent-review handoff and canonical findings register committed.
+- Reproducible local release builder/checksum/manifest and lifecycle gate
+  committed.
 
-The code is alpha quality. It is not approved for production until every P0 gate
-in this document passes.
+Automatic hosted GitHub Actions triggers remain intentionally paused. Absence of
+a hosted CI result is never evidence of a passing gate.
 
-### Implemented controls awaiting full gate evidence
+The code remains alpha quality until every P0 exit criterion below has actual
+recorded evidence. A committed harness is **implemented**, not **passed**.
 
-- **G1 implementation:** alpha.5 added persistent, atomic, credential-bound
-  idempotency with collision, replay and fail-closed unit coverage.
-- **G2 implementation:** alpha.7 added an out-of-band WordPress admin decision,
-  expiring single-operation tokens, canonical argument binding and tamper,
-  expiry, replay, cross-user and cross-credential unit coverage.
-- **G3 implementation:** alpha.8 added independent fixed-window budgets for MCP,
-  OAuth authorization, token exchange and dynamic registration. Alpha.10 adds a
-  separate revocation budget. Network subjects are hashed, arbitrary forwarding
-  headers are ignored, database failure fails closed, and deterministic/
-  exhaustion/proxy-spoof boundary tests are included.
-- **G4 implementation:** alpha.9 added conservative option allowlists, empty-by-
-  default transient disclosure, debug-log redaction, administrator/self-user
-  restrictions, execution-time plugin/user capability checks, protected plugin
-  rules, and checksummed non-replacing plugin archive installs.
-- **G5 implementation:** alpha.10 adds the advertised token-revocation route,
-  exact HTTPS/loopback redirect policy, strict PKCE S256 and state validation,
-  single-use authorization codes, refresh-token rotation/replay protection,
-  separate access/refresh lifetimes, bounded expired-token cleanup, bounded
-  dynamic-client capacity, fail-closed persistence, and no-store/no-cache/
-  nosniff response handling. The OAuth schema migration is versioned so existing
-  alpha installs do not keep the older token layout silently.
+## Gate status
 
-These controls are code-complete at the unit/adversarial level, but G1–G5 still
-require real WordPress database, filesystem, Multisite, reverse-proxy/browser and
-MCP wire evidence under G6–G8 before WPNerve can make a production-readiness
-claim.
-
-## Release gates
-
-| Gate | Deliverable | Required evidence | Exit criterion |
+| Gate | Implementation | Evidence required before PASS | Current state |
 |---|---|---|---|
-| G0 Contract integrity | README, catalog, threat model, changelog and version agree | Automated or locally reproducible documentation/version checks | No stale or contradictory security claims |
-| G1 Idempotency | Persistent per-user/authoritative-credential/tool idempotency store | Unit, integration and replay tests | A retry cannot duplicate a mutation |
-| G2 Destructive confirmation | Short-lived, single-use confirmation bound to actor, tool and canonical arguments | Tamper, expiry, reuse and cross-user tests | No destructive or privileged mutation executes without a valid confirmation |
-| G3 Rate limiting | Separate budgets for MCP and OAuth registration, authorization, token and revocation routes | Proxy/IP tests and deterministic clock tests | Limits fail closed without trusting arbitrary forwarding headers |
-| G4 Privileged hardening | Per-object authorization and safe allow/deny lists for users, plugins, options and logs | Adversarial tests for privilege escalation and secret disclosure | No path to administrator creation, protected option access or unsafe plugin replacement outside explicit policy |
-| G5 OAuth hardening | Complete OAuth threat review, token lifecycle cleanup, revocation and client limits | End-to-end PKCE, rotation, replay, redirect, revocation and CSRF tests | OAuth routes meet the documented profile and do not expand access beyond MCP |
-| G6 Runtime compatibility | WordPress and PHP matrix plus Multisite behavior | Real WordPress integration tests | Supported matrix passes without runtime doubles masking core behavior |
-| G7 MCP interoperability | Contract tests against strict clients and schema validation | Recorded client matrix and wire fixtures | Discovery and calls pass for every supported protocol era |
-| G8 Abuse resistance | JSON-RPC/schema fuzzing, request-size tests, archive abuse and retention | Reproducible fuzz corpus and retention tests | No crash, secret leak or unbounded persistence in the accepted corpus |
-| G9 Independent review | Security review by a reviewer who did not implement the controls | Findings register with dispositions | No open critical/high finding |
-| G10 Release engineering | Reproducible ZIP, checksums, upgrade/uninstall tests and release notes | Reproducible artifact evidence | Beta artifact is reproducible and upgrade-safe |
+| G0 Contract integrity | Version/docs/catalog/release checks | Run release contract on final clean candidate; no stale claims | Implemented / pending execution |
+| G1 Idempotency | Persistent credential-bound atomic claim/complete/replay | Real DB replay, conflict and crash-path evidence | Implemented / pending runtime evidence |
+| G2 Confirmation | Short-lived actor/tool/arguments/key-bound approval | Real admin + MCP tamper/expiry/replay evidence | Implemented / pending runtime evidence |
+| G3 Rate limiting | Independent MCP/OAuth budgets, hashed peer subject, fail closed | Real proxy/IP exhaustion evidence | Implemented / pending runtime evidence |
+| G4 Privileged hardening | Object guards, protected options/users/plugins/logs | Real WordPress/Multisite adversarial matrix | Implemented / pending runtime evidence |
+| G5 OAuth hardening | PKCE S256, state, exact redirects, rotation/replay, revocation, quotas | Real browser/public-client lifecycle and proxy evidence | Implemented / pending runtime evidence |
+| G6 Runtime compatibility | Real WP/MySQL runner plus Multisite | Supported patched WordPress/PHP matrix output | Harness complete / not executed |
+| G7 MCP interoperability | Real HTTP deterministic client for all supported eras | Recorded wire output + at least one strict external client | Harness complete / not executed |
+| G8 Abuse resistance | ZIP preflight, mutation corpus, retention/scale/prefix-isolation harnesses | Recorded real archive/HTTP/DB/Multisite evidence; forced extraction-failure evidence | Harness substantially complete / not executed |
+| G9 Independent review | Review contract + findings register | Independent reviewer assesses exact final commit; no open Critical/High | Package complete / reviewer pending |
+| G10 Release engineering | Reproducible builder + install/upgrade/uninstall runner | Two clean builds match; lifecycle matrix passes | Harness complete / not executed |
 
-## Implementation order
+## Implemented security controls
 
-### Phase 1 — Contract and observability
+### G1 — Idempotency
 
-1. Synchronize README, ability catalog, threat model and changelog.
-2. Add reproducible checks for ability count, version strings and forbidden stale claims.
-3. Define stable security error codes and audit outcomes.
-4. Add an explicit production-readiness warning to the admin screen.
+Alpha.5 added persistent atomic idempotency for every mutation. Claims are scoped
+to WordPress user, authoritative credential, tool and key, with canonical
+argument hashing. Completed retries replay the stored result; collisions,
+concurrency, ambiguous state and unavailable storage fail closed. Unresolved
+`in_progress` claims are deliberately not recycled by retention.
 
-**Exit:** G0 passes and every later gate has an owner, test location and evidence
-path.
+### G2 — High-risk confirmation
 
-### Phase 2 — Mutation safety
+Alpha.7 added five-minute out-of-band WordPress-admin approval for destructive
+and privileged tools. Challenges are bound to authenticated user, authoritative
+credential/session, tool, canonical arguments and idempotency key, then consumed
+atomically on the first authorized retry.
 
-1. Add an idempotency repository with TTL and atomic claim/complete semantics.
-2. Canonicalize tool arguments before hashing.
-3. Require idempotency keys for write, destructive and privileged operations.
-4. Add a preview/confirmation service.
-5. Bind confirmation tokens to authenticated user, client, ability, argument
-   digest, expiry and one-time use.
+### G3 — Boundary budgets
 
-**Exit:** G1 and G2 pass for every mutating ability.
+Alpha.8 added independent fixed-window budgets for MCP, OAuth authorization,
+token exchange and registration; alpha.10 added revocation. Network subjects are
+hashed and derived from the transport peer rather than arbitrary forwarded
+headers. Rate-limit persistence failure fails closed.
 
-### Phase 3 — Boundary protection
+### G4 — Privileged surfaces
 
-1. Rate-limit MCP and OAuth endpoints independently.
-2. Define trusted-proxy behavior; ignore untrusted forwarded headers.
-3. Cap OAuth dynamic registrations and clean expired codes/tokens.
-4. Add payload, upload, pagination and response-size budgets.
+Alpha.9 replaced arbitrary option access with conservative allowlists, made
+transient disclosure empty-by-default, redacted/capped debug logs, protected
+administrator and self-user operations, rechecked WordPress capabilities at
+execution time, protected WPNerve/network-active plugins, and required
+checksummed non-replacing plugin uploads.
 
-Alpha.10 completes the code-level OAuth lifecycle and revocation portion of this
-phase. Real deployment evidence remains part of G6–G8.
+The consolidated candidate further hardens plugin packages: private temp staging,
+`ZipArchive` consistency checks, traversal/absolute/drive/control-path rejection,
+case-collision rejection, symlink and Unix-special-file rejection, exactly one
+top-level root, at least one PHP plugin file, installed/existing-root protection,
+and a hard 200 MiB total uncompressed ceiling. The ceiling can only be reduced by
+filter for deterministic evidence; it cannot be raised above the hard limit.
 
-**Exit:** G3 and G5 pass with real boundary evidence.
+### G5 — OAuth
 
-### Phase 4 — Privileged surface review
+Alpha.10 adds the advertised revocation endpoint, exact HTTPS/loopback redirect
+policy, strict PKCE S256 and state validation, single-use authorization codes,
+refresh-token rotation/replay rejection, separate access/refresh lifetimes,
+bounded expired-token cleanup, bounded dynamic-client capacity, fail-closed
+persistence, and `no-store`/`no-cache`/`nosniff` response handling.
 
-Review users, plugins, options and system abilities individually. Each ability
-must have an abuse-case table, object-level authorization, secret redaction,
-recovery behavior and a fail-closed default. Remove or redesign any operation
-that cannot meet those requirements.
+Dynamic OAuth-client cleanup is intentionally opt-in: when configured, stale
+clients are removed in bounded batches only if they are older than the configured
+retention window and have no unexpired token/code rows.
 
-Alpha.9 provides the code-level surface guards and adversarial unit coverage.
-Real WordPress/Multisite execution and malformed-archive/filesystem abuse remain
-part of G6/G8 evidence.
+## Evidence phase
 
-**Exit:** G4 passes. No privileged ability is enabled merely because its broad
-risk class is enabled.
+### G6 — Real WordPress/PHP/Multisite
 
-### Phase 5 — Real runtime and protocol proof
+Committed gates:
 
-1. Test supported WordPress/PHP combinations in real WordPress.
-2. Add Multisite single-site and network-admin cases.
-3. Run MCP wire-contract fixtures for all supported protocol eras.
-4. Run OAuth through a real browser/strict public client against a real database.
-5. Add end-to-end clients, malformed-archive cases and fuzzing.
-6. Add retention/cleanup evidence for audit, idempotency and OAuth client/token data.
+- `scripts/test-real-wordpress.sh single`
+- `scripts/test-real-wordpress.sh multisite`
+- `tests/real-wordpress/platform-security.php`
+- `tests/real-wordpress/single-site.php`
+- `tests/real-wordpress/multisite.php`
+- `tests/real-wordpress/multisite-retention.php`
 
-**Exit:** G6, G7 and G8 pass.
+The Multisite path migrates/test-boots each selected blog prefix in a fresh
+WP-CLI process before checking network behavior and cross-prefix retention
+isolation.
 
-### Phase 6 — Beta release
+### G7 — MCP wire proof
 
-1. Independent security review.
-2. Resolve all critical/high findings.
-3. Produce reproducible artifacts and checksums.
-4. Validate clean install, upgrade and uninstall.
-5. Publish beta documentation with known limitations.
+`tests/wire/mcp_contract.py` exercises the real HTTP endpoint with Application
+Password authentication for modern MCP `2026-07-28` and both bounded legacy
+protocol eras. It also covers unauthenticated access, hostile Origin, mirrored
+header mismatches, unsupported protocol version, >1 MiB requests, wrong HTTP
+method and cache headers.
 
-**Exit:** G9 and G10 pass.
+A strict external MCP client is still required in addition to this deterministic
+fixture.
+
+### G8 — Abuse resistance
+
+Committed evidence layers include:
+
+- deterministic malformed request corpus;
+- in-process mutation sweep;
+- 60-case real-HTTP mutation corpus;
+- real archive traversal/collision/symlink/root-overwrite tests;
+- malformed-central-directory, package-shape, Unix-special-file, Unicode and
+  reduced-ceiling expansion tests;
+- rollback cleanup against WordPress' filesystem transport;
+- retention scale with more rows than two cleanup batches;
+- Multisite per-blog-prefix retention isolation.
+
+The remaining code/evidence gap is deliberately narrow: force a real
+mid-extraction/upgrader failure on each supported filesystem transport and retain
+the output. All other G8 harnesses still need to be executed on the release
+matrix before the gate can pass.
+
+### G9 — Independent review
+
+`docs/security/independent-review.md` and
+`docs/security/findings-register.md` define the reviewer handoff, required attack
+surfaces, severity model, dispositions and retest contract.
+
+The implementation workflow cannot satisfy its own independent-review gate. The
+reviewer must assess an exact candidate commit and every finding must be recorded.
+No Critical or High finding may remain open at beta release.
+
+### G10 — Release engineering
+
+Committed release tooling:
+
+- `scripts/check-release-contract.sh`
+- `scripts/build-release.sh`
+- `scripts/verify-release-archive.sh`
+- `scripts/test-release-engineering.sh`
+- `scripts/run-beta-gates.sh`
+
+The builder creates the same commit twice and requires byte-identical ZIPs,
+verifies package structure, then emits the release ZIP, `SHA256SUMS` and a
+manifest containing the exact commit SHA. The lifecycle gate tests clean install,
+optional previous-version upgrade, schema/ability registration, conservative
+uninstall, reinstall and explicit destructive uninstall.
+
+G10 also fixed a real uninstall defect: WordPress persists a true option as the
+string `"1"`, while the old uninstall guard required strict boolean `true`. The
+cleanup opt-in now accepts only explicit persisted truth representations and
+remains fail-safe for absent/ambiguous values.
+
+## One-command off-host runner
+
+On a clean checkout with Composer dependencies installed:
+
+```bash
+bash scripts/run-beta-gates.sh quality
+```
+
+Runtime evidence uses **separate disposable sites** because the G10 lifecycle
+ends by uninstalling WPNerve:
+
+```bash
+WP_PATH=/path/to/single-site \
+WP_MULTISITE_PATH=/path/to/multisite \
+WP_RELEASE_PATH=/path/to/fresh-release-site \
+WP_NERVE_BASE_URL=https://staging.example \
+WP_NERVE_USER=wpnerve-agent \
+WP_NERVE_APPLICATION_PASSWORD='...' \
+PREVIOUS_ZIP_ALPHA9=/path/to/alpha9.zip \
+PREVIOUS_ZIP_ALPHA10=/path/to/alpha10.zip \
+  bash scripts/run-beta-gates.sh all
+```
+
+Missing optional environments are reported as **PENDING**, never as PASS.
+Credentials must be dedicated staging credentials and must not be committed.
+
+## Beta exit sequence
+
+1. Freeze the exact candidate commit.
+2. Run local quality + release-contract + reproducible-build checks.
+3. Execute G6 single-site and Multisite matrices on patched supported Core/PHP.
+4. Execute G7 deterministic wire contract and one strict external MCP client.
+5. Execute G8 archive, mutation, retention-scale, prefix-isolation and forced
+   extraction-failure evidence.
+6. Run G9 independent review on that exact candidate SHA and resolve/retest every
+   Critical/High finding.
+7. Build the reviewed commit independently twice and compare SHA-256.
+8. Execute G10 clean/upgrade/uninstall matrix.
+9. Publish beta notes with known limitations and exact artifact checksum.
 
 ## Scope after beta
 
-The following are separate modules, not beta blockers:
+Separate modules, not beta blockers:
 
 - Gutenberg/FSE templates, template parts, patterns and global styles.
 - Custom fields and ACF.
@@ -154,19 +233,19 @@ The following are separate modules, not beta blockers:
 - Backups and managed updates.
 - Public third-party ability SDK.
 
-Themes, arbitrary filesystem access, wp-config editing, SQL, PHP, WP-CLI and
-shell execution remain outside the core product unless a later threat model
-proves a narrowly scoped design.
+Themes, arbitrary filesystem access, `wp-config.php` editing, SQL, PHP, WP-CLI
+and shell execution remain outside core unless a later threat model proves a
+narrowly scoped design.
 
-## Definition of done for every pull request
+## Definition of done for every release change
 
-- One concern per PR and domain-aligned source/test folders.
-- New behavior has unit and integration coverage.
-- Security-sensitive behavior includes negative and abuse cases.
-- Schemas validate serialized JSON, not only PHP arrays.
-- Documentation changes in the same PR as behavior.
-- PHPStan level 8, PHPCS, PHPUnit and the supported runtime matrix pass before a
-  beta claim; while hosted Actions are paused, absence of a CI result is never
-  treated as evidence.
+- One concern per change and domain-aligned source/test folders.
+- New behavior has deterministic coverage.
+- Security-sensitive behavior includes negative/abuse cases.
+- Schemas validate serialized JSON, not merely PHP arrays.
+- Documentation changes with behavior.
+- PHPStan level 8, PHPCS, PHPUnit and supported runtime evidence pass before a
+  beta claim.
+- Hosted Actions being paused cannot be interpreted as a passing CI result.
 - No production claim is made from runtime doubles alone.
-- Recovery, audit, idempotency and confirmation impact are explicitly stated.
+- Recovery, audit, idempotency, confirmation and retention impact are explicit.
