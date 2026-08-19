@@ -6,6 +6,7 @@ WP_PATH="${WP_PATH:-}"
 ALLOW_PRODUCTION="${WP_NERVE_ALLOW_PRODUCTION_RUNTIME_TEST:-0}"
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ARCHIVE_GATE="${ROOT_DIR}/tests/real-wordpress/abuse-resistance.php"
+ARCHIVE_EDGE_GATE="${ROOT_DIR}/tests/real-wordpress/archive-edge-cases.php"
 RETENTION_GATE="${ROOT_DIR}/tests/real-wordpress/retention-scale.php"
 
 if ! command -v wp >/dev/null 2>&1; then
@@ -41,15 +42,20 @@ if ($affected69 || $affected70 || version_compare($v, "6.9", "<")) {
 echo "PASS: patched WordPress baseline {$v}\n";
 '
 
+run_archive_gates() {
+  wp --path="${WP_PATH}" eval-file "${ARCHIVE_GATE}"
+  wp --path="${WP_PATH}" eval-file "${ARCHIVE_EDGE_GATE}"
+}
+
 case "${MODE}" in
   archive)
-    wp --path="${WP_PATH}" eval-file "${ARCHIVE_GATE}"
+    run_archive_gates
     ;;
   retention)
     wp --path="${WP_PATH}" eval-file "${RETENTION_GATE}"
     ;;
   all)
-    wp --path="${WP_PATH}" eval-file "${ARCHIVE_GATE}"
+    run_archive_gates
     wp --path="${WP_PATH}" eval-file "${RETENTION_GATE}"
     ;;
   *)
