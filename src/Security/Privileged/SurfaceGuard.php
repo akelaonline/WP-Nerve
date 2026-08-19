@@ -131,15 +131,17 @@ final class SurfaceGuard
             return false;
         }
 
-        if (null === $value || is_bool($value) || is_int($value) || is_float($value)) {
+        $type = gettype($value);
+
+        if (in_array($type, array('NULL', 'boolean', 'integer', 'double'), true)) {
             return true;
         }
 
-        if (is_string($value)) {
+        if ('string' === $type) {
             return strlen($value) <= 65536;
         }
 
-        if (! is_array($value) || count($value) > 100) {
+        if ('array' !== $type || count($value) > 100) {
             return false;
         }
 
