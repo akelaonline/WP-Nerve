@@ -14,9 +14,11 @@ final class ClientAddress
 {
     public function resolve(): string
     {
-        $remoteAddress = $_SERVER['REMOTE_ADDR'] ?? '';
+        $remoteAddress = isset($_SERVER['REMOTE_ADDR']) && is_string($_SERVER['REMOTE_ADDR'])
+            ? sanitize_text_field(wp_unslash($_SERVER['REMOTE_ADDR']))
+            : '';
 
-        if (! is_string($remoteAddress) || '' === $remoteAddress) {
+        if ('' === $remoteAddress) {
             return 'unknown';
         }
 
