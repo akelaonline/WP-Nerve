@@ -1,10 +1,10 @@
-# G7 — MCP wire-contract evidence
+# G7/G8 — MCP wire and mutation evidence
 
 This directory tests WPNerve through its **real HTTP endpoint**, not through
 PHPUnit doubles or direct PHP calls.
 
-The client uses only Python's standard library and sends credentials only in the
-HTTP `Authorization` header. It does not print or persist the Application
+The clients use only Python's standard library and send credentials only in the
+HTTP `Authorization` header. They do not print or persist the Application
 Password.
 
 ## Covered contract
@@ -24,6 +24,18 @@ Password.
 - request bodies over 1 MiB are rejected;
 - authenticated GET is rejected with HTTP 405 and advertises POST;
 - MCP responses use private/no-store caching and `nosniff`.
+
+`mcp_mutation_fuzz.py` adds a deterministic real-HTTP G8 corpus. It sends 60
+mutated JSON-RPC/MCP requests across malformed JSON, envelope types, request IDs,
+methods, params, protocol metadata, client capabilities, mirrored headers,
+encoded names, nested metadata and attacker-controlled authority-like fields.
+The run fails on any 5xx response, reflected Application Password/Authorization
+header, malformed JSON response, oversized response, or premature rate-limit
+exhaustion.
+
+The mutation corpus intentionally stays below the default 120 requests/minute
+MCP budget. Run it in a fresh rate window after the normal wire contract so the
+evidence does not depend on a rate-limit override.
 
 The modern mirrored-header checks are intentionally strict: the MCP protocol
 version and method in the request metadata/body must agree with the corresponding
@@ -48,12 +60,15 @@ export WP_NERVE_USER='wpnerve-agent'
 export WP_NERVE_APPLICATION_PASSWORD='xxxx xxxx xxxx xxxx xxxx xxxx'
 
 python3 tests/wire/mcp_contract.py
+# Wait for a fresh MCP rate-limit window before the mutation corpus.
+python3 tests/wire/mcp_mutation_fuzz.py
 ```
 
-Expected final marker:
+Expected final markers:
 
 ```text
 WPNERVE_MCP_WIRE_OK
+WPNERVE_MCP_MUTATION_FUZZ_OK cases=60
 ```
 
 For a disposable local HTTP environment only:
@@ -70,18 +85,19 @@ export WP_NERVE_INSECURE_TLS=1
 
 Neither override should be used for production-readiness evidence.
 
-## Evidence required before G7 is complete
+## Evidence required before G7/G8 are complete
 
 Record the exact client output plus server WordPress/PHP/WPNerve versions for:
 
-| Protocol | Required wire path |
+| Protocol / corpus | Required wire path |
 |---|---|
 | `2026-07-28` | discover → tools/list → tools/call |
 | `2025-11-25` | initialize → tools/list → tools/call |
 | `2025-06-18` | initialize → tools/list → tools/call |
+| mutation corpus | 60 deterministic real-HTTP cases with no crash/secret reflection |
 
 Then repeat the modern flow with at least one strict external MCP client. The
-stdlib client is the deterministic protocol fixture; it is not a substitute for
-real-client interoperability evidence.
+stdlib clients are deterministic protocol fixtures; they are not a substitute
+for real-client interoperability evidence.
 
-No automatic GitHub Actions trigger is required or added by this gate.
+No automatic GitHub Actions trigger is required or added by these gates.
