@@ -87,6 +87,7 @@ final class PluginArchiveInspector
             $seen       = array();
             $total      = 0;
             $hasPhpFile = false;
+            $maxExpanded = $this->maxUncompressedBytes();
 
             for ($index = 0; $index < $zip->numFiles; ++$index) {
                 $name = $zip->getNameIndex($index, \ZipArchive::FL_UNCHANGED);
@@ -146,7 +147,7 @@ final class PluginArchiveInspector
                 $size = max(0, (int) $stat['size']);
                 $total += $size;
 
-                if ($total > self::MAX_UNCOMPRESSED_BYTES) {
+                if ($total > $maxExpanded) {
                     return new WP_Error(
                         'wp_nerve_archive_expansion_limit',
                         __('The plugin archive expands beyond WPNerve\'s safety limit.', 'wp-nerve')
@@ -305,6 +306,24 @@ final class PluginArchiveInspector
         }
 
         return $roots;
+    }
+
+    private function maxUncompressedBytes(): int
+    {
+        /**
+         * Filters the maximum total uncompressed plugin archive size.
+         *
+         * The filter may only reduce WPNerve's hard 200 MiB ceiling. This makes
+         * expansion-limit behavior reproducible in tests without allowing another
+         * plugin to weaken the production boundary.
+         *
+         * @param int $bytes Maximum total uncompressed bytes.
+         */
+        $bytes = apply_filters('wp_nerve_max_plugin_uncompressed_bytes', self::MAX_UNCOMPRESSED_BYTES);
+
+        return is_int($bytes) && $bytes > 0
+            ? min($bytes, self::MAX_UNCOMPRESSED_BYTES)
+            : self::MAX_UNCOMPRESSED_BYTES;
     }
 
     private function normalizeEntryName(string $name): ?string
