@@ -90,10 +90,11 @@ final class RateLimiterTest extends TestCase
 
         $repository = new WpdbRepository();
         $result     = $repository->consume('mcp', '203.0.113.99', 120, 120, 240);
+        $sql        = implode("\n", array_merge(WPState::$wpdb->queries, array(WPState::$wpdb->lastQuery)));
 
         self::assertNotNull($result);
-        self::assertStringNotContainsString('203.0.113.99', implode("\n", WPState::$wpdb->queries));
-        self::assertStringContainsString(hash('sha256', '203.0.113.99'), WPState::$wpdb->lastPrepared);
+        self::assertStringNotContainsString('203.0.113.99', $sql);
+        self::assertStringContainsString(hash('sha256', '203.0.113.99'), WPState::$wpdb->lastQuery);
     }
 
     public function testClientAddressIgnoresUntrustedForwardingHeaders(): void
