@@ -16,10 +16,11 @@ database.
 
 > 🇬🇧 Full docs in English below — 🇪🇸 Documentación completa en español más abajo.
 
-> **Project status:** early alpha. The 53-ability v1 surface, credential
-> onboarding, persistent mutation idempotency and out-of-band confirmation for
-> high-risk operations are implemented. Do not install this branch on a
-> production site before the remaining beta gates and security review complete.
+> **Project status:** early alpha. The 53-ability v1 surface, secure credential
+> onboarding, persistent mutation idempotency, out-of-band high-risk confirmation,
+> fail-closed endpoint rate limiting and privileged-surface hardening are
+> implemented. Do not install this branch on a production site before the
+> remaining beta gates and security review complete.
 
 ---
 
@@ -41,41 +42,45 @@ only reviewed, schema-defined abilities become MCP tools.
   action registry.
 - **Self-hosted.** Runs inside WordPress. No external service ever sees your
   requests or credentials.
-- **Secure by default.** HTTPS required in production, Application Password
-  authentication, mirrored-header validation, and a central policy engine that
-  denies destructive and privileged actions.
+- **Secure by default.** HTTPS required in production, WordPress-native
+  authentication, fail-closed boundary controls and a central policy engine that
+  denies destructive and privileged actions by default.
 
 ### Why WPNerve
 
 - WordPress 6.9+ native Abilities API, not a parallel action registry.
 - MCP `2026-07-28` stateless HTTP plus compatibility with clients `2025-11-25` and
   `2025-06-18`.
-- WordPress Application Password authentication over HTTPS.
+- WordPress Application Password and OAuth 2.1 authentication over HTTPS.
 - A central policy gate separate from ability business logic.
 - Least-privilege tool discovery: each user sees only the abilities they can
-  execute.
+  execute subject to object-level authorization.
 - Privacy-preserving audit events without credentials or tool arguments.
 - Destructive and privileged risk classes denied by default.
 - Persistent idempotency for every mutation.
 - Short-lived WordPress-admin confirmation for destructive and privileged calls.
+- Independent fail-closed rate limits for MCP and OAuth boundaries.
+- Additional allowlists, redaction and object guards around users, plugins,
+  options, transients and system diagnostics.
 
 ### Architecture
 
 ```mermaid
 flowchart LR
-    A["MCP client"] --> B["HTTP transport"]
-    B --> C["Authentication"]
-    C --> D["High-risk confirmation"]
-    D --> E["Idempotency"]
-    E --> F["Policy engine"]
-    F --> G["Abilities API"]
-    G --> H["WordPress"]
-    F --> I["Audit log"]
+    A["MCP / OAuth client"] --> B["Rate limit"]
+    B --> C["HTTP transport"]
+    C --> D["Authentication"]
+    D --> E["High-risk confirmation"]
+    E --> F["Idempotency"]
+    F --> G["Policy + object guards"]
+    G --> H["Abilities API"]
+    H --> I["WordPress"]
+    G --> J["Audit log"]
 ```
 
-The protocol, transport, policy, and WordPress ability layers are deliberately
-separate. A future protocol revision can replace the transport and dispatcher
-without rewriting content operations. See
+The protocol, transport, policy, security, and WordPress ability layers are
+deliberately separate. A future protocol revision can replace the transport and
+dispatcher without rewriting content operations. See
 [Architecture](docs/architecture.md) and [Threat model](docs/threat-model.md).
 
 ### Quick start
@@ -89,8 +94,9 @@ without rewriting content operations. See
    verifies the credential against its MCP endpoint without persisting it.
 5. Revoke WPNerve credentials from the same screen when a client is retired or
    a device is lost.
-6. If you enable destructive or privileged risk classes, approve each matching
-   short-lived operation code in **Tools → WPNerve** before the client retries it.
+6. If you enable destructive or privileged risk classes and individual tools,
+   approve each matching short-lived operation code in **Tools → WPNerve** before
+   the client retries it.
 
 Never commit or share the Application Password. If a client or device is lost,
 revoke the password immediately.
@@ -194,12 +200,17 @@ curl --user 'USERNAME:APPLICATION_PASSWORD' \
 
 - The endpoint is private and requires an authenticated WordPress user.
 - Production HTTP without TLS is rejected.
-- Tool discovery and execution both pass through the same policy engine.
+- Tool discovery and execution both pass through WPNerve policy and WordPress
+  capability checks.
 - MCP mirrored headers are checked against the JSON-RPC body.
 - Unknown external WordPress abilities are not exposed automatically.
 - Every mutation requires a credential-bound idempotency key.
 - Destructive and privileged calls are hidden by default and require an
   expiring, argument-bound decision in the WordPress admin when enabled.
+- Public MCP/OAuth boundaries have independent request budgets that fail closed.
+- Arbitrary forwarding headers are not trusted to select the rate-limit subject.
+- Protected options/transients and administrator-account boundaries have
+  additional fail-closed guards beyond the broad risk class.
 - Tool arguments, authorization headers, and Application Passwords are never
   written to the WPNerve audit table.
 
@@ -221,17 +232,19 @@ composer test         # PHPUnit only
 ```
 
 `composer check` runs PHP syntax validation, coding standards, PHPStan level 8,
-and the unit test suite. CI runs the same checks
-on PHP 8.1, 8.3, and 8.5, verifies version consistency, and publishes a coverage
-report on every push.
+and the unit test suite. CI runs the same checks on PHP 8.1, 8.3, and 8.5,
+verifies version consistency, and publishes a coverage report on every push.
 
 ### Documentation
 
 - [Architecture](docs/architecture.md)
 - [Threat model](docs/threat-model.md)
+- [Beta-readiness roadmap](docs/roadmap/beta-readiness.md)
 - [Ability catalog v1](docs/abilities-v1.md)
 - [Mutation idempotency](docs/security/idempotency.md)
 - [High-risk confirmations](docs/security/confirmations.md)
+- [Rate limiting](docs/security/rate-limits.md)
+- [Privileged surfaces](docs/security/privileged-surfaces.md)
 - [Architecture decision records](docs/adr/)
 
 ### License
@@ -259,43 +272,46 @@ abilities revisadas y con schema se convierten en herramientas MCP.
   sobre un registro de acciones paralelo.
 - **Self-hosted.** Corre dentro de WordPress. Ningún servicio externo ve tus
   pedidos o credenciales.
-- **Seguro por defecto.** HTTPS obligatorio en producción, autenticación con
-  Application Passwords, validación de headers reflejados y un policy engine
-  central que deniega acciones destructivas y privilegiadas.
+- **Seguro por defecto.** HTTPS obligatorio en producción, autenticación nativa
+  de WordPress, límites fail-closed y un policy engine central que deniega
+  acciones destructivas y privilegiadas por defecto.
 
 ### Por qué WPNerve
 
 - Abilities API nativa de WordPress 6.9+, no un registro paralelo de acciones.
 - MCP `2026-07-28` stateless HTTP más compatibilidad con clientes `2025-11-25`
   y `2025-06-18`.
-- Autenticación con Application Password de WordPress sobre HTTPS.
+- Autenticación con Application Password y OAuth 2.1 sobre HTTPS.
 - Un gate central de políticas separado de la lógica de negocio de las abilities.
-- Descubrimiento de herramientas con mínimo privilegio: cada usuario ve solo las
-  abilities que puede ejecutar.
+- Descubrimiento de herramientas con mínimo privilegio y autorización por objeto.
 - Eventos de auditoría que preservan la privacidad: sin credenciales ni
   argumentos de herramientas.
 - Clases de riesgo destructivas y privilegiadas denegadas por defecto.
 - Idempotencia persistente para toda mutación.
 - Confirmación breve en el panel de WordPress para llamadas destructivas y
   privilegiadas.
+- Rate limiting independiente y fail-closed para MCP y OAuth.
+- Allowlists, redacción y protecciones específicas para usuarios, plugins,
+  options, transients y diagnósticos del sistema.
 
 ### Arquitectura
 
 ```mermaid
 flowchart LR
-    A["Cliente MCP"] --> B["Transporte HTTP"]
-    B --> C["Autenticación"]
-    C --> D["Confirmación de alto riesgo"]
-    D --> E["Idempotencia"]
-    E --> F["Policy engine"]
-    F --> G["Abilities API"]
-    G --> H["WordPress"]
-    F --> I["Audit log"]
+    A["Cliente MCP / OAuth"] --> B["Rate limit"]
+    B --> C["Transporte HTTP"]
+    C --> D["Autenticación"]
+    D --> E["Confirmación de alto riesgo"]
+    E --> F["Idempotencia"]
+    F --> G["Policy + object guards"]
+    G --> H["Abilities API"]
+    H --> I["WordPress"]
+    G --> J["Audit log"]
 ```
 
-Las capas de protocolo, transporte, políticas y abilities están separadas a
-propósito. Una revisión futura del protocolo puede reemplazar el transporte y el
-dispatcher sin reescribir las operaciones de contenido. Ver
+Las capas de protocolo, transporte, políticas, seguridad y abilities están
+separadas a propósito. Una revisión futura del protocolo puede reemplazar el
+transporte y el dispatcher sin reescribir las operaciones de contenido. Ver
 [Arquitectura](docs/architecture.md) y [Modelo de amenazas](docs/threat-model.md).
 
 ### Inicio rápido
@@ -309,8 +325,9 @@ dispatcher sin reescribir las operaciones de contenido. Ver
    WPNerve verifica la credencial sin persistirla.
 5. Revocá las credenciales desde la misma pantalla cuando retires un cliente o
    pierdas un dispositivo.
-6. Si habilitás clases destructivas o privilegiadas, aprobá cada código de
-   operación en **Herramientas → WPNerve** antes de que el cliente reintente.
+6. Si habilitás clases y abilities destructivas o privilegiadas, aprobá cada
+   código de operación en **Herramientas → WPNerve** antes de que el cliente
+   reintente.
 
 Nunca commitees ni compartas la Application Password. Si perdés un cliente o
 dispositivo, revocá la contraseña de inmediato.
@@ -332,13 +349,17 @@ diagnóstico del sistema. Ver el [catálogo completo](docs/abilities-v1.md).
 
 - El endpoint es privado y requiere un usuario de WordPress autenticado.
 - HTTP sin TLS en producción es rechazado.
-- El descubrimiento y la ejecución de herramientas pasan por el mismo policy
-  engine.
+- El descubrimiento y la ejecución pasan por las políticas de WPNerve y los
+  capabilities de WordPress.
 - Los headers MCP reflejados se verifican contra el cuerpo JSON-RPC.
 - Las abilities externas desconocidas de WordPress no se exponen automáticamente.
 - Toda mutación requiere una clave de idempotencia ligada a la credencial.
 - Las llamadas destructivas y privilegiadas están ocultas por defecto y, al
   habilitarlas, requieren una decisión breve ligada a sus argumentos en el panel.
+- MCP y OAuth tienen presupuestos de requests independientes que fallan cerrado.
+- Los forwarding headers arbitrarios no eligen la identidad de rate limiting.
+- Options/transients protegidos y cuentas administrator tienen límites
+  adicionales, aunque la clase de riesgo esté habilitada.
 - Los argumentos de herramientas, headers de autorización y Application
   Passwords nunca se escriben en la tabla de auditoría.
 
@@ -360,9 +381,19 @@ composer test         # solo PHPUnit
 ```
 
 `composer check` corre validación de sintaxis PHP, estándares de código, PHPStan
-nivel 8 y la suite de tests unitarios.
-La CI corre los mismos chequeos en PHP 8.1, 8.3 y 8.5, verifica la consistencia
-de versiones y publica un reporte de cobertura en cada push.
+nivel 8 y la suite de tests unitarios. La CI corre los mismos chequeos en PHP
+8.1, 8.3 y 8.5, verifica la consistencia de versiones y publica cobertura.
+
+### Documentación
+
+- [Arquitectura](docs/architecture.md)
+- [Modelo de amenazas](docs/threat-model.md)
+- [Roadmap de beta](docs/roadmap/beta-readiness.md)
+- [Catálogo de abilities v1](docs/abilities-v1.md)
+- [Idempotencia](docs/security/idempotency.md)
+- [Confirmaciones de alto riesgo](docs/security/confirmations.md)
+- [Rate limiting](docs/security/rate-limits.md)
+- [Superficies privilegiadas](docs/security/privileged-surfaces.md)
 
 ### Licencia
 

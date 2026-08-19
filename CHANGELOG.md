@@ -2,6 +2,39 @@
 
 All notable changes to WPNerve will be documented here.
 
+## [0.1.0-alpha.9] - 2026-08-19
+
+### Security
+
+- Replaced arbitrary WordPress option reads/writes with conservative allowlists.
+  Core security, credential-like, transient and WPNerve configuration options
+  remain protected even when an extension filter tries to allow them.
+- Privileged option/transient values reject objects, resources, excessive depth,
+  excessive collection size and oversized strings before disclosure or mutation.
+- Transient reads now use an empty default allowlist and require an exact per-key
+  opt-in.
+- Debug-log output is capped at 64 KiB, redacts common Authorization/password/
+  token/secret/credential and URL-userinfo forms, and no longer exposes the
+  absolute server filesystem path.
+- Administrator user creation, modification and deletion require a separate
+  explicit opt-in in addition to WordPress capabilities and WPNerve ability/risk
+  gates.
+- Sensitive changes to the authenticated agent user and self-deletion are
+  blocked. Existing-user password and email changes require independent opt-ins.
+- Plugin mutations re-check their WordPress capabilities at execution time.
+  WPNerve itself and network-active plugins are protected from deactivation and
+  deletion.
+- Plugin ZIP installs require a simple archive filename, decoded-size budget,
+  ZIP signature and matching SHA-256 checksum, and refuse replacement when the
+  archive slug matches an installed plugin.
+
+### Fixed
+
+- Existing-user email updates now correctly map the public `email` input to
+  WordPress `user_email`.
+- User update recovery metadata records the previous non-password profile state.
+- Plugin installation responses no longer disclose the absolute plugin directory.
+
 ## [0.1.0-alpha.8] - 2026-08-19
 
 ### Added

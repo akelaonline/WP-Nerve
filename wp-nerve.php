@@ -4,7 +4,7 @@
  * Plugin Name:       WPNerve
  * Plugin URI:        https://github.com/akelaonline/WP-Nerve
  * Description:       A secure, native MCP server and agent control layer for WordPress.
- * Version:           0.1.0-alpha.8
+ * Version:           0.1.0-alpha.9
  * Requires at least: 6.9
  * Requires PHP:      8.1
  * Author:            Alejandro Daniel José · Akela
@@ -24,7 +24,7 @@ if (! defined('ABSPATH')) {
 }
 
 if (! defined('WP_NERVE_VERSION')) {
-    define('WP_NERVE_VERSION', '0.1.0-alpha.8');
+    define('WP_NERVE_VERSION', '0.1.0-alpha.9');
 }
 if (! defined('WP_NERVE_FILE')) {
     define('WP_NERVE_FILE', __FILE__);

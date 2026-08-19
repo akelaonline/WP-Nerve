@@ -18,8 +18,9 @@ verified controls around every exposed operation.
 - Application Password and OAuth 2.1 authentication.
 - Central policy engine with read, write, destructive, and privileged classes.
 - Destructive and privileged classes disabled by default.
-- Persistent mutation idempotency, out-of-band high-risk confirmation and
-  independent MCP/OAuth rate-limit boundaries are implemented.
+- Persistent mutation idempotency, out-of-band high-risk confirmation,
+  independent MCP/OAuth rate-limit boundaries, and privileged-surface guards
+  are implemented.
 
 The code is alpha quality. It is not approved for production until every P0 gate
 in this document passes.
@@ -35,10 +36,15 @@ in this document passes.
   OAuth authorization, token exchange and dynamic registration. Network subjects
   are hashed, arbitrary forwarding headers are ignored, database failure fails
   closed, and deterministic/exhaustion/proxy-spoof boundary tests are included.
+- **G4 implementation:** alpha.9 adds conservative option allowlists, empty-by-
+  default transient disclosure, debug-log redaction, administrator/self-user
+  restrictions, execution-time plugin/user capability checks, protected plugin
+  rules, and checksummed non-replacing plugin archive installs.
 
-These controls are code-complete, but G1, G2 and G3 still require their real
-WordPress database, reverse-proxy/browser and MCP wire evidence under G6/G7
-before WPNerve can make a production-readiness claim.
+These controls are code-complete at the unit/adversarial level, but G1–G4 still
+require real WordPress database, filesystem, Multisite, reverse-proxy/browser and
+MCP wire evidence under G6–G8 before WPNerve can make a production-readiness
+claim.
 
 ## Release gates
 
@@ -94,6 +100,10 @@ Review users, plugins, options and system abilities individually. Each ability
 must have an abuse-case table, object-level authorization, secret redaction,
 recovery behavior and a fail-closed default. Remove or redesign any operation
 that cannot meet those requirements.
+
+Alpha.9 provides the code-level surface guards and adversarial unit coverage.
+Real WordPress/Multisite execution and malformed-archive/filesystem abuse remain
+part of G6/G8 evidence.
 
 **Exit:** G4 passes. No privileged ability is enabled merely because its broad
 risk class is enabled.
