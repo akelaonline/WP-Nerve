@@ -4,7 +4,7 @@ Tags: mcp, ai, agents, abilities, automation
 Requires at least: 6.9
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 0.1.0-alpha.7
+Stable tag: 0.1.0-alpha.8
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -21,6 +21,10 @@ content search, and full content reads. Recoverable writes are available across
 the selected v1 surface. Destructive and privileged tools are hidden until the
 site owner opts in and then require a matching, short-lived approval in Tools >
 WPNerve before each logical operation.
+
+Public MCP and OAuth boundaries have independent, fail-closed request budgets.
+Client-supplied forwarding headers are never trusted when deriving the network
+subject used for rate limiting.
 
 This version is an early alpha for development and security review.
 
@@ -66,7 +70,23 @@ approve that code in Tools > WPNerve, then retry with the same arguments,
 idempotency key, credential and confirmation token. Changed or expired requests
 fail closed.
 
+= How does rate limiting work behind a reverse proxy? =
+
+WPNerve uses the transport peer exposed as `REMOTE_ADDR` and deliberately ignores
+arbitrary `Forwarded` and `X-Forwarded-For` headers. If your deployment sits
+behind a trusted reverse proxy, normalize the client address at the web-server
+or PHP layer instead of trusting a header directly in WordPress.
+
 == Changelog ==
+
+= 0.1.0-alpha.8 =
+* Added independent fixed-window rate limits for MCP, OAuth authorization,
+  token exchange and dynamic client registration.
+* Added atomic database-backed request accounting with hashed network subjects.
+* Rate-limit storage failures fail closed and exhausted OAuth budgets return
+  Retry-After plus rate-limit response headers.
+* Untrusted forwarding headers are ignored when selecting the rate-limit subject.
+* Database schema advanced to v5 and uninstall cleanup includes rate-limit data.
 
 = 0.1.0-alpha.7 =
 * Added out-of-band admin confirmation for destructive and privileged MCP tools.

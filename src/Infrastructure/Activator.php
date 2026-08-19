@@ -14,6 +14,7 @@ use WPNerve\Audit\AuditRepository;
 use WPNerve\OAuth\OAuthStore;
 use WPNerve\Security\Confirmation\WpdbRepository as ConfirmationRepository;
 use WPNerve\Security\Idempotency\WpdbRepository;
+use WPNerve\Security\RateLimit\WpdbRepository as RateLimitRepository;
 
 final class Activator
 {
@@ -43,6 +44,7 @@ final class Activator
         OAuthStore::installSchema();
         WpdbRepository::installSchema();
         ConfirmationRepository::installSchema();
-        update_option('wp_nerve_schema_version', '4', false);
+        RateLimitRepository::installSchema();
+        update_option('wp_nerve_schema_version', '5', false);
     }
 }

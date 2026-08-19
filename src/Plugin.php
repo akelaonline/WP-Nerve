@@ -26,6 +26,9 @@ use WPNerve\Security\Idempotency\CanonicalJson;
 use WPNerve\Security\Idempotency\IdempotentToolRegistry;
 use WPNerve\Security\Idempotency\Service as IdempotencyService;
 use WPNerve\Security\Idempotency\WpdbRepository;
+use WPNerve\Security\RateLimit\ClientAddress;
+use WPNerve\Security\RateLimit\RateLimiter;
+use WPNerve\Security\RateLimit\WpdbRepository as RateLimitRepository;
 use WPNerve\Transport\HttpTransport;
 
 final class Plugin
@@ -56,12 +59,13 @@ final class Plugin
             return;
         }
 
-        if ('4' !== get_option('wp_nerve_schema_version')) {
+        if ('5' !== get_option('wp_nerve_schema_version')) {
             AuditRepository::installSchema();
             OAuthStore::installSchema();
             WpdbRepository::installSchema();
             ConfirmationRepository::installSchema();
-            update_option('wp_nerve_schema_version', '4', false);
+            RateLimitRepository::installSchema();
+            update_option('wp_nerve_schema_version', '5', false);
         }
 
         $abilities              = new AbilityRegistrar();
@@ -75,9 +79,16 @@ final class Plugin
         $confirmation           = new ConfirmationService($confirmationRepository, $canonicalJson);
         $registry               = new ConfirmedToolRegistry($idempotentRegistry, $confirmation);
         $handler                = new JsonRpcHandler($registry, $audit);
-        $transport              = new HttpTransport(new RequestValidator(), $handler);
+        $rateLimiter            = new RateLimiter(new RateLimitRepository());
+        $clientAddress          = new ClientAddress();
+        $transport              = new HttpTransport(
+            new RequestValidator(),
+            $handler,
+            $rateLimiter,
+            $clientAddress
+        );
         $admin                  = new AdminPage(null, $confirmationRepository);
-        $oauth                  = new OAuthServer(new OAuthStore());
+        $oauth                  = new OAuthServer(new OAuthStore(), $rateLimiter, $clientAddress);
 
         add_action('init', array($this, 'loadTextdomain'));
         add_action('wp_abilities_api_categories_init', array($abilities, 'registerCategory'));

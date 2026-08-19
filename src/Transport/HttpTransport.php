@@ -18,6 +18,9 @@ use WPNerve\Protocol\DispatchResult;
 use WPNerve\Protocol\JsonRpcHandler;
 use WPNerve\Protocol\ProtocolError;
 use WPNerve\Protocol\RequestValidator;
+use WPNerve\Security\RateLimit\ClientAddress;
+use WPNerve\Security\RateLimit\RateLimiter;
+use WPNerve\Security\RateLimit\Result as RateLimitResult;
 
 final class HttpTransport
 {
@@ -28,7 +31,9 @@ final class HttpTransport
 
     public function __construct(
         private readonly RequestValidator $validator,
-        private readonly JsonRpcHandler $handler
+        private readonly JsonRpcHandler $handler,
+        private readonly ?RateLimiter $rateLimiter = null,
+        private readonly ?ClientAddress $clientAddress = null
     ) {
     }
 
@@ -56,6 +61,14 @@ final class HttpTransport
     {
         $this->credentialId = '';
 
+        if (null !== $this->rateLimiter && null !== $this->clientAddress) {
+            $decision = $this->rateLimiter->consume('mcp', $this->clientAddress->resolve());
+
+            if (! $decision->available || ! $decision->allowed) {
+                return $this->rateLimitError($decision);
+            }
+        }
+
         $origin = $request->get_header('origin');
 
         if (is_string($origin) && '' !== $origin && ! $this->isAllowedOrigin($origin)) {
@@ -69,7 +82,7 @@ final class HttpTransport
         $authorization = $request->get_header('authorization');
 
         if (is_string($authorization) && str_starts_with(strtolower($authorization), 'bearer ')) {
-            $token  = trim(substr($authorization, 7));
+            $token    = trim(substr($authorization, 7));
             $identity = (new OAuthStore())->validateAccessTokenIdentity($token);
 
             if (null === $identity) {
@@ -224,6 +237,27 @@ final class HttpTransport
         $response->header('Vary', 'Authorization, MCP-Protocol-Version, Mcp-Method, Mcp-Name');
 
         return $response;
+    }
+
+    private function rateLimitError(RateLimitResult $decision): WP_Error
+    {
+        $status = $decision->available ? 429 : 503;
+        $code   = $decision->available ? 'wp_nerve_rate_limited' : 'wp_nerve_rate_limit_unavailable';
+        $message = $decision->available
+            ? __('Too many WPNerve requests. Retry after the current rate-limit window.', 'wp-nerve')
+            : __('WPNerve cannot verify the rate-limit budget right now.', 'wp-nerve');
+
+        return new WP_Error(
+            $code,
+            $message,
+            array(
+                'status'      => $status,
+                'retry_after' => $decision->retryAfter($this->rateLimiter?->now() ?? time()),
+                'limit'       => $decision->limit,
+                'remaining'   => $decision->remaining,
+                'reset_at'    => $decision->resetAt,
+            )
+        );
     }
 
     /**

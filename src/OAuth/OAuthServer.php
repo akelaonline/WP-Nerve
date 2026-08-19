@@ -15,16 +15,21 @@ declare(strict_types=1);
 
 namespace WPNerve\OAuth;
 
-use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
+use WPNerve\Security\RateLimit\ClientAddress;
+use WPNerve\Security\RateLimit\RateLimiter;
+use WPNerve\Security\RateLimit\Result as RateLimitResult;
 
 final class OAuthServer
 {
     private const NONCE_ACTION = 'wp_nerve_oauth_consent';
 
-    public function __construct(private readonly OAuthStore $store)
-    {
+    public function __construct(
+        private readonly OAuthStore $store,
+        private readonly ?RateLimiter $rateLimiter = null,
+        private readonly ?ClientAddress $clientAddress = null
+    ) {
     }
 
     public function registerRoutes(): void
@@ -72,11 +77,17 @@ final class OAuthServer
 
     public function authorize(WP_REST_Request $request): WP_REST_Response
     {
-        $clientId     = sanitize_text_field((string) $request->get_param('client_id'));
-        $redirectUri  = sanitize_text_field((string) $request->get_param('redirect_uri'));
-        $state        = sanitize_text_field((string) $request->get_param('state'));
-        $responseType = (string) $request->get_param('response_type');
-        $challenge    = sanitize_text_field((string) $request->get_param('code_challenge'));
+        $limited = $this->guardRateLimit('oauth_authorize');
+
+        if (null !== $limited) {
+            return $limited;
+        }
+
+        $clientId        = sanitize_text_field((string) $request->get_param('client_id'));
+        $redirectUri     = sanitize_text_field((string) $request->get_param('redirect_uri'));
+        $state           = sanitize_text_field((string) $request->get_param('state'));
+        $responseType    = (string) $request->get_param('response_type');
+        $challenge       = sanitize_text_field((string) $request->get_param('code_challenge'));
         $challengeMethod = (string) $request->get_param('code_challenge_method');
 
         $client = $this->store->getClient($clientId);
@@ -137,6 +148,12 @@ final class OAuthServer
 
     public function token(WP_REST_Request $request): WP_REST_Response
     {
+        $limited = $this->guardRateLimit('oauth_token');
+
+        if (null !== $limited) {
+            return $limited;
+        }
+
         $grantType = (string) $request->get_param('grant_type');
 
         if ('authorization_code' === $grantType) {
@@ -148,13 +165,22 @@ final class OAuthServer
         }
 
         return new WP_REST_Response(
-            array('error' => 'unsupported_grant_type', 'error_description' => 'Only authorization_code and refresh_token are supported.'),
+            array(
+                'error'             => 'unsupported_grant_type',
+                'error_description' => 'Only authorization_code and refresh_token are supported.',
+            ),
             400
         );
     }
 
     public function registerClient(WP_REST_Request $request): WP_REST_Response
     {
+        $limited = $this->guardRateLimit('oauth_register');
+
+        if (null !== $limited) {
+            return $limited;
+        }
+
         $body = $request->get_json_params();
 
         if (! is_array($body) || empty($body['client_name']) || empty($body['redirect_uris'])) {
@@ -173,13 +199,13 @@ final class OAuthServer
 
         return new WP_REST_Response(
             array(
-                'client_id'                => $clientId,
-                'client_name'              => (string) $body['client_name'],
-                'redirect_uris'            => $body['redirect_uris'],
-                'grant_types'              => array('authorization_code', 'refresh_token'),
+                'client_id'                  => $clientId,
+                'client_name'                => (string) $body['client_name'],
+                'redirect_uris'              => $body['redirect_uris'],
+                'grant_types'                => array('authorization_code', 'refresh_token'),
                 'token_endpoint_auth_method' => 'none',
-                'authorization_endpoint'   => $base . '/authorize',
-                'token_endpoint'           => $base . '/token',
+                'authorization_endpoint'     => $base . '/authorize',
+                'token_endpoint'             => $base . '/token',
             ),
             201
         );
@@ -219,10 +245,10 @@ final class OAuthServer
 
     private function tokenFromCode(WP_REST_Request $request): WP_REST_Response
     {
-        $clientId     = sanitize_text_field((string) $request->get_param('client_id'));
-        $code         = (string) $request->get_param('code');
-        $verifier     = (string) $request->get_param('code_verifier');
-        $redirectUri  = sanitize_text_field((string) $request->get_param('redirect_uri'));
+        $clientId    = sanitize_text_field((string) $request->get_param('client_id'));
+        $code        = (string) $request->get_param('code');
+        $verifier    = (string) $request->get_param('code_verifier');
+        $redirectUri = sanitize_text_field((string) $request->get_param('redirect_uri'));
 
         $record = $this->store->consumeAuthorizationCode($code);
 
@@ -287,6 +313,8 @@ final class OAuthServer
 
     private function redirect(string $url, WP_REST_Request $request): WP_REST_Response
     {
+        unset($request);
+
         $response = new WP_REST_Response(null, 302);
         $response->header('Location', $url);
 
@@ -295,7 +323,6 @@ final class OAuthServer
 
     /**
      * @param array<string, mixed> $client
-     * @return WP_REST_Response
      */
     private function consentPage(array $client, string $redirectUri, string $state, string $challenge): WP_REST_Response
     {
@@ -332,6 +359,43 @@ final class OAuthServer
 
         $response = new WP_REST_Response(null, 302);
         $response->header('Location', $redirectUri . $separator . http_build_query($params));
+
+        return $response;
+    }
+
+    private function guardRateLimit(string $bucket): ?WP_REST_Response
+    {
+        if (null === $this->rateLimiter || null === $this->clientAddress) {
+            return null;
+        }
+
+        $decision = $this->rateLimiter->consume($bucket, $this->clientAddress->resolve());
+
+        if ($decision->available && $decision->allowed) {
+            return null;
+        }
+
+        return $this->rateLimitResponse($decision);
+    }
+
+    private function rateLimitResponse(RateLimitResult $decision): WP_REST_Response
+    {
+        $status = $decision->available ? 429 : 503;
+        $error  = $decision->available ? 'slow_down' : 'temporarily_unavailable';
+        $description = $decision->available
+            ? 'Too many requests. Retry after the current rate-limit window.'
+            : 'The authorization server cannot verify its rate-limit budget.';
+
+        $response = new WP_REST_Response(
+            array('error' => $error, 'error_description' => $description),
+            $status
+        );
+        $response->header('Cache-Control', 'no-store');
+        $response->header('Pragma', 'no-cache');
+        $response->header('Retry-After', (string) $decision->retryAfter($this->rateLimiter?->now() ?? time()));
+        $response->header('X-RateLimit-Limit', (string) $decision->limit);
+        $response->header('X-RateLimit-Remaining', (string) $decision->remaining);
+        $response->header('X-RateLimit-Reset', (string) $decision->resetAt);
 
         return $response;
     }
