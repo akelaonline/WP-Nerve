@@ -158,7 +158,16 @@ final class PluginArchiveInspector
                 $entries[] = $normalized;
             }
 
+            $installedRoots = $this->installedPluginRoots();
+
             foreach ($roots as $root) {
+                if (isset($installedRoots[strtolower($root)])) {
+                    return new WP_Error(
+                        'wp_nerve_plugin_exists',
+                        __('The plugin archive would replace or extend an installed plugin path.', 'wp-nerve')
+                    );
+                }
+
                 $target = trailingslashit($pluginsDir) . $root;
 
                 if (file_exists($target) || is_link($target)) {
@@ -246,6 +255,28 @@ final class PluginArchiveInspector
                 $wp_filesystem->delete($directory, false, 'd');
             }
         }
+    }
+
+    /** @return array<string, true> */
+    private function installedPluginRoots(): array
+    {
+        if (! function_exists('get_plugins')) {
+            return array();
+        }
+
+        $roots = array();
+
+        foreach (array_keys(get_plugins()) as $plugin) {
+            $plugin = str_replace('\\', '/', (string) $plugin);
+            $parts  = explode('/', $plugin);
+            $root   = (string) ($parts[0] ?? '');
+
+            if ('' !== $root) {
+                $roots[strtolower($root)] = true;
+            }
+        }
+
+        return $roots;
     }
 
     private function normalizeEntryName(string $name): ?string
