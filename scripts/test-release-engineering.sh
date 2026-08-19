@@ -14,6 +14,7 @@ fail() {
 
 [[ "${RELEASE_TEST}" == "1" ]] || fail "set WP_NERVE_RELEASE_TEST=1 to confirm this is a disposable release-test site"
 command -v wp >/dev/null 2>&1 || fail "wp (WP-CLI) is required"
+command -v python3 >/dev/null 2>&1 || fail "python3 is required"
 [[ -n "${WP_PATH}" ]] || fail "set WP_PATH to a disposable/staging WordPress installation"
 [[ -n "${CANDIDATE_ZIP}" && -f "${CANDIDATE_ZIP}" ]] || fail "set CANDIDATE_ZIP to the built release ZIP"
 [[ -z "${PREVIOUS_ZIP}" || -f "${PREVIOUS_ZIP}" ]] || fail "PREVIOUS_ZIP does not exist"
@@ -24,6 +25,21 @@ environment="$(wp --path="${WP_PATH}" eval 'echo wp_get_environment_type();')"
 if [[ "${environment}" == "production" && "${ALLOW_PRODUCTION}" != "1" ]]; then
   fail "refusing release lifecycle tests on a production environment"
 fi
+
+wp --path="${WP_PATH}" eval '
+$v = (string) get_bloginfo("version");
+$affected69 = version_compare($v, "6.9.0", ">=") && version_compare($v, "6.9.5", "<");
+$affected70 = version_compare($v, "7.0.0", ">=") && version_compare($v, "7.0.2", "<");
+if (version_compare($v, "6.9", "<") || $affected69 || $affected70) {
+    fwrite(STDERR, "release evidence requires a patched supported WordPress baseline; found {$v}\n");
+    exit(4);
+}
+if (version_compare(PHP_VERSION, "8.1", "<")) {
+    fwrite(STDERR, "release evidence requires PHP 8.1+; found " . PHP_VERSION . "\n");
+    exit(5);
+}
+echo "PASS: patched runtime WordPress {$v}, PHP " . PHP_VERSION . "\n";
+'
 
 if wp --path="${WP_PATH}" plugin is-installed wp-nerve >/dev/null 2>&1; then
   fail "WPNerve is already installed; use a fresh disposable site so lifecycle evidence is unambiguous"
