@@ -125,6 +125,33 @@ final class SurfaceGuard
         return is_array($keys) && in_array($key, $this->normalizeKeys($keys), true);
     }
 
+    public function valueIsSafe(mixed $value, int $depth = 0): bool
+    {
+        if ($depth > 4) {
+            return false;
+        }
+
+        if (null === $value || is_bool($value) || is_int($value) || is_float($value)) {
+            return true;
+        }
+
+        if (is_string($value)) {
+            return strlen($value) <= 65536;
+        }
+
+        if (! is_array($value) || count($value) > 100) {
+            return false;
+        }
+
+        foreach ($value as $key => $item) {
+            if ((! is_int($key) && ! is_string($key)) || ! $this->valueIsSafe($item, $depth + 1)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     public function redactLog(string $content): string
     {
         $patterns = array(
