@@ -15,6 +15,9 @@ use WP_User;
 
 final class UserAbilities extends AbstractAbilityRegistrar
 {
+    /** @var array<int, string> */
+    private const ALLOWED_ROLES = array('subscriber', 'contributor', 'author', 'editor', 'administrator');
+
     public function register(): void
     {
         $this->registerListUsers();
@@ -82,12 +85,15 @@ final class UserAbilities extends AbstractAbilityRegistrar
 
         $role = (string) ($input['role'] ?? 'subscriber');
 
-        if (! in_array($role, array('subscriber', 'contributor', 'author', 'editor', 'administrator'), true)) {
+        if (! in_array($role, self::ALLOWED_ROLES, true)) {
             return new WP_Error('wp_nerve_invalid_role', __('The requested role is not allowed.', 'wp-nerve'));
         }
 
-        if ('administrator' === $role && ! current_user_can('promote_users')) {
-            return new WP_Error('wp_nerve_forbidden', __('Creating administrators requires the promote_users capability.', 'wp-nerve'));
+        if ('administrator' === $role && ! $this->administratorManagementAllowed()) {
+            return new WP_Error(
+                'wp_nerve_protected_role',
+                __('Administrator creation is disabled by WPNerve unless separately opted in.', 'wp-nerve')
+            );
         }
 
         $userdata = array(
@@ -140,23 +146,70 @@ final class UserAbilities extends AbstractAbilityRegistrar
             return new WP_Error('wp_nerve_forbidden', __('You are not allowed to edit this user.', 'wp-nerve'));
         }
 
-        $userdata = array('ID' => $user->ID);
+        if ($this->isAdministrator($user) && ! $this->administratorManagementAllowed()) {
+            return new WP_Error(
+                'wp_nerve_protected_user',
+                __('Administrator accounts are protected from WPNerve changes by default.', 'wp-nerve')
+            );
+        }
 
-        foreach (array('display_name', 'user_email', 'first_name', 'last_name') as $field) {
+        $sensitiveSelfChange = get_current_user_id() === $user->ID
+            && (array_key_exists('role', $input) || array_key_exists('password', $input) || array_key_exists('email', $input));
+
+        if ($sensitiveSelfChange) {
+            return new WP_Error(
+                'wp_nerve_self_user_change',
+                __('WPNerve cannot change the authenticated agent user role, password, or email.', 'wp-nerve')
+            );
+        }
+
+        if (array_key_exists('password', $input) && '' !== (string) $input['password'] && ! $this->passwordUpdatesAllowed()) {
+            return new WP_Error(
+                'wp_nerve_password_change_disabled',
+                __('Password changes are disabled by WPNerve unless separately opted in.', 'wp-nerve')
+            );
+        }
+
+        if (array_key_exists('email', $input) && ! $this->emailUpdatesAllowed()) {
+            return new WP_Error(
+                'wp_nerve_email_change_disabled',
+                __('Email changes are disabled by WPNerve unless separately opted in.', 'wp-nerve')
+            );
+        }
+
+        $userdata = array('ID' => $user->ID);
+        $previous = array(
+            'display_name' => $user->display_name,
+            'email'        => $user->user_email,
+            'roles'        => array_values($user->roles),
+        );
+
+        foreach (array('display_name', 'first_name', 'last_name') as $field) {
             if (array_key_exists($field, $input)) {
                 $userdata[$field] = (string) $input[$field];
             }
         }
 
+        if (array_key_exists('email', $input)) {
+            $userdata['user_email'] = (string) $input['email'];
+        }
+
         if (array_key_exists('role', $input)) {
             $role = (string) $input['role'];
 
-            if (! in_array($role, array('subscriber', 'contributor', 'author', 'editor', 'administrator'), true)) {
+            if (! in_array($role, self::ALLOWED_ROLES, true)) {
                 return new WP_Error('wp_nerve_invalid_role', __('The requested role is not allowed.', 'wp-nerve'));
             }
 
             if (! current_user_can('promote_users')) {
                 return new WP_Error('wp_nerve_forbidden', __('Changing roles requires the promote_users capability.', 'wp-nerve'));
+            }
+
+            if ('administrator' === $role && ! $this->administratorManagementAllowed()) {
+                return new WP_Error(
+                    'wp_nerve_protected_role',
+                    __('Promoting users to administrator is disabled unless separately opted in.', 'wp-nerve')
+                );
             }
 
             $userdata['role'] = $role;
@@ -173,8 +226,13 @@ final class UserAbilities extends AbstractAbilityRegistrar
         }
 
         $updated = get_userdata($user->ID);
+        $item    = $updated instanceof WP_User ? $this->userItem($updated, true) : $this->userItem($user, true);
+        $item['recovery'] = array(
+            'previous' => $previous,
+            'note'     => __('Restore the previous profile fields and role to undo. Password changes are not recoverable.', 'wp-nerve'),
+        );
 
-        return $updated instanceof WP_User ? $this->userItem($updated, true) : $this->userItem($user, true);
+        return $item;
     }
 
     /**
@@ -191,11 +249,29 @@ final class UserAbilities extends AbstractAbilityRegistrar
             return new WP_Error('wp_nerve_user_not_found', __('The requested user does not exist.', 'wp-nerve'));
         }
 
+        if (get_current_user_id() === $user->ID) {
+            return new WP_Error(
+                'wp_nerve_self_user_delete',
+                __('WPNerve cannot delete the authenticated agent user.', 'wp-nerve')
+            );
+        }
+
+        if ($this->isAdministrator($user) && ! $this->administratorManagementAllowed()) {
+            return new WP_Error(
+                'wp_nerve_protected_user',
+                __('Administrator accounts are protected from WPNerve deletion by default.', 'wp-nerve')
+            );
+        }
+
         if (! current_user_can('delete_user', $user->ID)) {
             return new WP_Error('wp_nerve_forbidden', __('You are not allowed to delete this user.', 'wp-nerve'));
         }
 
         $reassign = (int) ($input['reassign'] ?? 0);
+
+        if ($user->ID === $reassign) {
+            return new WP_Error('wp_nerve_invalid_reassign', __('Content cannot be reassigned to the user being deleted.', 'wp-nerve'));
+        }
 
         if (0 !== $reassign && ! get_userdata($reassign) instanceof WP_User) {
             return new WP_Error('wp_nerve_invalid_reassign', __('The reassign target user does not exist.', 'wp-nerve'));
@@ -272,7 +348,7 @@ final class UserAbilities extends AbstractAbilityRegistrar
         $this->registerAbility(
             'wp-nerve/create-user',
             __('Create user', 'wp-nerve'),
-            __('Creates a user. Administrator creation requires promote_users. Undo by deleting the user.', 'wp-nerve'),
+            __('Creates a user. Administrator creation requires a separate WPNerve opt-in. Undo by deleting the user.', 'wp-nerve'),
             array(
                 '$schema'              => 'https://json-schema.org/draft/2020-12/schema',
                 'type'                 => 'object',
@@ -282,10 +358,10 @@ final class UserAbilities extends AbstractAbilityRegistrar
                     'username'     => array('type' => 'string', 'minLength' => 1, 'maxLength' => 60),
                     'email'        => array('type' => 'string', 'format' => 'email'),
                     'display_name' => array('type' => 'string', 'maxLength' => 250),
-                    'password'     => array('type' => 'string', 'minLength' => 8, 'maxLength' => 100),
+                    'password'     => array('type' => 'string', 'minLength' => 12, 'maxLength' => 100),
                     'role'         => array(
                         'type'    => 'string',
-                        'enum'    => array('subscriber', 'contributor', 'author', 'editor', 'administrator'),
+                        'enum'    => self::ALLOWED_ROLES,
                         'default' => 'subscriber',
                     ),
                 ),
@@ -303,7 +379,7 @@ final class UserAbilities extends AbstractAbilityRegistrar
         $this->registerAbility(
             'wp-nerve/update-user',
             __('Update user', 'wp-nerve'),
-            __('Updates a user profile or role. Role changes require promote_users.', 'wp-nerve'),
+            __('Updates an allowed user profile or role. Credential-affecting fields have separate security opt-ins.', 'wp-nerve'),
             array(
                 '$schema'              => 'https://json-schema.org/draft/2020-12/schema',
                 'type'                 => 'object',
@@ -317,9 +393,9 @@ final class UserAbilities extends AbstractAbilityRegistrar
                     'last_name'    => array('type' => 'string', 'maxLength' => 100),
                     'role'         => array(
                         'type' => 'string',
-                        'enum' => array('subscriber', 'contributor', 'author', 'editor', 'administrator'),
+                        'enum' => self::ALLOWED_ROLES,
                     ),
-                    'password' => array('type' => 'string', 'minLength' => 8, 'maxLength' => 100),
+                    'password' => array('type' => 'string', 'minLength' => 12, 'maxLength' => 100),
                 ),
             ),
             $this->userResultSchema(),
@@ -335,7 +411,7 @@ final class UserAbilities extends AbstractAbilityRegistrar
         $this->registerAbility(
             'wp-nerve/delete-user',
             __('Delete user', 'wp-nerve'),
-            __('Deletes a user, optionally reassigning their content. Cannot be undone.', 'wp-nerve'),
+            __('Deletes a non-protected user, optionally reassigning content. Cannot be undone.', 'wp-nerve'),
             array(
                 '$schema'              => 'https://json-schema.org/draft/2020-12/schema',
                 'type'                 => 'object',
@@ -364,14 +440,46 @@ final class UserAbilities extends AbstractAbilityRegistrar
         );
     }
 
+    private function administratorManagementAllowed(): bool
+    {
+        /**
+         * Filters whether WPNerve may create, modify or delete administrator accounts.
+         *
+         * This is a separate opt-in from enabling the privileged/destructive risk
+         * classes and the individual user ability.
+         *
+         * @param bool $allowed Whether administrator account management is allowed.
+         */
+        $allowed = apply_filters('wp_nerve_allow_administrator_user_management', false);
+
+        return true === $allowed && current_user_can('promote_users');
+    }
+
+    private function passwordUpdatesAllowed(): bool
+    {
+        /** @param bool $allowed Whether WPNerve may change existing user passwords. */
+        return true === apply_filters('wp_nerve_allow_user_password_updates', false);
+    }
+
+    private function emailUpdatesAllowed(): bool
+    {
+        /** @param bool $allowed Whether WPNerve may change existing user email addresses. */
+        return true === apply_filters('wp_nerve_allow_user_email_updates', false);
+    }
+
+    private function isAdministrator(WP_User $user): bool
+    {
+        return in_array('administrator', array_values($user->roles), true);
+    }
+
     /** @return array<string, mixed> */
     private function userItem(WP_User $user, bool $withEmail): array
     {
         $item = array(
-            'id'       => $user->ID,
-            'username' => $user->user_login,
-            'name'     => $user->display_name,
-            'roles'    => array_values($user->roles),
+            'id'         => $user->ID,
+            'username'   => $user->user_login,
+            'name'       => $user->display_name,
+            'roles'      => array_values($user->roles),
             'registered' => $user->user_registered,
         );
 
@@ -395,7 +503,7 @@ final class UserAbilities extends AbstractAbilityRegistrar
         );
 
         if ($withEmail) {
-            $required[] = 'email';
+            $required[]    = 'email';
             $props['email'] = array('type' => 'string', 'format' => 'email');
         }
 
