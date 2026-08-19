@@ -8,6 +8,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PLATFORM_GATE="${ROOT_DIR}/tests/real-wordpress/platform-security.php"
 SINGLE_GATE="${ROOT_DIR}/tests/real-wordpress/single-site.php"
 MULTISITE_GATE="${ROOT_DIR}/tests/real-wordpress/multisite.php"
+MULTISITE_RETENTION_GATE="${ROOT_DIR}/tests/real-wordpress/multisite-retention.php"
 
 if ! command -v wp >/dev/null 2>&1; then
   echo "ERROR: wp (WP-CLI) is required." >&2
@@ -61,19 +62,22 @@ case "${MODE}" in
       [[ -n "${site_url}" ]] && SITE_URLS[${#SITE_URLS[@]}]="${site_url}"
     done < <(wp --path="${WP_PATH}" site list --field=url | head -n 10)
 
-    if [[ "${#SITE_URLS[@]}" -eq 0 ]]; then
-      echo "ERROR: no Multisite URLs found." >&2
+    if [[ "${#SITE_URLS[@]}" -lt 2 ]]; then
+      echo "ERROR: Multisite evidence requires at least two site URLs." >&2
       exit 2
     fi
 
     # Each URL runs in a fresh WP-CLI process. This matters because WPNerve's
-    # composition root is intentionally boot-once per PHP request.
+    # composition root is intentionally boot-once per PHP request, and it also
+    # ensures every tested blog prefix receives its schema migration before the
+    # cross-prefix retention isolation probe runs.
     for site_url in "${SITE_URLS[@]}"; do
       run_gate "${site_url}" "${PLATFORM_GATE}"
       run_gate "${site_url}" "${SINGLE_GATE}"
     done
 
     run_gate "${SITE_URLS[0]}" "${MULTISITE_GATE}"
+    run_gate "${SITE_URLS[0]}" "${MULTISITE_RETENTION_GATE}"
     ;;
 
   *)
