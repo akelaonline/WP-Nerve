@@ -49,6 +49,20 @@ final class PluginArchiveInspectorTest extends TestCase
         self::assertGreaterThan(0, $result['uncompressed_bytes']);
     }
 
+    public function testSingleFilePluginArchiveIsAccepted(): void
+    {
+        $this->requireZip();
+        $pluginsDir = $this->directory('plugins');
+        $archive = $this->archive(array(
+            'hello-custom.php' => '<?php /* Plugin Name: Hello Custom */',
+        ));
+
+        $result = (new PluginArchiveInspector())->inspect($archive, $pluginsDir);
+
+        self::assertIsArray($result);
+        self::assertSame(array('hello-custom.php'), $result['roots']);
+    }
+
     public function testArchiveCannotWriteIntoExistingFilesystemRoot(): void
     {
         $this->requireZip();
@@ -91,6 +105,33 @@ final class PluginArchiveInspectorTest extends TestCase
         self::assertSame('wp_nerve_archive_symlink', $result->get_error_code());
     }
 
+    public function testUnixSpecialFileEntryIsRejected(): void
+    {
+        $this->requireZip();
+        $pluginsDir = $this->directory('plugins');
+        $archive    = $this->path('fifo.zip');
+        $zip        = new ZipArchive();
+
+        self::assertTrue($zip->open($archive, ZipArchive::CREATE | ZipArchive::OVERWRITE));
+        self::assertTrue($zip->addFromString('fixture/fixture.php', '<?php /* Plugin Name: Fixture */'));
+        self::assertTrue($zip->addFromString('fixture/pipe', ''));
+
+        $unixFifoMode = 0010000 | 0600;
+        self::assertTrue(
+            $zip->setExternalAttributesName(
+                'fixture/pipe',
+                ZipArchive::OPSYS_UNIX,
+                $unixFifoMode << 16
+            )
+        );
+        self::assertTrue($zip->close());
+
+        $result = (new PluginArchiveInspector())->inspect($archive, $pluginsDir);
+
+        self::assertTrue(is_wp_error($result));
+        self::assertSame('wp_nerve_archive_special_file', $result->get_error_code());
+    }
+
     public function testBackslashTraversalIsRejectedAfterNormalization(): void
     {
         $this->requireZip();
@@ -101,6 +142,78 @@ final class PluginArchiveInspectorTest extends TestCase
 
         self::assertTrue(is_wp_error($result));
         self::assertSame('wp_nerve_unsafe_archive_path', $result->get_error_code());
+    }
+
+    public function testAbsoluteAndDriveQualifiedPathsAreRejected(): void
+    {
+        $this->requireZip();
+        $pluginsDir = $this->directory('plugins');
+
+        foreach (array('/escape.php', 'C:/escape.php') as $name) {
+            $archive = $this->archive(array($name => '<?php'));
+            $result = (new PluginArchiveInspector())->inspect($archive, $pluginsDir);
+
+            self::assertTrue(is_wp_error($result), $name);
+            self::assertSame('wp_nerve_unsafe_archive_path', $result->get_error_code(), $name);
+        }
+    }
+
+    public function testEmptyAndDotPathSegmentsAreRejected(): void
+    {
+        $this->requireZip();
+        $pluginsDir = $this->directory('plugins');
+
+        foreach (array('fixture//evil.php', 'fixture/./evil.php') as $name) {
+            $archive = $this->archive(array($name => '<?php'));
+            $result = (new PluginArchiveInspector())->inspect($archive, $pluginsDir);
+
+            self::assertTrue(is_wp_error($result), $name);
+            self::assertSame('wp_nerve_unsafe_archive_path', $result->get_error_code(), $name);
+        }
+    }
+
+    public function testArchiveWithMultipleTopLevelRootsIsRejected(): void
+    {
+        $this->requireZip();
+        $pluginsDir = $this->directory('plugins');
+        $archive = $this->archive(array(
+            'plugin-a/plugin-a.php' => '<?php /* Plugin Name: A */',
+            'plugin-b/plugin-b.php' => '<?php /* Plugin Name: B */',
+        ));
+
+        $result = (new PluginArchiveInspector())->inspect($archive, $pluginsDir);
+
+        self::assertTrue(is_wp_error($result));
+        self::assertSame('wp_nerve_archive_root_count', $result->get_error_code());
+    }
+
+    public function testArchiveWithoutPhpPluginFileIsRejected(): void
+    {
+        $this->requireZip();
+        $pluginsDir = $this->directory('plugins');
+        $archive = $this->archive(array(
+            'fixture/readme.txt' => 'not a plugin',
+        ));
+
+        $result = (new PluginArchiveInspector())->inspect($archive, $pluginsDir);
+
+        self::assertTrue(is_wp_error($result));
+        self::assertSame('wp_nerve_archive_no_plugin_file', $result->get_error_code());
+    }
+
+    public function testUnicodeFilenameInsideSinglePluginRootIsAccepted(): void
+    {
+        $this->requireZip();
+        $pluginsDir = $this->directory('plugins');
+        $archive = $this->archive(array(
+            'fixture/fixture.php'      => '<?php /* Plugin Name: Fixture */',
+            'fixture/documentación.md' => 'ok',
+        ));
+
+        $result = (new PluginArchiveInspector())->inspect($archive, $pluginsDir);
+
+        self::assertIsArray($result);
+        self::assertSame(array('fixture'), $result['roots']);
     }
 
     /** @param array<string, string> $files */
