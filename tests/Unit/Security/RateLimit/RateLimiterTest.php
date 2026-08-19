@@ -98,39 +98,24 @@ final class RateLimiterTest extends TestCase
 
     public function testClientAddressIgnoresUntrustedForwardingHeaders(): void
     {
-        $previousRemote    = $_SERVER['REMOTE_ADDR'] ?? null;
-        $previousForwarded = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? null;
-
-        $_SERVER['REMOTE_ADDR']         = '198.51.100.20';
+        $_SERVER['REMOTE_ADDR']          = '198.51.100.20';
         $_SERVER['HTTP_X_FORWARDED_FOR'] = '203.0.113.200';
 
         try {
             self::assertSame('198.51.100.20', (new ClientAddress())->resolve());
         } finally {
-            $this->restoreServerValue('REMOTE_ADDR', $previousRemote);
-            $this->restoreServerValue('HTTP_X_FORWARDED_FOR', $previousForwarded);
+            unset($_SERVER['REMOTE_ADDR'], $_SERVER['HTTP_X_FORWARDED_FOR']);
         }
     }
 
     public function testClientAddressFallsBackClosedForInvalidPeer(): void
     {
-        $previousRemote = $_SERVER['REMOTE_ADDR'] ?? null;
         $_SERVER['REMOTE_ADDR'] = 'not-an-ip';
 
         try {
             self::assertSame('unknown', (new ClientAddress())->resolve());
         } finally {
-            $this->restoreServerValue('REMOTE_ADDR', $previousRemote);
+            unset($_SERVER['REMOTE_ADDR']);
         }
-    }
-
-    private function restoreServerValue(string $key, mixed $value): void
-    {
-        if (null === $value) {
-            unset($_SERVER[$key]);
-            return;
-        }
-
-        $_SERVER[$key] = $value;
     }
 }
