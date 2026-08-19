@@ -17,7 +17,7 @@ use WP_Error;
 
 final class OAuthStore
 {
-    public const SCHEMA_VERSION = 2;
+    public const SCHEMA_VERSION = 3;
 
     /**
      * @param array<string, mixed> $client
