@@ -53,8 +53,8 @@ final class EntryPointTest extends PHPUnitTestCase
 
         self::assertCount(2, WPState::$actions['rest_api_init']);
         self::assertCount(1, WPState::$actions['wp_abilities_api_init']);
-        self::assertCount(5, WPState::$schemaCalls);
-        self::assertSame('4', WPState::$options['wp_nerve_schema_version']);
+        self::assertCount(6, WPState::$schemaCalls);
+        self::assertSame('5', WPState::$options['wp_nerve_schema_version']);
     }
 
     public function testEntryPointHeaderMatchesVersionConstant(): void
