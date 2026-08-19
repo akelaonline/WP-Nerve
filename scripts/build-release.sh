@@ -7,6 +7,13 @@ cd "${ROOT_DIR}"
 command -v git >/dev/null 2>&1 || { echo "ERROR: git is required." >&2; exit 2; }
 command -v cmp >/dev/null 2>&1 || { echo "ERROR: cmp is required." >&2; exit 2; }
 
+# The package is built from HEAD, so release validation must never read a
+# different uncommitted working tree and accidentally certify another artifact.
+if [[ -n "$(git status --porcelain --untracked-files=normal)" ]]; then
+  echo "ERROR: release builds require a clean worktree; commit or discard local changes first." >&2
+  exit 1
+fi
+
 bash scripts/check-release-contract.sh
 
 version="$(sed -n 's/^ \* Version:[[:space:]]*//p' wp-nerve.php | head -n 1)"
@@ -40,8 +47,11 @@ bash scripts/verify-release-archive.sh "${archive}"
 
 if command -v sha256sum >/dev/null 2>&1; then
   checksum="$(sha256sum "${archive}" | awk '{print $1}')"
-else
+elif command -v shasum >/dev/null 2>&1; then
   checksum="$(shasum -a 256 "${archive}" | awk '{print $1}')"
+else
+  echo "ERROR: sha256sum or shasum is required." >&2
+  exit 2
 fi
 
 printf '%s  %s\n' "${checksum}" "$(basename "${archive}")" > "${checksum_file}"
