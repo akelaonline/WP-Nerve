@@ -42,6 +42,13 @@
     "error": -32600
   },
   {
+    "name": "params-null",
+    "mode": "common",
+    "message": {"jsonrpc": "2.0", "id": 1, "method": "tools/list", "params": null},
+    "headers": {},
+    "error": -32602
+  },
+  {
     "name": "params-string",
     "mode": "common",
     "message": {"jsonrpc": "2.0", "id": 1, "method": "tools/list", "params": "not-an-object"},
