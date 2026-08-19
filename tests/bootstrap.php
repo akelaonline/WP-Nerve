@@ -23,6 +23,7 @@ require_once $fixtures . '/class-wp-rest.php';
 require_once $fixtures . '/class-wp-posts.php';
 require_once $fixtures . '/wp-functions.php';
 require_once $fixtures . '/wp-oauth-functions.php';
+require_once $fixtures . '/wp-filesystem-functions.php';
 
 defined('ABSPATH') || define('ABSPATH', $fixtures . '/');
 defined('WP_CONTENT_DIR') || define('WP_CONTENT_DIR', dirname(__DIR__) . '/wp-content');
