@@ -28,6 +28,12 @@ final class RetentionManager
 
     private const MAX_CONFIRMATION_TTL = 2592000;
 
+    private const DEFAULT_OAUTH_CLIENT_TTL = 0;
+
+    private const MIN_OAUTH_CLIENT_TTL = 86400;
+
+    private const MAX_OAUTH_CLIENT_TTL = 31536000;
+
     private const DEFAULT_BATCH = 200;
 
     private const MAX_BATCH = 1000;
@@ -35,7 +41,19 @@ final class RetentionManager
     /**
      * Runs from WordPress Core's daily wp_scheduled_delete cron event.
      *
-     * @return array{audit: int|false, idempotency: int|false, confirmations: int|false, oauth_tokens: int|false}
+     * OAuth dynamic-client pruning is intentionally opt-in. Registration is
+     * already hard-capped, and silently expiring an otherwise valid client can
+     * break a legitimate long-lived integration. When a site owner configures a
+     * client-retention TTL, only old clients with no unexpired token/code rows
+     * are removed.
+     *
+     * @return array{
+     *     audit: int|false,
+     *     idempotency: int|false,
+     *     confirmations: int|false,
+     *     oauth_tokens: int|false,
+     *     oauth_clients: int|false
+     * }
      */
     public function cleanup(): array
     {
@@ -83,11 +101,31 @@ final class RetentionManager
             )
         );
 
+        $oauthClients = 0;
+        $clientTtl = $this->oauthClientRetentionTtl();
+
+        if ($clientTtl > 0) {
+            $clientCutoff = gmdate('Y-m-d H:i:s', time() - $clientTtl);
+            $oauthClients = $wpdb->query(
+                $wpdb->prepare(
+                    'DELETE FROM %i WHERE created_at <= %s '
+                    . 'AND client_id NOT IN (SELECT client_id FROM %i WHERE expires_at > %s) '
+                    . 'ORDER BY id ASC LIMIT %d',
+                    $wpdb->prefix . 'wp_nerve_oauth_clients',
+                    $clientCutoff,
+                    $wpdb->prefix . 'wp_nerve_oauth_tokens',
+                    $now,
+                    $batch
+                )
+            );
+        }
+
         return array(
             'audit'         => $audit,
             'idempotency'   => $idempotency,
             'confirmations' => $confirmations,
             'oauth_tokens'  => $oauthTokens,
+            'oauth_clients' => $oauthClients,
         );
     }
 
@@ -124,6 +162,26 @@ final class RetentionManager
         }
 
         return max(self::MIN_CONFIRMATION_TTL, min(self::MAX_CONFIRMATION_TTL, $seconds));
+    }
+
+    public function oauthClientRetentionTtl(): int
+    {
+        /**
+         * Filters optional stale dynamic OAuth-client retention in seconds.
+         *
+         * Zero disables automatic client deletion. Any positive value is
+         * clamped to one day through one year. A client is eligible only when it
+         * is older than the cutoff and has no unexpired OAuth token/code rows.
+         *
+         * @param int $seconds Dynamic-client retention lifetime; 0 disables.
+         */
+        $seconds = apply_filters('wp_nerve_oauth_client_retention_ttl', self::DEFAULT_OAUTH_CLIENT_TTL);
+
+        if (! is_int($seconds) || $seconds <= 0) {
+            return self::DEFAULT_OAUTH_CLIENT_TTL;
+        }
+
+        return max(self::MIN_OAUTH_CLIENT_TTL, min(self::MAX_OAUTH_CLIENT_TTL, $seconds));
     }
 
     public function batchSize(): int
