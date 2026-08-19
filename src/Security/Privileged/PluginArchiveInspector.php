@@ -21,6 +21,38 @@ final class PluginArchiveInspector
     private const MAX_UNCOMPRESSED_BYTES = 209715200;
 
     /**
+     * Inspect decoded archive bytes without placing the package in a public uploads directory.
+     *
+     * @return array{entries: array<int, string>, roots: array<int, string>, uncompressed_bytes: int}|WP_Error
+     */
+    public function inspectBytes(string $bits, string $pluginsDir): array|WP_Error
+    {
+        $temporary = tempnam(sys_get_temp_dir(), 'wpnerve-zip-');
+
+        if (false === $temporary) {
+            return new WP_Error(
+                'wp_nerve_archive_inspection_failed',
+                __('WPNerve could not allocate a temporary file for plugin archive inspection.', 'wp-nerve')
+            );
+        }
+
+        try {
+            if (false === file_put_contents($temporary, $bits)) {
+                return new WP_Error(
+                    'wp_nerve_archive_inspection_failed',
+                    __('WPNerve could not stage the plugin archive for inspection.', 'wp-nerve')
+                );
+            }
+
+            return $this->inspect($temporary, $pluginsDir);
+        } finally {
+            if (is_file($temporary)) {
+                unlink($temporary);
+            }
+        }
+    }
+
+    /**
      * @return array{entries: array<int, string>, roots: array<int, string>, uncompressed_bytes: int}|WP_Error
      */
     public function inspect(string $archivePath, string $pluginsDir): array|WP_Error
