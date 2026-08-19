@@ -2,6 +2,32 @@
 
 All notable changes to WPNerve will be documented here.
 
+## [0.1.0-alpha.8] - 2026-08-19
+
+### Added
+
+- Independent fixed-window request budgets for MCP, OAuth authorization, OAuth
+  token exchange and OAuth dynamic client registration.
+- Atomic database-backed rate-limit accounting with a unique
+  bucket/subject/window key.
+- Privacy-preserving network subjects stored only as SHA-256 hashes.
+- Deterministic clock, exhaustion, storage-failure, proxy-spoof and endpoint
+  boundary tests.
+
+### Security
+
+- Rate-limit storage failure fails closed instead of allowing an unmetered
+  request through.
+- WPNerve derives the network subject from the transport peer exposed as
+  `REMOTE_ADDR` and deliberately ignores arbitrary client-supplied `Forwarded`
+  and `X-Forwarded-For` headers.
+- OAuth 429 responses include `Retry-After` and rate-limit metadata.
+
+### Changed
+
+- Database schema version increased to 5 and explicit uninstall cleanup now
+  includes the rate-limit table.
+
 ## [0.1.0-alpha.7] - 2026-08-18
 
 ### Added
