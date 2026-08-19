@@ -62,6 +62,24 @@ final class WPState
 
     public static int $currentUserId = 1;
 
+    public static ?string $applicationPasswordUuid = 'test-application-password';
+
+    public static string $sessionToken = 'test-session-token';
+
+    public static bool $applicationPasswordsAvailable = true;
+
+    /** @var array<int, array<int, array<string, mixed>>> User ID => credentials. */
+    public static array $applicationPasswords = array();
+
+    /** @var array{url: string, args: array<string, mixed>}|null */
+    public static ?array $lastRemotePost = null;
+
+    /** @var array<string, mixed>|\WP_Error */
+    public static mixed $remotePostResponse = array(
+        'response' => array('code' => 200),
+        'body'     => '{"jsonrpc":"2.0","id":"credential-test","result":{"tools":[]}}',
+    );
+
     public static string $currentUserDisplayName = 'Test User';
 
     public static string $wpVersion = '6.9';
@@ -242,6 +260,15 @@ final class WPState
         self::$pluginDirPath = '';
         self::$pluginDirUrl = 'https://example.test/wp-content/plugins/wp-nerve/';
         self::$currentUserId = 1;
+        self::$applicationPasswordUuid = 'test-application-password';
+        self::$sessionToken = 'test-session-token';
+        self::$applicationPasswordsAvailable = true;
+        self::$applicationPasswords = array();
+        self::$lastRemotePost = null;
+        self::$remotePostResponse = array(
+            'response' => array('code' => 200),
+            'body'     => '{"jsonrpc":"2.0","id":"credential-test","result":{"tools":[]}}',
+        );
         self::$currentUserDisplayName = 'Test User';
         self::$wpVersion = '6.9';
         self::$multisite = false;

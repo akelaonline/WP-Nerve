@@ -2,6 +2,69 @@
 
 All notable changes to WPNerve will be documented here.
 
+## [0.1.0-alpha.7] - 2026-08-18
+
+### Added
+
+- Out-of-band WordPress admin approval for every enabled destructive or
+  privileged MCP tool.
+- Five-minute confirmation challenges bound to the authenticated WordPress
+  user, authoritative Application Password, OAuth client or hashed WordPress
+  session identity, tool, canonical arguments and idempotency key.
+- Atomic approve/deny/consume transitions with changed-input, cross-user,
+  cross-credential, expiry and replay protection.
+- MCP tool metadata and error response metadata describing the confirmation
+  requirement, display code, expiry and opaque retry token.
+- Privacy-preserving confirmation storage and a pending-decision table in
+  Tools → WPNerve.
+
+### Fixed
+
+- Admin form handling is now registered on `admin_init` during plugin boot,
+  before WordPress fires the hook. Credential generation, revocation, risk
+  settings and confirmation decisions therefore execute from the real panel.
+
+### Changed
+
+- Database schema version increased to 4 and explicit uninstall cleanup now
+  includes the confirmation table.
+
+## [0.1.0-alpha.6] - 2026-08-18
+
+### Added
+
+- Least-privilege WordPress user selection for MCP credentials.
+- WPNerve-owned Application Password inventory and scoped revocation controls.
+- Copy-ready Basic authentication configuration shown only after generation.
+- Immediate authenticated loopback test against the MCP discovery endpoint.
+
+### Fixed
+
+- Parse the numeric tuple returned by WordPress core when creating an
+  Application Password; the previous associative lookup could display an empty
+  secret after successful creation.
+- Newly generated secrets remain only in the current admin request instead of
+  being persisted in a WordPress transient.
+- The placeholder Claude configuration no longer base64-encodes literal
+  placeholder text.
+
+## [0.1.0-alpha.5] - 2026-08-17
+
+### Added
+
+- Persistent idempotency for every write, destructive, and privileged MCP tool.
+- Atomic claims scoped to the WordPress user, authoritative Application Password
+  or OAuth client identity, tool, key, and canonical argument digest.
+- Safe replay of completed results, conflict detection, and fail-closed handling
+  for concurrent or indeterminate executions.
+- Tool metadata advertising when an idempotency key is required.
+- Dedicated schema v3 idempotency table and security documentation.
+
+### Changed
+
+- Mutating tool calls now require `wp-nerve/idempotencyKey` in request `_meta`.
+- Explicit uninstall cleanup removes audit, idempotency, and OAuth tables.
+
 ## [0.1.0-alpha.4] - 2026-08-17
 
 ### Added

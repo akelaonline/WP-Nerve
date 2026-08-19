@@ -226,6 +226,10 @@ final class OAuthTest extends TestCase
 
         // The access token validates to the consenting user.
         self::assertSame(WPState::$currentUserId, $this->store->validateAccessToken($tokens['access_token']));
+        self::assertSame(
+            array('user_id' => WPState::$currentUserId, 'client_id' => $clientId),
+            $this->store->validateAccessTokenIdentity($tokens['access_token'])
+        );
 
         // Refresh token rotates.
         $refreshRequest = $this->withParams(new WP_REST_Request('POST', '/oauth/token'), array(

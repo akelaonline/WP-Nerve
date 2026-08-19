@@ -2,17 +2,36 @@
 # This file is distributed under the GPL-2.0-or-later license.
 msgid ""
 msgstr ""
-"Project-Id-Version: WPNerve 0.1.0-alpha.4\n"
+"Project-Id-Version: WPNerve 0.1.0-alpha.7\n"
 "Report-Msgid-Bugs-To: https://github.com/akelaonline/WP-Nerve/issues\n"
-"POT-Creation-Date: 2026-08-16 12:00+0000\n"
-"MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-08-18 08:20-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
-"X-Generator: WPNerve pot generator\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: GNU xgettext\n"
+
+#. translators: 1: display name, 2: username.
+#: src/Admin/AdminPage.php:246 src/Admin/AdminPage.php:530
+#, php-format
+msgid "%1$s (%2$s)"
+msgstr ""
+
+#: src/Security/Confirmation/Service.php:150
+msgid "A secure confirmation token could not be generated."
+msgstr ""
+
+#: src/Security/Confirmation/Service.php:55
+msgid "A valid idempotency key is required before requesting confirmation."
+msgstr ""
+
+#: src/Admin/AdminPage.php:298
+msgid "Action"
+msgstr ""
 
 #: src/Abilities/PluginAbilities.php:237
 msgid "Activate plugin"
@@ -34,24 +53,50 @@ msgstr ""
 msgid "Adds an item to a navigation menu. Undo by deleting the item."
 msgstr ""
 
-#: src/OAuth/OAuthServer.php:287
+#: src/Admin/AdminPage.php:179 src/Admin/AdminPage.php:237
+msgid "Agent user"
+msgstr ""
+
+#: src/OAuth/OAuthServer.php:308
 msgid "Allow"
 msgstr ""
 
-#: src/OAuth/OAuthServer.php:298
+#: src/OAuth/OAuthServer.php:320
 msgid "Allow access"
 msgstr ""
 
-#: src/Admin/AdminPage.php:290
-msgid "Application Password created:"
+#: src/Security/Idempotency/Service.php:78
+msgid "An authenticated credential identity is required for mutating tools."
 msgstr ""
 
-#: src/Admin/AdminPage.php:263
-msgid "Application Passwords are not available on this WordPress version."
+#: src/Security/Confirmation/Service.php:64
+msgid ""
+"An authenticated user and credential identity are required for confirmation."
 msgstr ""
 
-#: src/Admin/AdminPage.php:116
+#: src/Security/Idempotency/Service.php:71
+msgid "An authenticated user is required."
+msgstr ""
+
+#: src/Admin/AdminPage.php:478
+msgid "Application Password created and the MCP connection test passed."
+msgstr ""
+
+#: src/Admin/ApplicationPasswords.php:48
+msgid "Application Passwords are not available for the selected user."
+msgstr ""
+
+#: src/Admin/AdminPage.php:218
 msgid "Application password"
+msgstr ""
+
+#: src/Security/Confirmation/Service.php:180
+msgid ""
+"Approval is required in Tools → WPNerve before this operation can execute."
+msgstr ""
+
+#: src/Admin/AdminPage.php:200
+msgid "Approve"
 msgstr ""
 
 #: src/Abilities/MenuAbilities.php:420
@@ -63,55 +108,75 @@ msgid "Assign terms"
 msgstr ""
 
 #: src/Abilities/MenuAbilities.php:421
-msgid "Assigns a menu to a theme location, or removes it with menu_id 0. The previous map is returned for recovery."
+msgid ""
+"Assigns a menu to a theme location, or removes it with menu_id 0. The "
+"previous map is returned for recovery."
 msgstr ""
 
 #: src/Abilities/TaxonomyAbilities.php:287
-msgid "Assigns terms to a post. The previous assignments are returned so they can be restored."
+msgid ""
+"Assigns terms to a post. The previous assignments are returned so they can "
+"be restored."
 msgstr ""
 
-#: src/Admin/AdminPage.php:110
+#: src/Admin/AdminPage.php:157
 msgid "Authenticated users with the edit_posts capability"
 msgstr ""
 
-#: src/Admin/AdminPage.php:100
+#: src/Admin/AdminPage.php:147
 msgid "Authentication"
 msgstr ""
 
-#: src/Transport/HttpTransport.php:85
+#: src/Transport/HttpTransport.php:90
 msgid "Authentication is required to access WPNerve."
 msgstr ""
 
-#: src/OAuth/OAuthServer.php:286
+#: src/OAuth/OAuthServer.php:307
 msgid "Authorize"
 msgstr ""
 
 #: src/Abilities/CommentAbilities.php:350
-msgid "Changes a comment status to approve, hold, spam, or trash. The previous status is returned for recovery."
+msgid ""
+"Changes a comment status to approve, hold, spam, or trash. The previous "
+"status is returned for recovery."
 msgstr ""
 
 #: src/Abilities/UserAbilities.php:159
 msgid "Changing roles requires the promote_users capability."
 msgstr ""
 
-#: src/Admin/AdminPage.php:160
+#: src/Admin/AdminPage.php:366
 msgid "Client configuration"
 msgstr ""
 
-#: src/Admin/AdminPage.php:203
-msgid "Configure the MCP client with the endpoint, username, and generated Application Password."
+#: src/Admin/AdminPage.php:178
+msgid "Code"
 msgstr ""
 
-#: src/Admin/AdminPage.php:92
+#: src/Admin/AdminPage.php:411
+msgid ""
+"Configure the MCP client with the endpoint, username, and generated "
+"Application Password."
+msgstr ""
+
+#: src/Admin/AdminPage.php:139
 msgid "Connection"
 msgstr ""
 
-#: src/Admin/AdminPage.php:86
-msgid "Copy this password now — it will not be shown again."
+#: src/Admin/AdminPage.php:133
+msgid ""
+"Copy this password now — WPNerve keeps it only for this response and it will "
+"not be shown again."
 msgstr ""
 
-#: src/Admin/AdminPage.php:119
-msgid "Create a dedicated password for the WordPress user the agent will act as. It is stored by WordPress, never by WPNerve."
+#: src/Admin/AdminPage.php:272
+msgid "Copy-ready client configuration"
+msgstr ""
+
+#: src/Admin/AdminPage.php:223
+msgid ""
+"Create a dedicated credential for the WordPress user the agent will act as. "
+"Prefer a separate user with only the capabilities the agent needs."
 msgstr ""
 
 #: src/Abilities/CommentAbilities.php:291
@@ -134,6 +199,10 @@ msgstr ""
 msgid "Create user"
 msgstr ""
 
+#: src/Admin/AdminPage.php:295
+msgid "Created"
+msgstr ""
+
 #: src/Abilities/MenuAbilities.php:321
 msgid "Creates a navigation menu. Undo by deleting the created menu."
 msgstr ""
@@ -143,11 +212,15 @@ msgid "Creates a new draft post or page. Undo by trashing the draft."
 msgstr ""
 
 #: src/Abilities/TaxonomyAbilities.php:258
-msgid "Creates a term in a taxonomy. Requires manage_categories. Undo by deleting the created term."
+msgid ""
+"Creates a term in a taxonomy. Requires manage_categories. Undo by deleting "
+"the created term."
 msgstr ""
 
 #: src/Abilities/UserAbilities.php:275
-msgid "Creates a user. Administrator creation requires promote_users. Undo by deleting the user."
+msgid ""
+"Creates a user. Administrator creation requires promote_users. Undo by "
+"deleting the user."
 msgstr ""
 
 #: src/Abilities/CommentAbilities.php:292
@@ -155,7 +228,8 @@ msgid "Creates an approved comment on a post. Requires moderate_comments."
 msgstr ""
 
 #: src/Abilities/CommentAbilities.php:321
-msgid "Creates an approved reply to an existing comment. Requires moderate_comments."
+msgid ""
+"Creates an approved reply to an existing comment. Requires moderate_comments."
 msgstr ""
 
 #: src/Abilities/UserAbilities.php:90
@@ -178,7 +252,11 @@ msgstr ""
 msgid "Deactivates a plugin. Undo by activating it."
 msgstr ""
 
-#: src/Admin/AdminPage.php:108
+#: src/Admin/AdminPage.php:183
+msgid "Decision"
+msgstr ""
+
+#: src/Admin/AdminPage.php:155
 msgid "Default access"
 msgstr ""
 
@@ -215,7 +293,8 @@ msgid "Delete the item to undo."
 msgstr ""
 
 #: src/Abilities/PluginAbilities.php:153
-msgid "Delete the plugin to undo. Verify the extracted folder with plugins/list."
+msgid ""
+"Delete the plugin to undo. Verify the extracted folder with plugins/list."
 msgstr ""
 
 #: src/Abilities/UserAbilities.php:337
@@ -223,11 +302,14 @@ msgid "Delete user"
 msgstr ""
 
 #: src/Abilities/CommentAbilities.php:385
-msgid "Deletes a comment. Trash by default; permanent deletion with force=true."
+msgid ""
+"Deletes a comment. Trash by default; permanent deletion with force=true."
 msgstr ""
 
 #: src/Abilities/MediaAbilities.php:363
-msgid "Deletes a media item. Trash by default; permanent deletion requires delete_others_posts."
+msgid ""
+"Deletes a media item. Trash by default; permanent deletion requires "
+"delete_others_posts."
 msgstr ""
 
 #: src/Abilities/MenuAbilities.php:396
@@ -250,7 +332,17 @@ msgstr ""
 msgid "Deleting comments requires the moderate_comments capability."
 msgstr ""
 
-#: src/Admin/AdminPage.php:313
+#: src/Admin/AdminPage.php:208
+msgid "Deny"
+msgstr ""
+
+#: src/Admin/AdminPage.php:343
+msgid ""
+"Destructive and privileged operations stay hidden unless enabled and still "
+"require one-time approval here."
+msgstr ""
+
+#: src/Admin/AdminPage.php:599
 msgid "Destructive — delete, publish, restore"
 msgstr ""
 
@@ -259,18 +351,31 @@ msgid "Draft status must be draft or pending."
 msgstr ""
 
 #: src/Abilities/ContentLifecycleAbilities.php:406
-msgid "Dry-run preview of update-content: shows the proposed changes without saving anything."
+msgid ""
+"Dry-run preview of update-content: shows the proposed changes without saving "
+"anything."
 msgstr ""
 
-#: src/Admin/AdminPage.php:136
-msgid "Enabled risk classes are exposed to MCP clients. Destructive and privileged operations are hidden unless you enable them here."
+#: src/Admin/AdminPage.php:340
+msgid "Enabled risk classes are exposed to MCP clients."
 msgstr ""
 
-#: src/Admin/AdminPage.php:129
-msgid "Generate Application Password for me"
+#: src/Admin/AdminPage.php:182
+msgid "Expires"
 msgstr ""
 
-#: src/Admin/AdminPage.php:200
+#: src/Admin/AdminPage.php:265
+msgid "Generate WPNerve credential"
+msgstr ""
+
+#: src/Admin/AdminPage.php:371
+msgid ""
+"Generate a credential above for a copy-ready configuration. Otherwise, "
+"base64-encode USERNAME:APPLICATION_PASSWORD and replace the placeholder "
+"below."
+msgstr ""
+
+#: src/Admin/AdminPage.php:407
 msgid "Generate or create a dedicated Application Password named WPNerve."
 msgstr ""
 
@@ -312,6 +417,23 @@ msgstr ""
 
 #: src/Abilities/UserAbilities.php:256
 msgid "Get user"
+msgstr ""
+
+#: src/Admin/AdminPage.php:517
+msgid ""
+"High-risk operation approved. The MCP client may now retry the exact call."
+msgstr ""
+
+#: src/Admin/AdminPage.php:518
+msgid "High-risk operation denied."
+msgstr ""
+
+#: src/Admin/AdminPage.php:297
+msgid "Last IP"
+msgstr ""
+
+#: src/Admin/AdminPage.php:296
+msgid "Last used"
 msgstr ""
 
 #: src/Abilities/WidgetAbilities.php:172
@@ -363,15 +485,18 @@ msgid "List users"
 msgstr ""
 
 #: src/Abilities/CommentAbilities.php:39
-msgid "Listing non-approved comments requires the moderate_comments capability."
+msgid ""
+"Listing non-approved comments requires the moderate_comments capability."
 msgstr ""
 
 #: src/Abilities/CommentAbilities.php:247
-msgid "Lists approved comments, or any status with the moderate_comments capability."
+msgid ""
+"Lists approved comments, or any status with the moderate_comments capability."
 msgstr ""
 
 #: src/Abilities/PluginAbilities.php:201
-msgid "Lists installed plugins with their active state. Requires activate_plugins."
+msgid ""
+"Lists installed plugins with their active state. Requires activate_plugins."
 msgstr ""
 
 #: src/Abilities/MediaAbilities.php:251
@@ -406,8 +531,24 @@ msgstr ""
 msgid "Lists users with optional role and search filters. Requires list_users."
 msgstr ""
 
-#: src/Admin/AdminPage.php:96
+#: src/Admin/AdminPage.php:143
 msgid "MCP endpoint"
+msgstr ""
+
+#: src/Admin/AdminPage.php:287
+msgid "Managed WPNerve credentials"
+msgstr ""
+
+#: src/Admin/AdminPage.php:167
+msgid ""
+"Match the code shown by the MCP client. Approve only when the user, tool, "
+"risk, and code describe the operation you expect."
+msgstr ""
+
+#: src/Security/Confirmation/Service.php:200
+msgid ""
+"Match this code in Tools → WPNerve, approve it, then retry the exact call "
+"with the same keys."
 msgstr ""
 
 #: src/Abilities/CommentAbilities.php:349
@@ -422,6 +563,34 @@ msgstr ""
 msgid "Moves content to the trash. Undo with restore-content."
 msgstr ""
 
+#: src/Security/Idempotency/Service.php:46
+msgid ""
+"Mutating tools require an idempotency key in params._meta[\"wp-nerve/"
+"idempotencyKey\"]."
+msgstr ""
+
+#: src/Admin/AdminPage.php:294
+msgid "Name"
+msgstr ""
+
+#: src/Admin/AdminPage.php:313
+msgid "Never"
+msgstr ""
+
+#: src/Admin/AdminPage.php:289
+msgid "No WPNerve credentials exist for this user."
+msgstr ""
+
+#: src/Admin/AdminPage.php:231
+msgid ""
+"No editable user with the edit_posts capability can use Application "
+"Passwords."
+msgstr ""
+
+#: src/Admin/AdminPage.php:173
+msgid "No high-risk operations are waiting for approval."
+msgstr ""
+
 #: src/Abilities/ContentLifecycleAbilities.php:98
 msgid "Only post and page drafts are supported."
 msgstr ""
@@ -430,8 +599,11 @@ msgstr ""
 msgid "Only trashed content can be restored."
 msgstr ""
 
-#: src/Abilities/CommentAbilities.php:237
-#: src/Abilities/MediaAbilities.php:241
+#: src/Admin/AdminPage.php:163
+msgid "Pending high-risk confirmations"
+msgstr ""
+
+#: src/Abilities/CommentAbilities.php:237 src/Abilities/MediaAbilities.php:241
 msgid "Permanent deletion cannot be undone."
 msgstr ""
 
@@ -439,8 +611,7 @@ msgstr ""
 msgid "Permanent deletion requires the delete_others_posts capability."
 msgstr ""
 
-#: src/Infrastructure/Activator.php:24
-#: src/Infrastructure/Activator.php:35
+#: src/Infrastructure/Activator.php:26 src/Infrastructure/Activator.php:37
 msgid "Plugin activation failed"
 msgstr ""
 
@@ -448,11 +619,11 @@ msgstr ""
 msgid "Preview content update"
 msgstr ""
 
-#: src/Admin/AdminPage.php:312
+#: src/Admin/AdminPage.php:598
 msgid "Privileged — administration (users, plugins, options)"
 msgstr ""
 
-#: src/Admin/AdminPage.php:104
+#: src/Admin/AdminPage.php:151
 msgid "Protocol versions"
 msgstr ""
 
@@ -461,7 +632,9 @@ msgid "Publish content"
 msgstr ""
 
 #: src/Abilities/ContentLifecycleAbilities.php:553
-msgid "Publishes a post or page. The previous status and a revision are kept for recovery."
+msgid ""
+"Publishes a post or page. The previous status and a revision are kept for "
+"recovery."
 msgstr ""
 
 #: src/Abilities/MenuAbilities.php:216
@@ -472,7 +645,7 @@ msgstr ""
 msgid "Read debug log"
 msgstr ""
 
-#: src/Admin/AdminPage.php:310
+#: src/Admin/AdminPage.php:596
 msgid "Read — safe information abilities"
 msgstr ""
 
@@ -482,10 +655,6 @@ msgstr ""
 
 #: src/Abilities/PluginAbilities.php:191
 msgid "Reinstall the plugin to undo."
-msgstr ""
-
-#: src/Admin/AdminPage.php:163
-msgid "Replace USERNAME and APPLICATION_PASSWORD with the user and the password generated above."
 msgstr ""
 
 #: src/Abilities/CommentAbilities.php:320
@@ -513,7 +682,9 @@ msgid "Restore the previous value to undo."
 msgstr ""
 
 #: src/Abilities/ContentLifecycleAbilities.php:570
-msgid "Restores a post from one of its revisions. A new revision is created before restoring."
+msgid ""
+"Restores a post from one of its revisions. A new revision is created before "
+"restoring."
 msgstr ""
 
 #: src/Abilities/ContentLifecycleAbilities.php:537
@@ -548,8 +719,10 @@ msgstr ""
 msgid "Returns a single user including email. Requires list_users."
 msgstr ""
 
-#: src/Abilities/AbilityRegistrar.php:182
-msgid "Returns non-sensitive WordPress and WPNerve runtime information for connection diagnostics."
+#: src/Abilities/AbilityRegistrar.php:183
+msgid ""
+"Returns non-sensitive WordPress and WPNerve runtime information for "
+"connection diagnostics."
 msgstr ""
 
 #: src/Abilities/MenuAbilities.php:300
@@ -568,16 +741,24 @@ msgstr ""
 msgid "Returns the widgets assigned to a sidebar."
 msgstr ""
 
-#: src/Admin/AdminPage.php:211
-msgid "Revoke that Application Password immediately if the client or device is lost."
+#: src/Admin/AdminPage.php:326
+msgid "Revoke"
 msgstr ""
 
-#: src/Admin/AdminPage.php:133
-#: src/Admin/AdminPage.php:146
+#: src/Admin/AdminPage.php:419
+msgid ""
+"Revoke that Application Password immediately if the client or device is lost."
+msgstr ""
+
+#: src/Admin/AdminPage.php:181
+msgid "Risk"
+msgstr ""
+
+#: src/Admin/AdminPage.php:337 src/Admin/AdminPage.php:352
 msgid "Risk classes"
 msgstr ""
 
-#: src/Admin/AdminPage.php:251
+#: src/Admin/AdminPage.php:458
 msgid "Risk classes updated."
 msgstr ""
 
@@ -585,7 +766,7 @@ msgstr ""
 msgid "Safe site information abilities exposed by WPNerve."
 msgstr ""
 
-#: src/Admin/AdminPage.php:156
+#: src/Admin/AdminPage.php:362
 msgid "Save risk classes"
 msgstr ""
 
@@ -598,14 +779,15 @@ msgid "Searches published content and returns matching posts with metadata."
 msgstr ""
 
 #: src/Abilities/AbilityRegistrar.php:117
-msgid "Searching non-public content requires the read_private_posts capability."
+msgid ""
+"Searching non-public content requires the read_private_posts capability."
 msgstr ""
 
-#: src/Admin/AdminPage.php:78
+#: src/Admin/AdminPage.php:118
 msgid "Secure MCP access to the native WordPress Abilities API."
 msgstr ""
 
-#: src/Admin/AdminPage.php:198
+#: src/Admin/AdminPage.php:405
 msgid "Secure setup"
 msgstr ""
 
@@ -621,11 +803,11 @@ msgstr ""
 msgid "The attachment could not be registered."
 msgstr ""
 
-#: src/Transport/HttpTransport.php:93
+#: src/Transport/HttpTransport.php:111
 msgid "The authenticated user cannot access WPNerve."
 msgstr ""
 
-#: src/Transport/HttpTransport.php:74
+#: src/Transport/HttpTransport.php:78
 msgid "The bearer token is invalid or expired."
 msgstr ""
 
@@ -636,6 +818,36 @@ msgstr ""
 
 #: src/Abilities/CommentAbilities.php:229
 msgid "The comment could not be deleted."
+msgstr ""
+
+#: src/Admin/AdminPage.php:519
+msgid ""
+"The confirmation could not be changed because it is missing, expired, or "
+"already decided."
+msgstr ""
+
+#: src/Security/Confirmation/Service.php:124
+msgid ""
+"The confirmation does not match this user, credential, tool, arguments, or "
+"idempotency key."
+msgstr ""
+
+#: src/Security/Confirmation/ConfirmedToolRegistry.php:62
+msgid "The confirmation service did not authorize this operation."
+msgstr ""
+
+#: src/Security/Confirmation/Service.php:132
+#: src/Security/Confirmation/Service.php:172
+msgid "The confirmation store is unavailable; the operation was not executed."
+msgstr ""
+
+#: src/Security/Confirmation/Service.php:91
+#: src/Security/Confirmation/Service.php:128
+msgid "The confirmation token is invalid."
+msgstr ""
+
+#: src/Admin/ApplicationPasswords.php:185
+msgid "The connection test request could not be encoded."
 msgstr ""
 
 #: src/Abilities/ContentLifecycleAbilities.php:253
@@ -651,9 +863,20 @@ msgstr ""
 msgid "The content parameter must be a non-empty string."
 msgstr ""
 
-#: src/Abilities/MediaAbilities.php:110
-#: src/Abilities/PluginAbilities.php:130
+#: src/Abilities/MediaAbilities.php:110 src/Abilities/PluginAbilities.php:130
 msgid "The content parameter must be valid base64."
+msgstr ""
+
+#: src/Admin/ApplicationPasswords.php:218
+msgid ""
+"The credential was created, but the MCP endpoint rejected the connection "
+"test."
+msgstr ""
+
+#: src/Admin/ApplicationPasswords.php:208
+msgid ""
+"The credential was created, but the local connection test could not reach "
+"the MCP endpoint."
 msgstr ""
 
 #: src/Abilities/SystemAbilities.php:64
@@ -670,6 +893,16 @@ msgstr ""
 
 #: src/Abilities/AbilityRegistrar.php:161
 msgid "The id parameter must be a positive integer."
+msgstr ""
+
+#: src/Security/Idempotency/Service.php:53
+msgid ""
+"The idempotency key must be 8-128 ASCII letters, digits, dots, colons, "
+"underscores, or hyphens."
+msgstr ""
+
+#: src/Security/Idempotency/Service.php:108
+msgid "The idempotency store is unavailable; the mutation was not executed."
 msgstr ""
 
 #: src/Abilities/OptionAbilities.php:60
@@ -700,14 +933,18 @@ msgstr ""
 msgid "The menu item could not be saved."
 msgstr ""
 
-#: src/Abilities/MenuAbilities.php:155
-#: src/Abilities/MenuAbilities.php:202
+#: src/Abilities/MenuAbilities.php:155 src/Abilities/MenuAbilities.php:202
 msgid "The menu item is not attached to a menu."
 msgstr ""
 
-#: src/Abilities/MenuAbilities.php:93
-#: src/Abilities/TaxonomyAbilities.php:104
+#: src/Abilities/MenuAbilities.php:93 src/Abilities/TaxonomyAbilities.php:104
 msgid "The name parameter must be a non-empty string."
+msgstr ""
+
+#: src/Security/Idempotency/Service.php:122
+msgid ""
+"The operation ran but its result could not be persisted. Its key is locked "
+"to prevent an unsafe retry."
 msgstr ""
 
 #: src/Abilities/CommentAbilities.php:134
@@ -718,6 +955,10 @@ msgstr ""
 msgid "The plugin could not be deleted."
 msgstr ""
 
+#: src/Security/Idempotency/Service.php:160
+msgid "The previous execution failed."
+msgstr ""
+
 #: src/Abilities/AbilityRegistrar.php:109
 msgid "The query parameter must be a non-empty string."
 msgstr ""
@@ -726,22 +967,20 @@ msgstr ""
 msgid "The reassign target user does not exist."
 msgstr ""
 
-#: src/Transport/HttpTransport.php:60
+#: src/Transport/HttpTransport.php:64
 msgid "The request Origin is not allowed to access WPNerve."
 msgstr ""
 
-#: src/Protocol/AbilityToolRegistry.php:49
+#: src/Protocol/AbilityToolRegistry.php:51
 msgid "The requested MCP tool does not exist or is not available."
 msgstr ""
 
-#: src/Abilities/CommentAbilities.php:76
-#: src/Abilities/CommentAbilities.php:178
+#: src/Abilities/CommentAbilities.php:76 src/Abilities/CommentAbilities.php:178
 #: src/Abilities/CommentAbilities.php:217
 msgid "The requested comment does not exist."
 msgstr ""
 
-#: src/Abilities/MediaAbilities.php:76
-#: src/Abilities/MediaAbilities.php:166
+#: src/Abilities/MediaAbilities.php:76 src/Abilities/MediaAbilities.php:166
 #: src/Abilities/MediaAbilities.php:217
 msgid "The requested media item does not exist."
 msgstr ""
@@ -750,8 +989,7 @@ msgstr ""
 msgid "The requested menu does not exist."
 msgstr ""
 
-#: src/Abilities/MenuAbilities.php:149
-#: src/Abilities/MenuAbilities.php:196
+#: src/Abilities/MenuAbilities.php:149 src/Abilities/MenuAbilities.php:196
 msgid "The requested menu item does not exist."
 msgstr ""
 
@@ -759,14 +997,12 @@ msgstr ""
 msgid "The requested option does not exist."
 msgstr ""
 
-#: src/Abilities/PluginAbilities.php:63
-#: src/Abilities/PluginAbilities.php:94
+#: src/Abilities/PluginAbilities.php:63 src/Abilities/PluginAbilities.php:94
 #: src/Abilities/PluginAbilities.php:170
 msgid "The requested plugin does not exist."
 msgstr ""
 
-#: src/Abilities/AbilityRegistrar.php:167
-#: src/Abilities/CommentAbilities.php:97
+#: src/Abilities/AbilityRegistrar.php:167 src/Abilities/CommentAbilities.php:97
 #: src/Abilities/ContentLifecycleAbilities.php:188
 #: src/Abilities/ContentLifecycleAbilities.php:243
 #: src/Abilities/ContentLifecycleAbilities.php:272
@@ -781,8 +1017,7 @@ msgstr ""
 msgid "The requested revision does not exist."
 msgstr ""
 
-#: src/Abilities/UserAbilities.php:86
-#: src/Abilities/UserAbilities.php:155
+#: src/Abilities/UserAbilities.php:86 src/Abilities/UserAbilities.php:155
 msgid "The requested role is not allowed."
 msgstr ""
 
@@ -790,14 +1025,29 @@ msgstr ""
 msgid "The requested sidebar does not exist."
 msgstr ""
 
-#: src/Abilities/UserAbilities.php:65
-#: src/Abilities/UserAbilities.php:136
+#: src/Abilities/UserAbilities.php:65 src/Abilities/UserAbilities.php:136
 #: src/Abilities/UserAbilities.php:191
 msgid "The requested user does not exist."
 msgstr ""
 
 #: src/Abilities/ContentLifecycleAbilities.php:340
 msgid "The revision could not be restored."
+msgstr ""
+
+#: src/Admin/ApplicationPasswords.php:145
+msgid "The selected WPNerve credential does not exist."
+msgstr ""
+
+#: src/Security/Idempotency/IdempotentToolRegistry.php:64
+#: src/Security/Idempotency/Service.php:152
+#: src/Security/Idempotency/Service.php:171
+msgid "The stored idempotency outcome is invalid."
+msgstr ""
+
+#: src/Security/Idempotency/Service.php:101
+msgid ""
+"The stored outcome has expired. Use a new idempotency key after verifying "
+"the original operation."
 msgstr ""
 
 #: src/Abilities/TaxonomyAbilities.php:63
@@ -814,8 +1064,7 @@ msgstr ""
 msgid "The transient parameter is required."
 msgstr ""
 
-#: src/Abilities/MediaAbilities.php:104
-#: src/Abilities/PluginAbilities.php:124
+#: src/Abilities/MediaAbilities.php:104 src/Abilities/PluginAbilities.php:124
 msgid "The uploaded file exceeds the configured size limit."
 msgstr ""
 
@@ -825,6 +1074,40 @@ msgstr ""
 
 #: src/Abilities/UserAbilities.php:207
 msgid "The user could not be deleted."
+msgstr ""
+
+#: src/Security/Confirmation/Service.php:120
+msgid "This confirmation expired. Request a new confirmation before retrying."
+msgstr ""
+
+#: src/Security/Idempotency/Service.php:87
+msgid "This idempotency key was already used with different tool arguments."
+msgstr ""
+
+#: src/Security/Idempotency/Service.php:94
+msgid ""
+"This operation is already running or its final state is indeterminate. It "
+"will not be repeated automatically."
+msgstr ""
+
+#: src/Security/Confirmation/Service.php:111
+msgid "This operation is waiting for approval in Tools → WPNerve."
+msgstr ""
+
+#: src/Security/Confirmation/Service.php:116
+msgid "This operation was denied by a WordPress administrator."
+msgstr ""
+
+#: src/Admin/AdminPage.php:180
+msgid "Tool"
+msgstr ""
+
+#: src/Security/Confirmation/Service.php:73
+msgid "Tool arguments cannot be bound to a confirmation safely."
+msgstr ""
+
+#: src/Security/Idempotency/Service.php:62
+msgid "Tool arguments cannot be canonicalized safely."
 msgstr ""
 
 #: src/Abilities/ContentLifecycleAbilities.php:519
@@ -860,7 +1143,9 @@ msgid "Update user"
 msgstr ""
 
 #: src/Abilities/OptionAbilities.php:117
-msgid "Updates a named option. The previous value is returned for recovery. Requires manage_options."
+msgid ""
+"Updates a named option. The previous value is returned for recovery. "
+"Requires manage_options."
 msgstr ""
 
 #: src/Abilities/UserAbilities.php:306
@@ -876,7 +1161,9 @@ msgid "Updates the title, caption, description, or alt text of a media item."
 msgstr ""
 
 #: src/Abilities/ContentLifecycleAbilities.php:379
-msgid "Updates the title, content, or excerpt of an existing post. A WordPress revision is kept for recovery."
+msgid ""
+"Updates the title, content, or excerpt of an existing post. A WordPress "
+"revision is kept for recovery."
 msgstr ""
 
 #: src/Abilities/MediaAbilities.php:296
@@ -888,32 +1175,61 @@ msgid "Upload plugin"
 msgstr ""
 
 #: src/Abilities/MediaAbilities.php:297
-msgid "Uploads a base64-encoded file to the media library. Requires upload_files. Undo by deleting the attachment."
+msgid ""
+"Uploads a base64-encoded file to the media library. Requires upload_files. "
+"Undo by deleting the attachment."
 msgstr ""
 
 #: src/Abilities/PluginAbilities.php:268
-msgid "Uploads a base64-encoded plugin zip and installs it. Undo by deleting the plugin."
+msgid ""
+"Uploads a base64-encoded plugin zip and installs it. Undo by deleting the "
+"plugin."
 msgstr ""
 
-#: src/Admin/AdminPage.php:22
-#: src/Admin/AdminPage.php:23
-#: src/Admin/AdminPage.php:77
+#. translators: %d: WordPress user ID.
+#: src/Admin/AdminPage.php:536
+#, php-format
+msgid "User #%d"
+msgstr ""
+
+#: src/Admin/AdminPage.php:126
+msgid "Username:"
+msgstr ""
+
+#: src/Admin/AdminPage.php:256
+msgid "View credentials"
+msgstr ""
+
+#: src/Admin/AdminPage.php:40 src/Admin/AdminPage.php:41
+#: src/Admin/AdminPage.php:117
 msgid "WPNerve"
 msgstr ""
 
-#: src/Admin/AdminPage.php:221
-msgid "WPNerve never displays or stores the Application Password. Tool arguments and credentials are excluded from the audit log."
+#: src/Admin/AdminPage.php:504
+msgid "WPNerve credential revoked."
 msgstr ""
 
-#: src/Transport/HttpTransport.php:101
+#: src/Admin/AdminPage.php:429
+msgid ""
+"WPNerve displays a newly generated secret once and never persists it. Tool "
+"arguments and credentials are excluded from the audit log."
+msgstr ""
+
+#: src/Transport/HttpTransport.php:119
 msgid "WPNerve requires HTTPS in production."
 msgstr ""
 
-#: src/Infrastructure/Activator.php:23
+#: src/Infrastructure/Activator.php:25
 msgid "WPNerve requires PHP 8.1 or newer."
 msgstr ""
 
-#: src/Infrastructure/Activator.php:34
+#: src/Plugin.php:105
+msgid ""
+"WPNerve requires WordPress 6.9 or newer with the native Abilities API "
+"available."
+msgstr ""
+
+#: src/Infrastructure/Activator.php:36
 msgid "WPNerve requires WordPress 6.9 or newer."
 msgstr ""
 
@@ -921,11 +1237,19 @@ msgstr ""
 msgid "WPNerve: Site"
 msgstr ""
 
-#: src/Admin/AdminPage.php:101
+#: src/Admin/AdminPage.php:148
 msgid "WordPress Application Password over HTTPS"
 msgstr ""
 
-#: src/Admin/AdminPage.php:311
+#: src/Admin/AdminPage.php:499 src/Admin/ApplicationPasswords.php:157
+msgid "WordPress could not revoke the selected WPNerve credential."
+msgstr ""
+
+#: src/Admin/ApplicationPasswords.php:71
+msgid "WordPress created an invalid Application Password response."
+msgstr ""
+
+#: src/Admin/AdminPage.php:597
 msgid "Write — recoverable mutations"
 msgstr ""
 
@@ -998,6 +1322,10 @@ msgstr ""
 msgid "You are not allowed to upload media."
 msgstr ""
 
+#: src/Admin/ApplicationPasswords.php:237
+msgid "You cannot manage Application Passwords for the selected user."
+msgstr ""
+
 #: src/Abilities/MediaAbilities.php:94
 msgid "filename and base64 content are required."
 msgstr ""
@@ -1006,11 +1334,10 @@ msgstr ""
 msgid "filename and base64 zip content are required."
 msgstr ""
 
-#: src/OAuth/OAuthServer.php:289
+#: src/OAuth/OAuthServer.php:310
 msgid "through MCP as"
 msgstr ""
 
-#: src/OAuth/OAuthServer.php:288
+#: src/OAuth/OAuthServer.php:309
 msgid "to access"
 msgstr ""
-

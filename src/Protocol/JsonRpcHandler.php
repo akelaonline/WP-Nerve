@@ -61,7 +61,8 @@ final class JsonRpcHandler
                 RequestValidator::LEGACY_VERSIONS
             ),
             'capabilities'     => array('tools' => array('listChanged' => false)),
-            'instructions'     => 'Use only the tools exposed for the authenticated WordPress user. WPNerve denies destructive actions by default.',
+            'instructions'     => 'Use only tools exposed for the authenticated WordPress user. '
+                . 'Mutations require idempotency keys; destructive and privileged tools also require approval in WordPress.',
             'ttlMs'            => 60000,
             'cacheScope'       => 'private',
             '_meta'            => $this->resultMeta(),
@@ -128,7 +129,19 @@ final class JsonRpcHandler
         }
 
         $started = hrtime(true);
-        $result  = $this->tools->execute($name, $arguments);
+        $meta    = is_array($params['_meta'] ?? null) ? $params['_meta'] : array();
+
+        $result = $this->tools->execute(
+            $name,
+            $arguments,
+            array(
+                'idempotency_key'   => $meta['wp-nerve/idempotencyKey'] ?? null,
+                'confirmation_token' => $meta['wp-nerve/confirmationToken'] ?? null,
+                'credential_id'     => is_string($context['credential_id'] ?? null)
+                    ? $context['credential_id']
+                    : '',
+            )
+        );
         $elapsed = (int) round((hrtime(true) - $started) / 1_000_000);
 
         if (is_wp_error($result)) {
@@ -137,7 +150,7 @@ final class JsonRpcHandler
                 $protocolVersion,
                 $context,
                 $name,
-                '',
+                (string) ($this->tools->risk($name) ?? ''),
                 'error',
                 $elapsed,
                 (string) $result->get_error_code()
@@ -151,6 +164,14 @@ final class JsonRpcHandler
                 'content' => array(array('type' => 'text', 'text' => $result->get_error_message())),
                 'isError' => true,
             );
+
+            $errorData = $result->get_error_data();
+
+            if (is_array($errorData) && is_array($errorData['wp_nerve_confirmation'] ?? null)) {
+                $toolResult['_meta'] = array(
+                    'wp-nerve/confirmation' => $errorData['wp_nerve_confirmation'],
+                );
+            }
         } else {
             $this->audit($message, $protocolVersion, $context, $name, (string) $result['risk'], 'success', $elapsed, '');
 
@@ -162,10 +183,11 @@ final class JsonRpcHandler
         }
 
         if ($modern) {
+            $toolMeta   = is_array($toolResult['_meta'] ?? null) ? $toolResult['_meta'] : array();
             $toolResult = array_merge(
                 array('resultType' => 'complete'),
                 $toolResult,
-                array('_meta' => $this->resultMeta())
+                array('_meta' => array_merge($this->resultMeta(), $toolMeta))
             );
         }
 

@@ -41,8 +41,10 @@ final class AbilityToolRegistry implements ToolRegistry
      * @param array<string, mixed> $arguments
      * @return array{result: mixed, risk: string}|WP_Error
      */
-    public function execute(string $toolName, array $arguments): array|WP_Error
+    public function execute(string $toolName, array $arguments, array $context = array()): array|WP_Error
     {
+        unset($context);
+
         $ability = $this->find($toolName);
 
         if (null === $ability) {
@@ -65,6 +67,13 @@ final class AbilityToolRegistry implements ToolRegistry
             'result' => $result,
             'risk'   => $this->policy->risk($ability)->value,
         );
+    }
+
+    public function risk(string $toolName): ?string
+    {
+        $ability = $this->find($toolName);
+
+        return null === $ability ? null : $this->policy->risk($ability)->value;
     }
 
     private function find(string $toolName): ?WP_Ability
@@ -97,6 +106,7 @@ final class AbilityToolRegistry implements ToolRegistry
     {
         $annotations = $ability->get_meta_item('annotations', array());
         $annotations = is_array($annotations) ? $annotations : array();
+        $risk         = $this->policy->risk($ability)->value;
         $descriptor  = array(
             'name'         => $this->toolName($ability),
             'title'        => $ability->get_label(),
@@ -110,7 +120,9 @@ final class AbilityToolRegistry implements ToolRegistry
             ),
             '_meta'        => array(
                 'wp-nerve/ability' => $ability->get_name(),
-                'wp-nerve/risk'    => $this->policy->risk($ability)->value,
+                'wp-nerve/risk'    => $risk,
+                'wp-nerve/idempotencyRequired' => 'read' !== $risk,
+                'wp-nerve/confirmationRequired' => in_array($risk, array('destructive', 'privileged'), true),
             ),
         );
 

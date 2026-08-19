@@ -4,7 +4,7 @@ Tags: mcp, ai, agents, abilities, automation
 Requires at least: 6.9
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 0.1.0-alpha.4
+Stable tag: 0.1.0-alpha.7
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -17,9 +17,10 @@ over the Model Context Protocol. It runs entirely inside WordPress and does not
 require an external relay, SaaS account, or additional database.
 
 Read-only abilities ship enabled by default: site status, content type listing,
-content search, and full content reads. Recoverable writes are available for
-drafts, content updates, revisions, and taxonomy assignment. Destructive and
-privileged operations are denied until the site owner opts in.
+content search, and full content reads. Recoverable writes are available across
+the selected v1 surface. Destructive and privileged tools are hidden until the
+site owner opts in and then require a matching, short-lived approval in Tools >
+WPNerve before each logical operation.
 
 This version is an early alpha for development and security review.
 
@@ -28,8 +29,10 @@ This version is an early alpha for development and security review.
 1. Upload the WPNerve plugin directory to `/wp-content/plugins/`.
 2. Activate WPNerve.
 3. Open Tools > WPNerve.
-4. Create a dedicated Application Password for the WordPress user the agent uses.
-5. Configure the MCP client with the displayed endpoint.
+4. Select a dedicated, least-privilege agent user and generate its WPNerve
+   credential. The plugin verifies the connection without persisting the secret.
+5. Copy the generated client configuration and revoke the credential from the
+   same screen when it is no longer needed.
 
 == Frequently Asked Questions ==
 
@@ -48,9 +51,47 @@ capabilities. Destructive and privileged operations are denied by default.
 The modern stateless HTTP protocol `2026-07-28` plus legacy clients using
 `2025-11-25` and `2025-06-18`.
 
+= Do mutating tools require an idempotency key? =
+
+Yes. Every write, destructive, and privileged call must send a unique
+`wp-nerve/idempotencyKey` in request `_meta`. Reuse the same key only when
+retrying the exact same call. This prevents network retries from duplicating
+changes.
+
+= Do destructive or privileged tools require confirmation? =
+
+Yes. Their risk class must first be enabled by an administrator. The first exact
+call returns a short-lived token and display code without executing. Match and
+approve that code in Tools > WPNerve, then retry with the same arguments,
+idempotency key, credential and confirmation token. Changed or expired requests
+fail closed.
+
 == Changelog ==
 
-= Unreleased =
+= 0.1.0-alpha.7 =
+* Added out-of-band admin confirmation for destructive and privileged MCP tools.
+* Challenges are short-lived and bound to the WordPress user, authoritative
+  credential, tool, canonical arguments and idempotency key.
+* Added atomic approval/consumption, safe idempotent replay, tamper and expiry
+  protection, and privacy-preserving confirmation storage.
+* Fixed admin action wiring so credential and confirmation forms run on the
+  correct WordPress hook.
+
+= 0.1.0-alpha.6 =
+* Added least-privilege user selection, copy-ready client configuration,
+  automatic MCP connection testing, and WPNerve credential revocation.
+* Fixed Application Password parsing to use WordPress core's tuple response.
+* Newly generated secrets exist only in the current admin response and are no
+  longer stored in a transient.
+
+= 0.1.0-alpha.5 =
+* Added persistent, atomic idempotency for every mutating MCP tool.
+* Claims are scoped to the authenticated user, authoritative credential, tool,
+  key, and canonical argument digest.
+* Added safe outcome replay, collision detection, and fail-closed handling of
+  concurrent or indeterminate executions.
+
+= 0.1.0-alpha.4 =
 * Added content lifecycle abilities: create-draft, update-content,
   list/get-revisions, trash/restore/publish-content, and restore-revision.
 * Added taxonomy abilities: list-taxonomies, list-terms, create-term, assign-terms.

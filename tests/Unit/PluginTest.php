@@ -42,13 +42,13 @@ final class PluginTest extends TestCase
     {
         Plugin::instance()->boot();
 
-        self::assertCount(3, WPState::$schemaCalls);
-        self::assertSame('2', WPState::$options['wp_nerve_schema_version']);
+        self::assertCount(5, WPState::$schemaCalls);
+        self::assertSame('4', WPState::$options['wp_nerve_schema_version']);
     }
 
     public function testBootSkipsSchemaWhenAlreadyInstalled(): void
     {
-        WPState::$options['wp_nerve_schema_version'] = '2';
+        WPState::$options['wp_nerve_schema_version'] = '4';
 
         Plugin::instance()->boot();
 
@@ -62,6 +62,7 @@ final class PluginTest extends TestCase
         self::assertCount(1, WPState::$actions['wp_abilities_api_categories_init']);
         self::assertCount(1, WPState::$actions['wp_abilities_api_init']);
         self::assertCount(2, WPState::$actions['rest_api_init']);
+        self::assertCount(1, WPState::$actions['admin_init']);
         self::assertCount(1, WPState::$actions['admin_menu']);
         self::assertCount(1, WPState::$filters['rest_allowed_cors_headers']);
     }

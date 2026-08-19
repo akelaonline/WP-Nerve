@@ -58,7 +58,25 @@ final class AbilityToolRegistryTest extends TestCase
         self::assertFalse($tool['annotations']['openWorldHint']);
         self::assertSame('wp-nerve/site-status', $tool['_meta']['wp-nerve/ability']);
         self::assertSame('read', $tool['_meta']['wp-nerve/risk']);
+        self::assertFalse($tool['_meta']['wp-nerve/idempotencyRequired']);
+        self::assertFalse($tool['_meta']['wp-nerve/confirmationRequired']);
         self::assertArrayNotHasKey('outputSchema', $tool);
+    }
+
+    public function testHighRiskDescriptorAdvertisesConfirmationRequirement(): void
+    {
+        WPState::$options['wp_nerve_enabled_risk_classes'] = array('destructive');
+        WPState::$abilities = array(
+            $this->makeAbility(
+                'wp-nerve/delete-user',
+                array('meta' => $this->makeAbilityMeta('destructive'))
+            ),
+        );
+
+        $tool = $this->registry->tools()[0];
+
+        self::assertTrue($tool['_meta']['wp-nerve/idempotencyRequired']);
+        self::assertTrue($tool['_meta']['wp-nerve/confirmationRequired']);
     }
 
     public function testToolsIncludesOutputSchemaWhenPresent(): void

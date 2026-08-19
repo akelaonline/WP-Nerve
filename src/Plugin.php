@@ -19,6 +19,13 @@ use WPNerve\Policy\PolicyEngine;
 use WPNerve\Protocol\AbilityToolRegistry;
 use WPNerve\Protocol\JsonRpcHandler;
 use WPNerve\Protocol\RequestValidator;
+use WPNerve\Security\Confirmation\ConfirmedToolRegistry;
+use WPNerve\Security\Confirmation\Service as ConfirmationService;
+use WPNerve\Security\Confirmation\WpdbRepository as ConfirmationRepository;
+use WPNerve\Security\Idempotency\CanonicalJson;
+use WPNerve\Security\Idempotency\IdempotentToolRegistry;
+use WPNerve\Security\Idempotency\Service as IdempotencyService;
+use WPNerve\Security\Idempotency\WpdbRepository;
 use WPNerve\Transport\HttpTransport;
 
 final class Plugin
@@ -49,26 +56,35 @@ final class Plugin
             return;
         }
 
-        if ('2' !== get_option('wp_nerve_schema_version')) {
+        if ('4' !== get_option('wp_nerve_schema_version')) {
             AuditRepository::installSchema();
             OAuthStore::installSchema();
-            update_option('wp_nerve_schema_version', '2', false);
+            WpdbRepository::installSchema();
+            ConfirmationRepository::installSchema();
+            update_option('wp_nerve_schema_version', '4', false);
         }
 
-        $abilities = new AbilityRegistrar();
-        $audit     = new AuditRepository();
-        $policy    = new PolicyEngine();
-        $registry  = new AbilityToolRegistry($policy);
-        $handler   = new JsonRpcHandler($registry, $audit);
-        $transport = new HttpTransport(new RequestValidator(), $handler);
-        $admin     = new AdminPage();
-        $oauth     = new OAuthServer(new OAuthStore());
+        $abilities              = new AbilityRegistrar();
+        $audit                  = new AuditRepository();
+        $policy                 = new PolicyEngine();
+        $abilitiesRegistry      = new AbilityToolRegistry($policy);
+        $canonicalJson          = new CanonicalJson();
+        $confirmationRepository = new ConfirmationRepository();
+        $idempotency            = new IdempotencyService(new WpdbRepository(), $canonicalJson);
+        $idempotentRegistry     = new IdempotentToolRegistry($abilitiesRegistry, $idempotency);
+        $confirmation           = new ConfirmationService($confirmationRepository, $canonicalJson);
+        $registry               = new ConfirmedToolRegistry($idempotentRegistry, $confirmation);
+        $handler                = new JsonRpcHandler($registry, $audit);
+        $transport              = new HttpTransport(new RequestValidator(), $handler);
+        $admin                  = new AdminPage(null, $confirmationRepository);
+        $oauth                  = new OAuthServer(new OAuthStore());
 
         add_action('init', array($this, 'loadTextdomain'));
         add_action('wp_abilities_api_categories_init', array($abilities, 'registerCategory'));
         add_action('wp_abilities_api_init', array($abilities, 'registerAbilities'));
         add_action('rest_api_init', array($transport, 'registerRoutes'));
         add_action('rest_api_init', array($oauth, 'registerRoutes'));
+        add_action('admin_init', array($admin, 'handleActions'));
         add_action('admin_menu', array($admin, 'registerMenu'));
         add_filter('rest_allowed_cors_headers', array($transport, 'allowedCorsHeaders'), 10, 2);
     }
