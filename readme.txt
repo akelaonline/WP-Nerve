@@ -4,7 +4,7 @@ Tags: mcp, ai, agents, abilities, automation
 Requires at least: 6.9
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 0.1.0-alpha.8
+Stable tag: 0.1.0-alpha.9
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -25,6 +25,12 @@ WPNerve before each logical operation.
 Public MCP and OAuth boundaries have independent, fail-closed request budgets.
 Client-supplied forwarding headers are never trusted when deriving the network
 subject used for rate limiting.
+
+Privileged surfaces have additional input- and object-level protections:
+security-sensitive options are not exposed, transient reads require explicit
+key allowlisting, debug logs are redacted, administrator account management has
+a separate opt-in, and WPNerve protects its own plugin from agent deactivation
+or deletion.
 
 This version is an early alpha for development and security review.
 
@@ -77,7 +83,32 @@ arbitrary `Forwarded` and `X-Forwarded-For` headers. If your deployment sits
 behind a trusted reverse proxy, normalize the client address at the web-server
 or PHP layer instead of trusting a header directly in WordPress.
 
+= Can an enabled privileged tool access every option, transient, user or plugin? =
+
+No. Privileged abilities remain disabled by default and, when explicitly
+enabled, still apply narrow safety boundaries. Sensitive WordPress/WPNerve and
+credential-like options are always protected. Transients require an exact
+per-key allowlist. Administrator account management, existing-user password
+changes and existing-user email changes each require separate opt-ins. WPNerve
+itself cannot be deactivated or deleted through its MCP plugin tools.
+
 == Changelog ==
+
+= 0.1.0-alpha.9 =
+* Hardened user, plugin, option and system diagnostic abilities with additional
+  object- and input-level authorization controls.
+* Added conservative WordPress option allowlists and permanent protection for
+  security-sensitive, credential-like, transient and WPNerve configuration keys.
+* Transient disclosure now defaults to an empty per-key allowlist.
+* Debug-log reads are capped at 64 KiB, redact common credential forms and no
+  longer disclose the absolute server filesystem path.
+* Administrator account management, existing-user password changes and email
+  changes require separate opt-ins; sensitive self-user changes and self-delete
+  are blocked.
+* WPNerve itself and network-active plugins are protected from deactivation and
+  deletion.
+* Plugin archive installs now require ZIP validation, a SHA-256 checksum,
+  decoded-size limits and refuse replacement of a matching installed slug.
 
 = 0.1.0-alpha.8 =
 * Added independent fixed-window rate limits for MCP, OAuth authorization,
