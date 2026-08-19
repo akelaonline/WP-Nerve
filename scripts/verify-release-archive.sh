@@ -15,6 +15,7 @@ import zipfile
 archive = pathlib.Path(sys.argv[1])
 required = {
     "wp-nerve/wp-nerve.php",
+    "wp-nerve/src/Autoloader.php",
     "wp-nerve/readme.txt",
     "wp-nerve/uninstall.php",
     "wp-nerve/LICENSE",
@@ -56,6 +57,8 @@ with zipfile.ZipFile(archive, "r") as zf:
         path = pathlib.PurePosixPath(name)
         if name.startswith("/") or ".." in path.parts:
             raise SystemExit(f"ERROR: unsafe archive path: {name}")
+        if any(ord(ch) < 32 or ord(ch) == 127 for ch in name):
+            raise SystemExit(f"ERROR: control character in archive path: {name!r}")
         if not name.startswith("wp-nerve/"):
             raise SystemExit(f"ERROR: unexpected top-level path: {name}")
         key = name.casefold()
@@ -85,6 +88,10 @@ with zipfile.ZipFile(archive, "r") as zf:
             break
     if stable != version:
         raise SystemExit(f"ERROR: archive stable tag {stable!r} != plugin version {version!r}")
+
+    expected_name = f"wp-nerve-{version}.zip"
+    if archive.name != expected_name:
+        raise SystemExit(f"ERROR: archive name {archive.name!r} != expected {expected_name!r}")
 
 print(f"PASS: release archive {archive.name} is structurally clean; version={version}; entries={len(infos)}")
 PY
