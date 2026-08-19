@@ -21,21 +21,16 @@ final class PolicyEngine
         }
 
         $configuration = $this->configuration($ability);
-        $capability    = $configuration['capability'] ?? 'do_not_allow';
-
-        if (! is_string($capability) || '' === $capability) {
-            return false;
-        }
 
         $discoverable = $this->isEnabled($configuration, $ability)
             && $this->isRiskClassEnabled($this->risk($ability))
-            && current_user_can($capability);
+            && $this->hasRequiredCapabilities($configuration);
 
         /**
          * Filters whether an ability is exposed as an MCP tool.
          *
          * @param bool       $discoverable Whether the ability is discoverable.
-         * @param WP_Ability $ability     Ability under evaluation.
+         * @param WP_Ability $ability      Ability under evaluation.
          */
         return (bool) apply_filters('wp_nerve_ability_is_discoverable', $discoverable, $ability);
     }
@@ -109,6 +104,28 @@ final class PolicyEngine
          * @param WP_Ability $ability Ability under evaluation.
          */
         return (bool) apply_filters('wp_nerve_ability_is_enabled', $enabled, $ability);
+    }
+
+    /**
+     * @param array<string, mixed> $configuration
+     */
+    private function hasRequiredCapabilities(array $configuration): bool
+    {
+        $capabilities = $configuration['capabilities'] ?? null;
+
+        if (is_array($capabilities) && array() !== $capabilities) {
+            foreach ($capabilities as $capability) {
+                if (! is_string($capability) || '' === $capability || ! current_user_can($capability)) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        $capability = $configuration['capability'] ?? 'do_not_allow';
+
+        return is_string($capability) && '' !== $capability && current_user_can($capability);
     }
 
     /** @return array<string, mixed> */
