@@ -28,6 +28,17 @@ if [[ "${ENVIRONMENT}" == "production" && "${ALLOW_PRODUCTION}" != "1" ]]; then
   exit 3
 fi
 
+wp --path="${WP_PATH}" eval '
+$v = (string) get_bloginfo("version");
+$affected69 = version_compare($v, "6.9.0", ">=") && version_compare($v, "6.9.5", "<");
+$affected70 = version_compare($v, "7.0.0", ">=") && version_compare($v, "7.0.2", "<");
+if ($affected69 || $affected70 || version_compare($v, "6.9", "<")) {
+    fwrite(STDERR, "ERROR: refusing G8 evidence on WordPress {$v}; use a patched supported Core release.\n");
+    exit(4);
+}
+echo "PASS: patched WordPress baseline {$v}\n";
+'
+
 wp --path="${WP_PATH}" eval-file "${GATE}"
 
 echo "WPNERVE_REAL_WORDPRESS_G8_RUNTIME_OK"
