@@ -82,10 +82,11 @@ final class PluginArchiveInspector
                 );
             }
 
-            $entries = array();
-            $roots   = array();
-            $seen    = array();
-            $total   = 0;
+            $entries    = array();
+            $roots      = array();
+            $seen       = array();
+            $total      = 0;
+            $hasPhpFile = false;
 
             for ($index = 0; $index < $zip->numFiles; ++$index) {
                 $name = $zip->getNameIndex($index, \ZipArchive::FL_UNCHANGED);
@@ -117,10 +118,19 @@ final class PluginArchiveInspector
 
                 $seen[$collisionKey] = true;
 
-                if ($this->isSymlink($zip, $index)) {
+                $entryType = $this->entryType($zip, $index);
+
+                if ('symlink' === $entryType) {
                     return new WP_Error(
                         'wp_nerve_archive_symlink',
                         __('Plugin archives containing symbolic links are not accepted.', 'wp-nerve')
+                    );
+                }
+
+                if ('special' === $entryType) {
+                    return new WP_Error(
+                        'wp_nerve_archive_special_file',
+                        __('Plugin archives containing device, socket, FIFO, or other special file entries are not accepted.', 'wp-nerve')
                     );
                 }
 
@@ -154,8 +164,26 @@ final class PluginArchiveInspector
                     );
                 }
 
+                if (! str_ends_with($normalized, '/') && str_ends_with(strtolower($trimmed), '.php')) {
+                    $hasPhpFile = true;
+                }
+
                 $roots[strtolower($root)] = $root;
                 $entries[] = $normalized;
+            }
+
+            if (1 !== count($roots)) {
+                return new WP_Error(
+                    'wp_nerve_archive_root_count',
+                    __('The plugin archive must contain exactly one top-level plugin root.', 'wp-nerve')
+                );
+            }
+
+            if (! $hasPhpFile) {
+                return new WP_Error(
+                    'wp_nerve_archive_no_plugin_file',
+                    __('The plugin archive does not contain a PHP plugin file.', 'wp-nerve')
+                );
             }
 
             $installedRoots = $this->installedPluginRoots();
@@ -316,19 +344,30 @@ final class PluginArchiveInspector
         return $directory ? $trimmed . '/' : $trimmed;
     }
 
-    private function isSymlink(\ZipArchive $zip, int $index): bool
+    /**
+     * @return 'regular'|'directory'|'symlink'|'special'|'unknown'
+     */
+    private function entryType(\ZipArchive $zip, int $index): string
     {
         $operationsSystem = 0;
         $attributes       = 0;
 
         if (! $zip->getExternalAttributesIndex($index, $operationsSystem, $attributes, \ZipArchive::FL_UNCHANGED)) {
-            return false;
+            return 'unknown';
         }
 
-        unset($operationsSystem);
+        if (\ZipArchive::OPSYS_UNIX !== $operationsSystem) {
+            return 'unknown';
+        }
 
         $unixType = ($attributes >> 16) & 0xF000;
 
-        return 0xA000 === $unixType;
+        return match ($unixType) {
+            0xA000 => 'symlink',
+            0x8000 => 'regular',
+            0x4000 => 'directory',
+            0x0000 => 'unknown',
+            default => 'special',
+        };
     }
 }
