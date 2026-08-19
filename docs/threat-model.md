@@ -2,7 +2,7 @@
 
 ## Status
 
-This document describes the alpha.7 attack surface. WPNerve is not approved for
+This document describes the alpha.8 attack surface. WPNerve is not approved for
 production until the P0 gates in [the beta-readiness plan](roadmap/beta-readiness.md)
 pass.
 
@@ -28,6 +28,12 @@ Client identity metadata is self-reported and is never an authorization signal.
 The authenticated WordPress user, enabled ability policy, risk class, and
 per-object capability checks are the authorization authority.
 
+For anonymous boundary protection, WPNerve derives its rate-limit subject only
+from the transport peer exposed by PHP as `REMOTE_ADDR`. Arbitrary client-supplied
+`Forwarded` and `X-Forwarded-For` headers are not trusted. Reverse proxies must
+normalize the client address before the request reaches WordPress if per-client
+budgets are required.
+
 ## Current administrative surface
 
 The alpha includes content, taxonomy, media, comments, menus, widgets, users,
@@ -51,7 +57,7 @@ core product scope.
 | Excessive agent authority | Least-privilege discovery; destructive and privileged classes off by default | Per-ability grants instead of class-only opt-in |
 | Duplicate mutation after retry | Persistent, credential-bound idempotency with atomic claim and replay | Real WordPress database and crash-path evidence |
 | Accidental destructive action | Risk class off by default plus bound, expiring, single-operation admin confirmation | Real admin/browser and MCP wire E2E evidence |
-| Endpoint abuse or registration flood | Request-size ceiling | MCP/OAuth rate limiting and dynamic registration quotas |
+| Endpoint abuse or registration flood | Independent fail-closed MCP/OAuth budgets with hashed transport-peer subjects; untrusted forwarding headers ignored | Real reverse-proxy matrix, OAuth lifecycle quotas and broader response/payload budgets |
 | Header/body request smuggling | Mirrored MCP headers checked against JSON body | Fuzzing and proxy matrix |
 | DNS rebinding from browser clients | Same-origin validation when Origin is present | Real proxy/browser tests |
 | SSRF through uploads or URLs | Current upload paths are intended to avoid unrestricted fetching | Verify every archive/media path and redirect behavior |
@@ -63,15 +69,16 @@ core product scope.
 | Tool-name confusion | Deterministic one-to-one mapping and WPNerve namespace | Encoded-name fuzzing |
 | Untrusted third-party ability | Only WPNerve namespace exposed | Reviewed opt-in SDK remains post-beta |
 | Cache disclosure | Authenticated and OAuth token responses use no-store headers | End-to-end intermediary tests |
-| Database growth | None sufficient for idempotency, OAuth and audit lifecycle | Retention and cleanup jobs with failure tests |
+| Database growth | Bounded rate-limit cleanup; no sufficient lifecycle policy yet for idempotency, OAuth and audit storage | Retention and cleanup jobs with failure tests |
 
 ## P0 requirements before beta
 
 - Real-runtime evidence for persistent idempotency claim/complete and replay behavior.
 - Real-runtime evidence for expiring confirmation tokens bound to actor,
   authoritative credential, ability, canonical arguments and idempotency key.
-- Independent rate limits for MCP, OAuth registration, authorization and token
-  routes, with explicit trusted-proxy behavior.
+- Real reverse-proxy and WordPress evidence for the implemented independent MCP,
+  OAuth registration, authorization and token rate limits and their trusted-peer
+  behavior.
 - Per-ability review of users, plugins, options and system diagnostics.
 - OAuth lifecycle cleanup, registration quotas and complete negative E2E tests.
 - Audit retention and privacy controls.
@@ -99,6 +106,8 @@ core product scope.
 5. Destructive and privileged operations require explicit, narrow authorization.
 6. Confirmation tokens cannot authorize a second logical operation, be
    transferred, outlive their expiry or be applied to changed input.
-7. Secrets never enter audit records or normal error messages.
-8. Unsupported or unknown risk states fail closed.
-9. Runtime-double success is not accepted as proof of WordPress compatibility.
+7. Rate-limit storage failure never turns rate limiting into an optional control.
+8. Arbitrary forwarding headers never select the rate-limit subject.
+9. Secrets never enter audit records or normal error messages.
+10. Unsupported or unknown risk states fail closed.
+11. Runtime-double success is not accepted as proof of WordPress compatibility.
