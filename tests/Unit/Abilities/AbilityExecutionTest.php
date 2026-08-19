@@ -48,7 +48,7 @@ final class AbilityExecutionTest extends TestCase
         self::assertFalse($status['multisite']);
         self::assertSame('https://example.test/wp-json/wp-nerve/v1/mcp', $status['mcp_endpoint']);
         self::assertContains('2026-07-28', $status['protocol_versions']);
-        self::assertSame('0.1.0-alpha.8', $status['wpnerve_version']);
+        self::assertSame('0.1.0-alpha.9', $status['wpnerve_version']);
     }
 
     public function testListContentTypesReturnsPublicTypes(): void
