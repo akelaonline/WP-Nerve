@@ -5,7 +5,7 @@
 [![WordPress](https://img.shields.io/badge/WordPress-6.9%2B-21759b)](https://wordpress.org/)
 [![PHP](https://img.shields.io/badge/PHP-8.1%2B-777bb3)](https://www.php.net/)
 [![License](https://img.shields.io/badge/license-GPL--2.0-orange)](LICENSE)
-[![Version](https://img.shields.io/badge/version-0.1.0--alpha.10-111827)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.1.0--alpha.11-111827)](CHANGELOG.md)
 [![Instagram](https://img.shields.io/badge/Instagram-%40akelaonline-E4405F)](https://www.instagram.com/akelaonline/)
 
 WPNerve is a self-hosted WordPress plugin that exposes carefully selected native
@@ -15,10 +15,13 @@ external database.
 
 > 🇬🇧 English documentation first — 🇪🇸 documentación en español más abajo.
 
-> **Project status: early alpha.** The 53-ability v1 surface, least-privilege
-> credential onboarding, persistent mutation idempotency, out-of-band high-risk
-> confirmation, fail-closed endpoint rate limiting, privileged-surface hardening,
-> and the alpha.10 OAuth lifecycle controls are implemented. This is not yet a
+> **Project status: early alpha.** The v1 contract contains exactly **53 registered
+> abilities**. Alpha.11 adds live runtime diagnostics that separate the registered
+> catalog from the abilities actually discoverable for the current WordPress user,
+> plus an explicit site-owner opt-in for reviewed abilities whose default is off.
+> Least-privilege onboarding, persistent mutation idempotency, out-of-band
+> high-risk confirmation, fail-closed endpoint rate limiting, privileged-surface
+> hardening, and the OAuth lifecycle controls are implemented. This is not yet a
 > production-readiness claim: real WordPress/Multisite, strict-client, wire,
 > filesystem/fuzzing, retention, and independent security-review gates remain.
 
@@ -58,8 +61,11 @@ proves a narrow design.
   redaction.
 - **Privacy-preserving audit.** Tool arguments and credentials are not persisted
   in the normal audit records.
+- **Runtime catalog diagnostics.** Tools → WPNerve Diagnostics compares the exact
+  53-ability code contract with WordPress' live registry and current discovery
+  policy, listing any blocked tools by name.
 
-### OAuth security profile — alpha.10
+### OAuth security profile — alpha.10+
 
 OAuth exists only for MCP clients that cannot send WordPress Application
 Passwords. The implemented public-client profile requires:
@@ -104,13 +110,16 @@ separate so protocol changes do not require rewriting WordPress operations.
 2. Open **Tools → WPNerve**.
 3. Select a dedicated WordPress user with only the capabilities the agent needs.
 4. Generate a WPNerve Application Password and copy the one-time client config.
-5. Connect the client to:
+5. Open **Tools → WPNerve Diagnostics** and verify the live registered and
+   discoverable counts. On a disposable staging site, the full reviewed
+   53-ability surface can be enabled in one click.
+6. Connect the client to:
    `https://your-site.com/wp-json/wp-nerve/v1/mcp`
-6. Revoke the credential from the same screen when the client is retired.
-7. If high-risk tools are explicitly enabled, approve each matching operation in
+7. Revoke the credential from the same screen when the client is retired.
+8. If high-risk tools are explicitly enabled, approve each matching operation in
    **Tools → WPNerve** before retrying it from the client.
 
-Never commit or share an Application Password.
+Never commit or share an Application Password from a real site.
 
 ### Selected tools
 
@@ -121,9 +130,11 @@ Never commit or share an Application Password.
 | `wp_nerve_search_content` | Search content with type/status/pagination controls | Read |
 | `wp_nerve_get_content` | Read one content item subject to status/capability | Read |
 
-The v1 catalog contains **53 abilities** across content lifecycle, revisions,
-taxonomy, media, comments, menus, widgets, users, plugins, options, and system
-diagnostics. See [Ability catalog v1](docs/abilities-v1.md).
+The v1 catalog contains **exactly 53 registered abilities** across content
+lifecycle, revisions, taxonomy, media, comments, menus, widgets, users, plugins,
+options, and system diagnostics. A client can discover fewer because per-ability
+enablement, risk classes, and WordPress capabilities are independent policy
+gates. See [Ability catalog v1](docs/abilities-v1.md).
 
 ### MCP discovery example
 
@@ -160,6 +171,8 @@ curl --user 'USERNAME:APPLICATION_PASSWORD' \
 - Persistent idempotency prevents a completed mutation from being duplicated by
   a retry.
 - Destructive/privileged operations require narrow opt-in and matching approval.
+- Explicit per-ability opt-ins never bypass WordPress capabilities or risk-class
+  policy.
 - Rate-limit storage failure fails closed.
 - Arbitrary `Forwarded` / `X-Forwarded-For` values do not select the rate-limit
   identity.
@@ -221,6 +234,16 @@ de WPNerve y autorizaciones por objeto.
 No hay relay, SaaS, Firebase ni base externa. Tampoco se expone SQL, PHP, shell,
 WP-CLI, edición arbitraria del filesystem o `wp-config.php`.
 
+### Catálogo y diagnóstico runtime
+
+El contrato v1 contiene **exactamente 53 abilities registradas**. Eso no significa
+que las 53 deban aparecerle a cualquier cliente: el opt-in individual, la clase
+de riesgo y las capabilities del usuario son gates separados. **Herramientas →
+WPNerve Diagnostics** muestra ambos números desde el WordPress real y lista por
+nombre cualquier ability bloqueada. En un staging descartable se puede habilitar
+la superficie completa revisada con un clic sin desactivar las demás barreras de
+seguridad.
+
 ### Por qué existe
 
 - Abilities API nativa de WordPress 6.9+.
@@ -233,7 +256,7 @@ WP-CLI, edición arbitraria del filesystem o `wp-config.php`.
 - Protecciones específicas para usuarios, plugins, options, transients y logs.
 - Auditoría sin guardar argumentos ni credenciales.
 
-### OAuth en alpha.10
+### OAuth en alpha.10+
 
 El flujo OAuth está pensado para clientes MCP que no pueden enviar Application
 Passwords. Exige PKCE S256, `state`, redirects exactos, HTTPS remoto, HTTP sólo
@@ -247,10 +270,13 @@ credenciales.
 2. Abrí **Herramientas → WPNerve**.
 3. Elegí un usuario dedicado con el mínimo de capabilities necesarias.
 4. Generá la credencial y copiá la configuración del cliente.
-5. Conectá al endpoint:
+5. Abrí **Herramientas → WPNerve Diagnostics** y verificá `53 / 53` en el
+   registro. En un staging descartable podés habilitar la superficie completa de
+   prueba con un clic.
+6. Conectá al endpoint:
    `https://tu-sitio.com/wp-json/wp-nerve/v1/mcp`
-6. Revocá la credencial cuando retires el cliente.
-7. Si habilitás herramientas de alto riesgo, aprobá cada operación desde
+7. Revocá la credencial cuando retires el cliente.
+8. Si habilitás herramientas de alto riesgo, aprobá cada operación desde
    WordPress antes del reintento.
 
 ### Estado de seguridad
