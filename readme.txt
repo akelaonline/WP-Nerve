@@ -4,7 +4,7 @@ Tags: mcp, ai, agents, abilities, automation
 Requires at least: 6.9
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 0.1.0-alpha.10
+Stable tag: 0.1.0-alpha.11
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -15,6 +15,11 @@ A secure, native MCP server and agent control layer for WordPress.
 WPNerve exposes selected native WordPress Abilities to authenticated MCP clients
 over the Model Context Protocol. It runs entirely inside WordPress and does not
 require an external relay, SaaS account, or additional database.
+
+The v1 catalog contains exactly 53 reviewed abilities. Tools > WPNerve
+Diagnostics shows the live WordPress registry count and the number currently
+discoverable for the logged-in administrator, so documentation counts are never
+confused with runtime exposure.
 
 Read-only abilities ship enabled by default: site status, content type listing,
 content search, and full content reads. Recoverable writes are available across
@@ -45,7 +50,10 @@ This version is an early alpha for development and security review.
 3. Open Tools > WPNerve.
 4. Select a dedicated, least-privilege agent user and generate its WPNerve
    credential. The plugin verifies the connection without persisting the secret.
-5. Copy the generated client configuration and revoke the credential from the
+5. Open Tools > WPNerve Diagnostics to verify the live 53-ability registry and
+   current discoverable count. On disposable staging only, the full reviewed
+   surface can be enabled in one click.
+6. Copy the generated client configuration and revoke the credential from the
    same screen when it is no longer needed.
 
 == Frequently Asked Questions ==
@@ -53,6 +61,13 @@ This version is an early alpha for development and security review.
 = Does WPNerve send data to an external service? =
 
 No. MCP requests are processed inside the WordPress installation.
+
+= How many abilities are implemented? =
+
+The v1 catalog contains exactly 53 registered WPNerve abilities. The number a
+specific MCP client can discover can be lower because ability flags, risk
+classes and WordPress capabilities are independent policy gates. Tools > WPNerve
+Diagnostics shows both numbers from the live registry.
 
 = Which operations are enabled by default? =
 
@@ -106,6 +121,17 @@ and refresh tokens are single-use at their rotation boundary, and clients can
 revoke their own access or refresh tokens.
 
 == Changelog ==
+
+= 0.1.0-alpha.11 =
+* Added Tools > WPNerve Diagnostics with live registered/discoverable ability
+  counts, REST-route and schema checks.
+* Established 53 as the explicit v1 catalog contract in code and documentation.
+* Added an explicit site-owner ability opt-in that never bypasses risk classes or
+  WordPress capability checks.
+* Added a one-click full 53-ability staging mode for disposable test sites while
+  preserving idempotency and high-risk confirmations.
+* Protected the new ability-exposure option from MCP option mutation and clean it
+  during explicit destructive uninstall.
 
 = 0.1.0-alpha.10 =
 * Hardened the OAuth lifecycle with strict PKCE/state validation, exact HTTPS or
