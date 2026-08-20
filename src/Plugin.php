@@ -13,6 +13,7 @@ namespace WPNerve;
 use WPNerve\Abilities\AbilityRegistrar;
 use WPNerve\Admin\AdminPage;
 use WPNerve\Admin\DiagnosticsPage;
+use WPNerve\Admin\HttpSmokePage;
 use WPNerve\Audit\AuditRepository;
 use WPNerve\Infrastructure\Activator;
 use WPNerve\Maintenance\RetentionManager;
@@ -87,6 +88,7 @@ final class Plugin
         );
         $admin                  = new AdminPage(null, $confirmationRepository);
         $diagnostics            = new DiagnosticsPage();
+        $httpSmoke              = new HttpSmokePage();
         $oauth                  = new OAuthServer(new OAuthStore(), $rateLimiter, $clientAddress);
         $retention              = new RetentionManager();
 
@@ -99,6 +101,7 @@ final class Plugin
         add_action('admin_init', array($diagnostics, 'handleActions'));
         add_action('admin_menu', array($admin, 'registerMenu'));
         add_action('admin_menu', array($diagnostics, 'registerMenu'));
+        add_action('admin_menu', array($httpSmoke, 'registerMenu'));
         add_action('wp_scheduled_delete', array($retention, 'cleanup'), 20, 0);
         add_filter('rest_allowed_cors_headers', array($transport, 'allowedCorsHeaders'), 10, 2);
     }
