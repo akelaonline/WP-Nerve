@@ -81,7 +81,7 @@ final class PluginTest extends TestCase
         self::assertCount(1, WPState::$actions['wp_abilities_api_init']);
         self::assertCount(2, WPState::$actions['rest_api_init']);
         self::assertCount(2, WPState::$actions['admin_init']);
-        self::assertCount(2, WPState::$actions['admin_menu']);
+        self::assertCount(3, WPState::$actions['admin_menu']);
         self::assertCount(1, WPState::$actions['wp_scheduled_delete']);
         self::assertCount(1, WPState::$filters['rest_allowed_cors_headers']);
     }
