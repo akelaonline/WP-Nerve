@@ -51,7 +51,7 @@ final class RequestValidator
             return new ProtocolError(-32600, 'Invalid Request: id must be a string, integer, or null.');
         }
 
-        if (isset($message['params']) && ! is_array($message['params'])) {
+        if (array_key_exists('params', $message) && ! is_array($message['params'])) {
             return new ProtocolError(-32602, 'Invalid params: params must be an object.');
         }
 

@@ -32,29 +32,27 @@ final class EntryPointTest extends PHPUnitTestCase
 
         if (! self::$entryLoaded) {
             require dirname(__DIR__, 2) . '/wp-nerve.php';
-
             self::$entryLoaded = true;
-
             return;
         }
 
         $property = new ReflectionProperty(Plugin::class, 'instance');
         $property->setValue(null, null);
-
         Plugin::instance()->boot();
     }
 
     public function testLoadingEntryPointBootsThePlugin(): void
     {
-        self::assertSame('0.1.0-alpha.9', WP_NERVE_VERSION);
+        self::assertSame('0.1.0-alpha.14', WP_NERVE_VERSION);
 
         self::assertCount(1, WPState::$activationHooks);
         self::assertSame(array(Activator::class, 'activate'), WPState::$activationHooks[0]['callback']);
-
         self::assertCount(2, WPState::$actions['rest_api_init']);
         self::assertCount(1, WPState::$actions['wp_abilities_api_init']);
+        self::assertCount(2, WPState::$actions['admin_init']);
+        self::assertCount(2, WPState::$actions['admin_menu']);
         self::assertCount(6, WPState::$schemaCalls);
-        self::assertSame('5', WPState::$options['wp_nerve_schema_version']);
+        self::assertSame('6', WPState::$options['wp_nerve_schema_version']);
     }
 
     public function testEntryPointHeaderMatchesVersionConstant(): void
@@ -63,7 +61,6 @@ final class EntryPointTest extends PHPUnitTestCase
         self::assertIsString($source);
 
         preg_match('/^\s*\* Version:\s*(.+)$/m', $source, $matches);
-
         self::assertSame(WP_NERVE_VERSION, trim($matches[1] ?? ''));
     }
 

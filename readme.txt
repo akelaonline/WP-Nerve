@@ -1,169 +1,77 @@
 === WPNerve ===
 Contributors: akelaonline
-Tags: mcp, ai, agents, abilities, automation
+Tags: mcp, ai, agents, abilities, wordpress
 Requires at least: 6.9
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 0.1.0-alpha.9
+Stable tag: 0.1.0-alpha.14
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-A secure, native MCP server and agent control layer for WordPress.
+Native, self-hosted MCP gateway for WordPress agents built on the WordPress Abilities API.
 
 == Description ==
 
-WPNerve exposes selected native WordPress Abilities to authenticated MCP clients
-over the Model Context Protocol. It runs entirely inside WordPress and does not
-require an external relay, SaaS account, or additional database.
+WPNerve exposes a curated catalog of 53 native WordPress Abilities as authenticated MCP tools.
 
-Read-only abilities ship enabled by default: site status, content type listing,
-content search, and full content reads. Recoverable writes are available across
-the selected v1 surface. Destructive and privileged tools are hidden until the
-site owner opts in and then require a matching, short-lived approval in Tools >
-WPNerve before each logical operation.
+Highlights:
 
-Public MCP and OAuth boundaries have independent, fail-closed request budgets.
-Client-supplied forwarding headers are never trusted when deriving the network
-subject used for rate limiting.
+* Native WordPress 6.9+ Abilities API
+* 53 reviewed abilities with live runtime diagnostics
+* Application Password and constrained OAuth authentication over HTTPS
+* Read, Write, Privileged and Destructive risk classes
+* Persistent idempotency for mutations
+* WordPress-admin approval for high-risk operations
+* Independent MCP/OAuth rate limits
+* Privacy-preserving audit records
+* Hardened plugin ZIP inspection
+* In-product Dashboard, Diagnostics, HTTP Smoke and Documentation
+* No arbitrary SQL, PHP, shell, WP-CLI or wp-config.php access
 
-Privileged surfaces have additional input- and object-level protections:
-security-sensitive options are not exposed, transient reads require explicit
-key allowlisting, debug logs are redacted, administrator account management has
-a separate opt-in, and WPNerve protects its own plugin from agent deactivation
-or deletion.
-
-This version is an early alpha for development and security review.
+WPNerve runs inside WordPress. There is no relay, SaaS control plane, Firebase dependency or external credential store.
 
 == Installation ==
 
-1. Upload the WPNerve plugin directory to `/wp-content/plugins/`.
+1. Upload the WPNerve ZIP from Plugins > Add New > Upload Plugin.
 2. Activate WPNerve.
-3. Open Tools > WPNerve.
-4. Select a dedicated, least-privilege agent user and generate its WPNerve
-   credential. The plugin verifies the connection without persisting the secret.
-5. Copy the generated client configuration and revoke the credential from the
-   same screen when it is no longer needed.
+3. Open WPNerve > Dashboard.
+4. Generate a dedicated WPNerve Application Password for the WordPress user the agent should act as.
+5. Copy the generated MCP client configuration.
+6. Review enabled risk classes.
+7. Run WPNerve > Diagnostics before connecting a new client.
 
 == Frequently Asked Questions ==
 
-= Does WPNerve send data to an external service? =
+= Does WPNerve expose unrestricted access to WordPress? =
 
-No. MCP requests are processed inside the WordPress installation.
+No. WPNerve exposes only reviewed, schema-defined abilities. It does not expose arbitrary SQL, PHP, shell, WP-CLI, filesystem editing or wp-config.php access.
 
-= Which operations are enabled by default? =
+= How many abilities are included? =
 
-Read-only abilities: site status, list content types, search content, and get
-content. Drafts and private posts require the corresponding WordPress
-capabilities. Destructive and privileged operations are denied by default.
+The v1 catalog contains exactly 53 registered abilities. The Diagnostics screen compares that contract to WordPress' live registry and current policy.
 
-= Which MCP protocol versions are supported? =
+= What authentication is supported? =
 
-The modern stateless HTTP protocol `2026-07-28` plus legacy clients using
-`2025-11-25` and `2025-06-18`.
+WordPress Application Passwords are the simplest option. A constrained OAuth public-client flow is also implemented for clients that cannot send Basic authentication.
 
-= Do mutating tools require an idempotency key? =
+= Are destructive operations automatic? =
 
-Yes. Every write, destructive, and privileged call must send a unique
-`wp-nerve/idempotencyKey` in request `_meta`. Reuse the same key only when
-retrying the exact same call. This prevents network retries from duplicating
-changes.
-
-= Do destructive or privileged tools require confirmation? =
-
-Yes. Their risk class must first be enabled by an administrator. The first exact
-call returns a short-lived token and display code without executing. Match and
-approve that code in Tools > WPNerve, then retry with the same arguments,
-idempotency key, credential and confirmation token. Changed or expired requests
-fail closed.
-
-= How does rate limiting work behind a reverse proxy? =
-
-WPNerve uses the transport peer exposed as `REMOTE_ADDR` and deliberately ignores
-arbitrary `Forwarded` and `X-Forwarded-For` headers. If your deployment sits
-behind a trusted reverse proxy, normalize the client address at the web-server
-or PHP layer instead of trusting a header directly in WordPress.
-
-= Can an enabled privileged tool access every option, transient, user or plugin? =
-
-No. Privileged abilities remain disabled by default and, when explicitly
-enabled, still apply narrow safety boundaries. Sensitive WordPress/WPNerve and
-credential-like options are always protected. Transients require an exact
-per-key allowlist. Administrator account management, existing-user password
-changes and existing-user email changes each require separate opt-ins. WPNerve
-itself cannot be deactivated or deleted through its MCP plugin tools.
+No. Privileged and destructive operations are disabled by default and require a one-time WordPress administrator approval when enabled.
 
 == Changelog ==
 
-= 0.1.0-alpha.9 =
-* Hardened user, plugin, option and system diagnostic abilities with additional
-  object- and input-level authorization controls.
-* Added conservative WordPress option allowlists and permanent protection for
-  security-sensitive, credential-like, transient and WPNerve configuration keys.
-* Transient disclosure now defaults to an empty per-key allowlist.
-* Debug-log reads are capped at 64 KiB, redact common credential forms and no
-  longer disclose the absolute server filesystem path.
-* Administrator account management, existing-user password changes and email
-  changes require separate opt-ins; sensitive self-user changes and self-delete
-  are blocked.
-* WPNerve itself and network-active plugins are protected from deactivation and
-  deletion.
-* Plugin archive installs now require ZIP validation, a SHA-256 checksum,
-  decoded-size limits and refuse replacement of a matching installed slug.
+= 0.1.0-alpha.14 =
+* Product-grade WPNerve admin dashboard and navigation.
+* Unified visual system across Dashboard, Diagnostics, HTTP Smoke and Documentation.
+* New in-product operator documentation.
+* GitHub/readme documentation refresh.
+* Preserves the 53-ability runtime contract and security gates validated on staging.
 
-= 0.1.0-alpha.8 =
-* Added independent fixed-window rate limits for MCP, OAuth authorization,
-  token exchange and dynamic client registration.
-* Added atomic database-backed request accounting with hashed network subjects.
-* Rate-limit storage failures fail closed and exhausted OAuth budgets return
-  Retry-After plus rate-limit response headers.
-* Untrusted forwarding headers are ignored when selecting the rate-limit subject.
-* Database schema advanced to v5 and uninstall cleanup includes rate-limit data.
+= 0.1.0-alpha.13 =
+* Added authenticated real-HTTP MCP smoke diagnostics using a temporary Application Password that is revoked automatically.
 
-= 0.1.0-alpha.7 =
-* Added out-of-band admin confirmation for destructive and privileged MCP tools.
-* Challenges are short-lived and bound to the WordPress user, authoritative
-  credential, tool, canonical arguments and idempotency key.
-* Added atomic approval/consumption, safe idempotent replay, tamper and expiry
-  protection, and privacy-preserving confirmation storage.
-* Fixed admin action wiring so credential and confirmation forms run on the
-  correct WordPress hook.
+= 0.1.0-alpha.12 =
+* Added one-click operational MCP smoke covering discovery, tools/list, reads, writes and destructive confirmation.
 
-= 0.1.0-alpha.6 =
-* Added least-privilege user selection, copy-ready client configuration,
-  automatic MCP connection testing, and WPNerve credential revocation.
-* Fixed Application Password parsing to use WordPress core's tuple response.
-* Newly generated secrets exist only in the current admin response and are no
-  longer stored in a transient.
-
-= 0.1.0-alpha.5 =
-* Added persistent, atomic idempotency for every mutating MCP tool.
-* Claims are scoped to the authenticated user, authoritative credential, tool,
-  key, and canonical argument digest.
-* Added safe outcome replay, collision detection, and fail-closed handling of
-  concurrent or indeterminate executions.
-
-= 0.1.0-alpha.4 =
-* Added content lifecycle abilities: create-draft, update-content,
-  list/get-revisions, trash/restore/publish-content, and restore-revision.
-* Added taxonomy abilities: list-taxonomies, list-terms, create-term, assign-terms.
-* Added media abilities: list/get/upload/update/delete-media.
-* Added comment abilities: list/get/create/reply/moderate/delete-comment.
-* Added menu abilities: list, get-items, create, add/update/delete-item,
-  assign-location. Widget reads: list-sidebars, get-sidebar, list-available.
-* Added user, plugin, option, and system abilities (opt-in by default):
-  list/get/create/update/delete-user, plugin lifecycle, options, transients,
-  and debug log.
-* Added preview-content-update dry-run and an admin dashboard with one-click
-  Application Password generation, risk class toggles, and client snippets.
-* Added an OAuth 2.1 authorization server (PKCE S256, dynamic client
-  registration, refresh tokens) for Claude web and mobile connectors.
-* Added risk class opt-in: destructive and privileged operations are denied
-  until the site owner enables them.
-
-= 0.1.0-alpha.2 =
-* Added list-content-types, search-content, and get-content read abilities.
-* Added text domain loading and the .pot catalog.
-* Added the unit test suite with ~96% line coverage.
-
-= 0.1.0-alpha.1 =
-* Initial protocol, policy, audit, and native Abilities API foundation.
+= 0.1.0-alpha.11 =
+* Added live 53-ability runtime diagnostics and explicit full-surface staging controls.

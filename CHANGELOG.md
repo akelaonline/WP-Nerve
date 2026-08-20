@@ -2,64 +2,53 @@
 
 All notable changes to WPNerve will be documented here.
 
-## [0.1.0-alpha.9] - 2026-08-19
-
-### Security
-
-- Replaced arbitrary WordPress option reads/writes with conservative allowlists.
-  Core security, credential-like, transient and WPNerve configuration options
-  remain protected even when an extension filter tries to allow them.
-- Privileged option/transient values reject objects, resources, excessive depth,
-  excessive collection size and oversized strings before disclosure or mutation.
-- Transient reads now use an empty default allowlist and require an exact per-key
-  opt-in.
-- Debug-log output is capped at 64 KiB, redacts common Authorization/password/
-  token/secret/credential and URL-userinfo forms, and no longer exposes the
-  absolute server filesystem path.
-- Administrator user creation, modification and deletion require a separate
-  explicit opt-in in addition to WordPress capabilities and WPNerve ability/risk
-  gates.
-- Sensitive changes to the authenticated agent user and self-deletion are
-  blocked. Existing-user password and email changes require independent opt-ins.
-- Plugin mutations re-check their WordPress capabilities at execution time.
-  WPNerve itself and network-active plugins are protected from deactivation and
-  deletion.
-- Plugin ZIP installs require a simple archive filename, decoded-size budget,
-  ZIP signature and matching SHA-256 checksum, and refuse replacement when the
-  archive slug matches an installed plugin.
-
-### Fixed
-
-- Existing-user email updates now correctly map the public `email` input to
-  WordPress `user_email`.
-- User update recovery metadata records the previous non-password profile state.
-- Plugin installation responses no longer disclose the absolute plugin directory.
-
-## [0.1.0-alpha.8] - 2026-08-19
+## [0.1.0-alpha.14] - 2026-08-20
 
 ### Added
 
-- Independent fixed-window request budgets for MCP, OAuth authorization, OAuth
-  token exchange and OAuth dynamic client registration.
-- Atomic database-backed rate-limit accounting with a unique
-  bucket/subject/window key.
-- Privacy-preserving network subjects stored only as SHA-256 hashes.
-- Deterministic clock, exhaustion, storage-failure, proxy-spoof and endpoint
-  boundary tests.
-
-### Security
-
-- Rate-limit storage failure fails closed instead of allowing an unmetered
-  request through.
-- WPNerve derives the network subject from the transport peer exposed as
-  `REMOTE_ADDR` and deliberately ignores arbitrary client-supplied `Forwarded`
-  and `X-Forwarded-For` headers.
-- OAuth 429 responses include `Retry-After` and rate-limit metadata.
+- Product-grade top-level WPNerve admin navigation with Dashboard, Diagnostics, HTTP Smoke and Documentation.
+- Unified Akela product UI with hero/status treatment, KPI cards, operational panels, responsive layout and dedicated admin stylesheet.
+- In-product operator documentation covering onboarding, security model, risk classes, client configuration, diagnostics and product scope.
 
 ### Changed
 
-- Database schema version increased to 5 and explicit uninstall cleanup now
-  includes the rate-limit table.
+- Connection, credentials, confirmations and risk controls are now organized as an operational dashboard instead of raw WordPress tables.
+- Diagnostics and HTTP smoke screens use the same professional admin shell and are linked directly from the dashboard.
+- Documentation and repository copy now use the exact 53-ability runtime contract and distinguish operational evidence from remaining production-readiness gates.
+
+### Security
+
+- The redesign does not weaken capability checks, idempotency, confirmation, rate limiting or ability-discovery policy.
+- High-risk approval language now points to WPNerve → Dashboard after the admin navigation migration.
+
+## [0.1.0-alpha.13] - 2026-08-20
+
+### Added
+
+- Authenticated real-HTTP MCP smoke diagnostics in Tools > WPNerve HTTP Smoke.
+- Temporary Application Password lifecycle dedicated to the smoke: create, use over the public HTTPS endpoint, and revoke in the same run.
+- Modern MCP `2026-07-28` discovery, 53-tool listing and `site-status` checks over WordPress HTTP.
+- Legacy `2025-11-25` and `2025-06-18` initialize + tools/list checks.
+- Negative boundary checks for unauthenticated access, hostile Origin, mirrored method mismatch and unsupported protocol versions.
+
+### Changed
+
+- Alpha.12 operational in-process smoke is preserved as the mutation/confirmation gate; alpha.13 adds a separate network-path gate instead of replacing it.
+
+## [0.1.0-alpha.12] - 2026-08-19
+
+### Added
+
+- Tools > WPNerve Diagnostics with live registered/discoverable ability counts.
+- Explicit per-ability opt-in and one-click full 53-ability staging mode.
+
+### Fixed
+
+- Enabling all risk classes no longer leaves reviewed abilities unreachable solely because their catalog default is off.
+
+### Security
+
+- Ability opt-ins do not bypass WordPress capabilities, risk classes, idempotency, or high-risk confirmation.
 
 ## [0.1.0-alpha.7] - 2026-08-18
 

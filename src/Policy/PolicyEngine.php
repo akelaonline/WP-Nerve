@@ -97,8 +97,25 @@ final class PolicyEngine
     {
         $enabled = true === ($configuration['enabled_by_default'] ?? false);
 
+        if (! $enabled) {
+            $overrides = get_option('wp_nerve_enabled_abilities', array());
+
+            if (is_array($overrides)) {
+                foreach ($overrides as $name) {
+                    if (is_string($name) && $ability->get_name() === $name) {
+                        $enabled = true;
+                        break;
+                    }
+                }
+            }
+        }
+
         /**
          * Filters whether an ability is enabled regardless of its default flag.
+         *
+         * Site owners can also explicitly opt in reviewed abilities through the
+         * wp_nerve_enabled_abilities option. This never bypasses risk-class or
+         * WordPress capability checks.
          *
          * @param bool       $enabled Whether the ability is enabled.
          * @param WP_Ability $ability Ability under evaluation.

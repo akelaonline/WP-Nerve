@@ -12,7 +12,12 @@ namespace WPNerve;
 
 use WPNerve\Abilities\AbilityRegistrar;
 use WPNerve\Admin\AdminPage;
+use WPNerve\Admin\DiagnosticsPage;
+use WPNerve\Admin\DocumentationPage;
+use WPNerve\Admin\HttpSmokePage;
 use WPNerve\Audit\AuditRepository;
+use WPNerve\Infrastructure\Activator;
+use WPNerve\Maintenance\RetentionManager;
 use WPNerve\OAuth\OAuthServer;
 use WPNerve\OAuth\OAuthStore;
 use WPNerve\Policy\PolicyEngine;
@@ -34,7 +39,6 @@ use WPNerve\Transport\HttpTransport;
 final class Plugin
 {
     private static ?self $instance = null;
-
     private bool $booted = false;
 
     public static function instance(): self
@@ -42,7 +46,6 @@ final class Plugin
         if (null === self::$instance) {
             self::$instance = new self();
         }
-
         return self::$instance;
     }
 
@@ -51,7 +54,6 @@ final class Plugin
         if ($this->booted) {
             return;
         }
-
         $this->booted = true;
 
         if (! $this->requirementsMet()) {
@@ -59,13 +61,8 @@ final class Plugin
             return;
         }
 
-        if ('5' !== get_option('wp_nerve_schema_version')) {
-            AuditRepository::installSchema();
-            OAuthStore::installSchema();
-            WpdbRepository::installSchema();
-            ConfirmationRepository::installSchema();
-            RateLimitRepository::installSchema();
-            update_option('wp_nerve_schema_version', '5', false);
+        if (Activator::SCHEMA_VERSION !== get_option('wp_nerve_schema_version')) {
+            Activator::installSchema();
         }
 
         $abilities              = new AbilityRegistrar();
@@ -81,14 +78,13 @@ final class Plugin
         $handler                = new JsonRpcHandler($registry, $audit);
         $rateLimiter            = new RateLimiter(new RateLimitRepository());
         $clientAddress          = new ClientAddress();
-        $transport              = new HttpTransport(
-            new RequestValidator(),
-            $handler,
-            $rateLimiter,
-            $clientAddress
-        );
+        $transport              = new HttpTransport(new RequestValidator(), $handler, $rateLimiter, $clientAddress);
         $admin                  = new AdminPage(null, $confirmationRepository);
+        $diagnostics            = new DiagnosticsPage();
+        $documentation          = new DocumentationPage();
+        $httpSmoke              = new HttpSmokePage();
         $oauth                  = new OAuthServer(new OAuthStore(), $rateLimiter, $clientAddress);
+        $retention              = new RetentionManager();
 
         add_action('init', array($this, 'loadTextdomain'));
         add_action('wp_abilities_api_categories_init', array($abilities, 'registerCategory'));
@@ -96,8 +92,36 @@ final class Plugin
         add_action('rest_api_init', array($transport, 'registerRoutes'));
         add_action('rest_api_init', array($oauth, 'registerRoutes'));
         add_action('admin_init', array($admin, 'handleActions'));
+        add_action('admin_init', array($diagnostics, 'handleActions'));
         add_action('admin_menu', array($admin, 'registerMenu'));
+        add_action(
+            'admin_menu',
+            static function () use ($diagnostics, $httpSmoke, $documentation): void {
+                if (! function_exists('add_submenu_page')) {
+                    $diagnostics->registerMenu();
+                    $httpSmoke->registerMenu();
+                    $documentation->registerMenu();
+                    return;
+                }
+
+                add_submenu_page('wp-nerve', __('WPNerve Diagnostics', 'wp-nerve'), __('Diagnostics', 'wp-nerve'), 'manage_options', 'wp-nerve-diagnostics', array($diagnostics, 'render'));
+                add_submenu_page('wp-nerve', __('WPNerve HTTP Smoke', 'wp-nerve'), __('HTTP Smoke', 'wp-nerve'), 'manage_options', 'wp-nerve-http-smoke', array($httpSmoke, 'render'));
+                add_submenu_page('wp-nerve', __('WPNerve Documentation', 'wp-nerve'), __('Documentation', 'wp-nerve'), 'manage_options', 'wp-nerve-documentation', array($documentation, 'render'));
+            }
+        );
+        add_action('admin_enqueue_scripts', array($admin, 'enqueueAssets'));
+        add_filter('admin_body_class', array($this, 'adminBodyClass'));
+        add_action('wp_scheduled_delete', array($retention, 'cleanup'), 20, 0);
         add_filter('rest_allowed_cors_headers', array($transport, 'allowedCorsHeaders'), 10, 2);
+    }
+
+    public function adminBodyClass(string $classes): string
+    {
+        // phpcs:disable WordPress.Security.NonceVerification.Recommended -- read-only admin page detection.
+        $page = isset($_GET['page']) ? sanitize_key((string) wp_unslash($_GET['page'])) : '';
+        // phpcs:enable WordPress.Security.NonceVerification.Recommended
+
+        return str_starts_with($page, 'wp-nerve') ? trim($classes . ' wpn-product-screen') : $classes;
     }
 
     public function loadTextdomain(): void
@@ -110,11 +134,7 @@ final class Plugin
         if (! current_user_can('activate_plugins')) {
             return;
         }
-
-        printf(
-            '<div class="notice notice-error"><p>%s</p></div>',
-            esc_html__('WPNerve requires WordPress 6.9 or newer with the native Abilities API available.', 'wp-nerve')
-        );
+        printf('<div class="notice notice-error"><p>%s</p></div>', esc_html__('WPNerve requires WordPress 6.9 or newer with the native Abilities API available.', 'wp-nerve'));
     }
 
     private function requirementsMet(): bool

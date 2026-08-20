@@ -2,9 +2,6 @@ name: Build plugin archive
 
 on:
   workflow_dispatch:
-  push:
-    tags:
-      - "v*"
 
 permissions:
   contents: read
@@ -17,34 +14,15 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Build deterministic WordPress archive
-        run: git archive --format=zip --prefix=wp-nerve/ --output="wp-nerve-${GITHUB_REF_NAME}.zip" HEAD
+      - name: Build and verify reproducible WordPress archive
+        run: bash scripts/build-release.sh
 
-      - name: Upload plugin archive
+      - name: Upload release evidence
         uses: actions/upload-artifact@v4
         with:
-          name: wp-nerve-${{ github.ref_name }}
-          path: wp-nerve-${{ github.ref_name }}.zip
+          name: wp-nerve-release-${{ github.ref_name }}
+          path: |
+            dist/wp-nerve-*.zip
+            dist/SHA256SUMS
+            dist/RELEASE-MANIFEST.txt
           if-no-files-found: error
-
-  release:
-    name: Publish GitHub Release
-    if: startsWith(github.ref, 'refs/tags/v')
-    needs: build
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-
-    steps:
-      - name: Download plugin archive
-        uses: actions/download-artifact@v4
-        with:
-          name: wp-nerve-${{ github.ref_name }}
-          path: dist
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          name: WPNerve ${{ github.ref_name }}
-          files: dist/wp-nerve-${{ github.ref_name }}.zip
-          generate_release_notes: true

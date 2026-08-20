@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace WPNerve\Tests\Unit;
 
 use ReflectionProperty;
+use WPNerve\Infrastructure\Activator;
 use WPNerve\Plugin;
 use WPNerve\Tests\Fixtures\WPState;
 
@@ -36,6 +37,7 @@ final class PluginTest extends TestCase
         Plugin::instance()->boot();
 
         self::assertCount(2, WPState::$actions['rest_api_init']);
+        self::assertCount(1, WPState::$actions['wp_scheduled_delete']);
     }
 
     public function testBootInstallsSchemaOnFirstRun(): void
@@ -43,7 +45,7 @@ final class PluginTest extends TestCase
         Plugin::instance()->boot();
 
         self::assertCount(6, WPState::$schemaCalls);
-        self::assertSame('5', WPState::$options['wp_nerve_schema_version']);
+        self::assertSame(Activator::SCHEMA_VERSION, WPState::$options['wp_nerve_schema_version']);
         self::assertTrue(
             (bool) array_filter(
                 WPState::$schemaCalls,
@@ -52,9 +54,19 @@ final class PluginTest extends TestCase
         );
     }
 
-    public function testBootSkipsSchemaWhenAlreadyInstalled(): void
+    public function testBootMigratesSchemaFromAlpha9(): void
     {
         WPState::$options['wp_nerve_schema_version'] = '5';
+
+        Plugin::instance()->boot();
+
+        self::assertCount(6, WPState::$schemaCalls);
+        self::assertSame('6', WPState::$options['wp_nerve_schema_version']);
+    }
+
+    public function testBootSkipsSchemaWhenAlreadyInstalled(): void
+    {
+        WPState::$options['wp_nerve_schema_version'] = Activator::SCHEMA_VERSION;
 
         Plugin::instance()->boot();
 
@@ -68,8 +80,9 @@ final class PluginTest extends TestCase
         self::assertCount(1, WPState::$actions['wp_abilities_api_categories_init']);
         self::assertCount(1, WPState::$actions['wp_abilities_api_init']);
         self::assertCount(2, WPState::$actions['rest_api_init']);
-        self::assertCount(1, WPState::$actions['admin_init']);
-        self::assertCount(1, WPState::$actions['admin_menu']);
+        self::assertCount(2, WPState::$actions['admin_init']);
+        self::assertCount(2, WPState::$actions['admin_menu']);
+        self::assertCount(1, WPState::$actions['wp_scheduled_delete']);
         self::assertCount(1, WPState::$filters['rest_allowed_cors_headers']);
     }
 
