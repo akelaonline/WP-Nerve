@@ -1,53 +1,56 @@
-# Security policy
+# WPNerve Security Policy
+
+WPNerve is a self-hosted MCP gateway that intentionally sits on a privileged WordPress boundary. Security issues are treated as product defects, not documentation problems.
 
 ## Supported versions
 
-WPNerve is pre-release software. Only the latest tagged pre-release receives
-security fixes. The project is not approved for production use until the P0 gates
-in `docs/roadmap/beta-readiness.md` pass.
+WPNerve is currently pre-release software. Security fixes are provided for the latest published pre-release/candidate only. Older alpha builds should be upgraded before reporting behavior that may already have been corrected.
 
 ## Reporting a vulnerability
 
-Do not open a public issue for an undisclosed vulnerability. Use GitHub's private
-security advisory flow for this repository and include:
+Please **do not open a public issue** for a suspected vulnerability. Use GitHub's private security-advisory flow for this repository and include, when possible:
 
-- affected WPNerve commit/version and WordPress/PHP environment;
+- affected WPNerve version;
+- WordPress and PHP versions;
+- single-site or Multisite;
+- authentication method used;
+- required WordPress role/capability;
 - reproduction steps or proof of concept;
-- security impact and required WordPress capability/preconditions;
-- whether Application Password, OAuth, browser, MCP, Multisite, database or
-  filesystem behavior is involved;
-- any proposed mitigation.
+- expected vs. observed behavior;
+- impact and any proposed mitigation.
 
-Please avoid accessing data that is not yours and do not run destructive tests on
-production sites.
+Do not access data you do not own and do not run destructive tests against production sites.
 
-## Security defaults
+## Security architecture
 
-- Authenticated MCP access only.
-- HTTPS required in production.
-- Minimum transport capability defaults to `edit_posts` and can only be narrowed
-  or deliberately changed by the site owner.
-- The v1 surface contains 53 reviewed WPNerve abilities; arbitrary third-party
-  abilities are not exposed automatically.
-- Read and recoverable-write abilities are selectively available according to
-  per-ability policy and WordPress capabilities.
-- Destructive and privileged risk classes are denied by default and high-risk
-  operations require a short-lived, operation-bound WordPress-admin confirmation.
-- Every mutation requires persistent, credential-bound idempotency.
-- MCP and OAuth boundaries use independent fail-closed rate-limit budgets.
-- Privileged user/plugin/option/transient/log surfaces have additional object and
-  input guards beyond broad WordPress capabilities.
-- OAuth public clients use authorization code + PKCE S256, exact redirect URIs,
-  single-use authorization codes, refresh-token rotation and revocation.
-- Audit records exclude credentials and tool arguments by design.
-- Plugin archives are checksummed, size-bounded and preflighted before extraction;
-  unsafe paths, symlinks, collisions and existing plugin roots are rejected.
+WPNerve layers controls instead of relying on one permission check:
 
-## Independent review
+- authenticated MCP transport using WordPress Application Passwords or constrained OAuth;
+- HTTPS enforcement in production;
+- WordPress transport and object-level capability checks;
+- a WPNerve discovery policy with explicit ability/risk-class exposure;
+- persistent idempotency for mutations;
+- short-lived, out-of-band WordPress-admin confirmation for privileged and destructive operations;
+- independent fail-closed request budgets around MCP and OAuth boundaries;
+- privacy-preserving audit records that exclude normal persistence of credentials and tool arguments;
+- hardened plugin archive inspection before extraction;
+- self-protection around WPNerve plugin administration;
+- bounded retention for operational tables.
 
-The beta release gate requires an independent reviewer who did not implement the
-reviewed controls. The review scope and finding format are defined in
-`docs/security/independent-review.md`; dispositions are recorded in
-`docs/security/findings-register.md`.
+## Deliberately excluded surfaces
 
-No Critical or High finding may remain open for the beta.
+The core product does not expose arbitrary SQL, arbitrary PHP execution, shell access, unrestricted WP-CLI, direct `wp-config.php` editing, or generic filesystem access. Adding a new ability requires a schema, explicit capability model, risk classification, audit behavior and tests.
+
+## Runtime security diagnostics
+
+Administrators can use **WPNerve → Diagnostics** to compare the code catalog with WordPress' live Abilities registry and current discovery policy. **WPNerve → HTTP Smoke** exercises the public HTTPS MCP boundary using a temporary Application Password that is revoked after the test.
+
+## Production guidance
+
+- Keep WordPress, PHP and WPNerve patched.
+- Use HTTPS only.
+- Prefer a dedicated WordPress user with only the capabilities the agent needs.
+- Leave Privileged and Destructive classes disabled unless required.
+- Revoke unused Application Passwords and OAuth clients.
+- Do not use staging/full-surface diagnostic mode on a production site.
+- Review pending high-risk confirmations before approving them.
