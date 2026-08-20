@@ -2,6 +2,35 @@
 
 All notable changes to WPNerve will be documented here.
 
+## [0.1.0-alpha.11] - 2026-08-19
+
+### Added
+
+- `Tools > WPNerve Diagnostics` with live counts for registered and currently
+  discoverable WPNerve abilities, MCP route status, schema status, enabled risk
+  classes, and the exact blocked ability names.
+- An explicit site-owner `wp_nerve_enabled_abilities` opt-in for reviewed
+  abilities whose catalog default is off.
+- A one-click staging control that enables the complete 53-ability v1 surface on
+  disposable test sites while keeping WordPress capabilities, idempotency and
+  high-risk confirmation enforcement intact.
+
+### Fixed
+
+- Enabling all four risk classes no longer leaves individually-disabled v1
+  abilities permanently unreachable. Risk-class enablement and per-ability
+  enablement remain separate controls, but both now have an administrator UI.
+- The catalog count is now an explicit code contract (`53`) and diagnostics
+  compare that contract to WordPress' live Abilities registry instead of relying
+  on a documentation estimate.
+
+### Security
+
+- Explicit ability opt-ins do not bypass WordPress capabilities or enabled risk
+  classes.
+- The ability exposure option is protected from WPNerve option mutation and is
+  removed only during an explicitly destructive uninstall.
+
 ## [0.1.0-alpha.10] - 2026-08-19
 
 ### Added
