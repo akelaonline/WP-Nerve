@@ -45,4 +45,6 @@ foreach (
 }
 
 delete_option('wp_nerve_schema_version');
+delete_option('wp_nerve_enabled_risk_classes');
+delete_option('wp_nerve_enabled_abilities');
 delete_option('wp_nerve_delete_data_on_uninstall');
