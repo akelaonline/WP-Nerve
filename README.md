@@ -131,11 +131,17 @@ New abilities must be:
 - MySQL/MariaDB through WordPress' normal database layer
 - `ZipArchive` for hardened plugin ZIP inspection/upload operations
 
+## Current release candidate
+
+- Release notes: [`docs/releases/0.1.0-alpha.14.md`](docs/releases/0.1.0-alpha.14.md)
+- SHA-256: [`docs/releases/0.1.0-alpha.14.sha256`](docs/releases/0.1.0-alpha.14.sha256)
+- Package: `wp-nerve-0.1.0-alpha.14.zip`
+
 ## Documentation
 
-- `SECURITY.md` — security policy and architecture notes
-- `docs/security/` — threat model, OAuth and privileged-surface documentation
-- `docs/roadmap.md` — evidence gates and beta-readiness roadmap
+- [`SECURITY.md`](SECURITY.md) — security policy and architecture notes
+- [`docs/security/`](docs/security/) — threat model, OAuth and privileged-surface documentation
+- [`docs/roadmap/beta-readiness.md`](docs/roadmap/beta-readiness.md) — evidence gates and beta-readiness roadmap
 - **WPNerve → Documentation** — operator guide installed with the plugin
 
 ## Development and testing
