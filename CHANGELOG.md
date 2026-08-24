@@ -7,12 +7,12 @@ All notable changes to WPNerve will be documented here.
 ### Changed
 
 - Completed the operator-facing Diagnostics redesign so runtime KPIs, protocol/database state, operational smoke evidence, staging controls and blocked-ability reporting use the same WPNerve product UI as Dashboard, HTTP Smoke and Documentation.
-- Synchronized the installable package, repository source, version mirrors, release metadata and translation catalog around one exact alpha.15 candidate.
+- Synchronized the installable package, repository source, version mirrors and release metadata around one exact alpha.15 candidate.
 - Aligned the packaged admin stylesheet with the final product UI build and corrected release-documentation links/history.
 
 ### Release QA
 
-- Regenerated the translation template from the final runtime PHP surface.
+- Kept generated localization templates out of the installable alpha artifact; runtime text-domain behavior is unchanged.
 - Rebuilt the installable archive only after source/version/documentation consistency checks, PHP syntax validation and package-structure validation.
 
 ## [0.1.0-alpha.14] - 2026-08-20
