@@ -13,11 +13,13 @@ header_version="$(sed -n 's/^ \* Version:[[:space:]]*//p' wp-nerve.php | head -n
 constant_version="$(sed -n "s/.*define('WP_NERVE_VERSION', '\([^']*\)').*/\1/p" wp-nerve.php | head -n 1)"
 stable_tag="$(sed -n 's/^Stable tag:[[:space:]]*//p' readme.txt | head -n 1)"
 bootstrap_version="$(sed -n "s/.*define('WP_NERVE_VERSION', '\([^']*\)').*/\1/p" tests/bootstrap.php | head -n 1)"
+phpstan_version="$(sed -n "s/.*define('WP_NERVE_VERSION', '\([^']*\)').*/\1/p" tests/phpstan-bootstrap.php | head -n 1)"
 
 [[ -n "${header_version}" ]] || fail "plugin header version not found"
 [[ "${header_version}" == "${constant_version}" ]] || fail "plugin header (${header_version}) != WP_NERVE_VERSION (${constant_version})"
 [[ "${header_version}" == "${stable_tag}" ]] || fail "plugin header (${header_version}) != readme stable tag (${stable_tag})"
 [[ "${header_version}" == "${bootstrap_version}" ]] || fail "plugin header (${header_version}) != PHPUnit bootstrap (${bootstrap_version})"
+[[ "${header_version}" == "${phpstan_version}" ]] || fail "plugin header (${header_version}) != PHPStan bootstrap (${phpstan_version})"
 
 grep -Fq "## [${header_version}]" CHANGELOG.md || fail "CHANGELOG has no heading for ${header_version}"
 grep -Fq "${header_version}" README.md || fail "README does not mention ${header_version}"
@@ -25,6 +27,7 @@ grep -Fq "Requires at least: 6.9" readme.txt || fail "WordPress minimum drifted 
 grep -Fq "Requires PHP: 8.1" readme.txt || fail "PHP minimum drifted in readme.txt"
 grep -Fq "Requires at least: 6.9" wp-nerve.php || fail "WordPress minimum drifted in plugin header"
 grep -Fq "Requires PHP:      8.1" wp-nerve.php || fail "PHP minimum drifted in plugin header"
+grep -Fq "'${header_version}' === WP_NERVE_VERSION" tests/real-wordpress/single-site.php || fail "real WordPress single-site gate is not pinned to ${header_version}"
 
 ability_rows="$(grep -E '^\| `[^`]+` \|' docs/abilities-v1.md | wc -l | tr -d ' ')"
 [[ "${ability_rows}" == "53" ]] || fail "ability catalog contains ${ability_rows} rows; expected 53"
@@ -34,4 +37,10 @@ for pattern in '/.github export-ignore' '/docs export-ignore' '/tests export-ign
   grep -Fq "${pattern}" .gitattributes || fail ".gitattributes missing: ${pattern}"
 done
 
-echo "PASS: release contract ${header_version}; 53 abilities; package exclusions present"
+# A tracked POT is optional because it is a development/localization artifact, not runtime code.
+# If one is present, it must never advertise a different release version.
+if [[ -f languages/wp-nerve.pot ]]; then
+  grep -Fq "Project-Id-Version: WPNerve ${header_version}" languages/wp-nerve.pot || fail "tracked POT version drifted from ${header_version}"
+fi
+
+echo "PASS: release contract ${header_version}; 53 abilities; version mirrors and package exclusions present"
