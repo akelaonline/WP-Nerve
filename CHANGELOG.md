@@ -2,6 +2,19 @@
 
 All notable changes to WPNerve will be documented here.
 
+## [0.1.0-alpha.15] - 2026-08-24
+
+### Changed
+
+- Completed the operator-facing Diagnostics redesign so runtime KPIs, protocol/database state, operational smoke evidence, staging controls and blocked-ability reporting use the same WPNerve product UI as Dashboard, HTTP Smoke and Documentation.
+- Synchronized the installable package, repository source, version mirrors, release metadata and translation catalog around one exact alpha.15 candidate.
+- Aligned the packaged admin stylesheet with the final product UI build and corrected release-documentation links/history.
+
+### Release QA
+
+- Regenerated the translation template from the final runtime PHP surface.
+- Rebuilt the installable archive only after source/version/documentation consistency checks, PHP syntax validation and package-structure validation.
+
 ## [0.1.0-alpha.14] - 2026-08-20
 
 ### Added
@@ -12,43 +25,70 @@ All notable changes to WPNerve will be documented here.
 
 ### Changed
 
-- Connection, credentials, confirmations and risk controls are now organized as an operational dashboard instead of raw WordPress tables.
-- Diagnostics and HTTP smoke screens use the same professional admin shell and are linked directly from the dashboard.
-- Documentation and repository copy now use the exact 53-ability runtime contract and distinguish operational evidence from remaining production-readiness gates.
-
-### Security
-
-- The redesign does not weaken capability checks, idempotency, confirmation, rate limiting or ability-discovery policy.
-- High-risk approval language now points to WPNerve → Dashboard after the admin navigation migration.
+- Connection, credentials, confirmations and risk controls are organized as an operational dashboard instead of raw WordPress tables.
+- Documentation and repository copy use the exact 53-ability runtime contract and distinguish operational evidence from remaining production-readiness gates.
 
 ## [0.1.0-alpha.13] - 2026-08-20
 
 ### Added
 
-- Authenticated real-HTTP MCP smoke diagnostics in Tools > WPNerve HTTP Smoke.
-- Temporary Application Password lifecycle dedicated to the smoke: create, use over the public HTTPS endpoint, and revoke in the same run.
-- Modern MCP `2026-07-28` discovery, 53-tool listing and `site-status` checks over WordPress HTTP.
-- Legacy `2025-11-25` and `2025-06-18` initialize + tools/list checks.
-- Negative boundary checks for unauthenticated access, hostile Origin, mirrored method mismatch and unsupported protocol versions.
+- Authenticated public-HTTPS MCP smoke diagnostics using a temporary WPNerve Application Password that is revoked automatically after each run.
+- Modern MCP `2026-07-28` discovery, 53-tool listing and `site-status` checks over the public WordPress endpoint.
+- Legacy `2025-11-25` and `2025-06-18` protocol checks plus negative authentication/origin/header/version boundary tests.
 
-### Changed
-
-- Alpha.12 operational in-process smoke is preserved as the mutation/confirmation gate; alpha.13 adds a separate network-path gate instead of replacing it.
-
-## [0.1.0-alpha.12] - 2026-08-19
+## [0.1.0-alpha.12] - 2026-08-20
 
 ### Added
 
-- Tools > WPNerve Diagnostics with live registered/discoverable ability counts.
-- Explicit per-ability opt-in and one-click full 53-ability staging mode.
+- One-click operational MCP smoke covering `server/discover`, `tools/list`, `site-status`, an opt-in privileged read, draft creation/update, destructive confirmation, trash and restore.
+- Cleanup of temporary smoke content after the operational run.
+
+### Validation
+
+- Real WordPress staging passed the full operational smoke with all 53 abilities discoverable in explicit staging mode.
+
+## [0.1.0-alpha.11] - 2026-08-20
+
+### Added
+
+- Live Diagnostics backed by the WordPress Abilities registry with exact registered/discoverable counts.
+- Explicit per-ability opt-in plus a one-click full 53-ability staging surface for disposable test sites.
 
 ### Fixed
 
-- Enabling all risk classes no longer leaves reviewed abilities unreachable solely because their catalog default is off.
+- Enabling every risk class no longer leaves reviewed abilities unreachable solely because their catalog default is disabled.
 
 ### Security
 
-- Ability opt-ins do not bypass WordPress capabilities, risk classes, idempotency, or high-risk confirmation.
+- Full-surface staging opt-in does not bypass WordPress capabilities, risk classes, idempotency or high-risk confirmation.
+
+## [0.1.0-alpha.10] - 2026-08-19
+
+### Security
+
+- Hardened the OAuth authorization-code/PKCE lifecycle with strict S256 validation, state constraints, exact redirect rules, single-use codes, refresh rotation/replay rejection and explicit token revocation.
+- Added bounded OAuth client/token cleanup, dynamic-client capacity and dedicated revocation rate limiting.
+- Advanced the WPNerve database schema contract to version 6 for the hardened OAuth storage layout.
+
+### Changed
+
+- Hosted GitHub Actions workflows were converted to manual dispatch only; absence of hosted CI is not treated as passing evidence.
+
+## [0.1.0-alpha.9] - 2026-08-19
+
+### Security
+
+- Hardened privileged user, plugin, option, transient and system-diagnostic abilities with conservative allowlists, redaction, object guards and execution-time capability checks.
+- Protected WPNerve itself and network-active plugins from unsafe deactivation/deletion paths.
+- Added composite capability requirements for plugin upload discovery/execution.
+
+## [0.1.0-alpha.8] - 2026-08-19
+
+### Security
+
+- Added independent fail-closed fixed-window request budgets for MCP and OAuth boundaries.
+- Hashes rate-limit subjects at rest and derives peer identity from the transport address rather than trusting arbitrary forwarding headers.
+- Added bounded cleanup for expired rate-limit records and advanced the database schema contract to version 5.
 
 ## [0.1.0-alpha.7] - 2026-08-18
 
