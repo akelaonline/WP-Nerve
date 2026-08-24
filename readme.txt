@@ -62,7 +62,7 @@ No. Privileged and destructive operations are disabled by default and require a 
 
 = 0.1.0-alpha.15 =
 * Completed the professional Diagnostics UI and aligned all operator screens under the WPNerve product system.
-* Synchronized package source, version mirrors, release metadata and translation catalog for the final alpha.15 candidate.
+* Synchronized package source, version mirrors and release metadata for the final alpha.15 candidate.
 
 = 0.1.0-alpha.14 =
 * Added the product-grade WPNerve Dashboard, top-level navigation and unified visual system.
@@ -85,4 +85,3 @@ No. Privileged and destructive operations are disabled by default and require a 
 
 = 0.1.0-alpha.8 =
 * Added independent fail-closed MCP/OAuth rate limits and bounded cleanup.
-
