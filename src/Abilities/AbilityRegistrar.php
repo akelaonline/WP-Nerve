@@ -17,6 +17,9 @@ use WP_Query;
 
 final class AbilityRegistrar extends AbstractAbilityRegistrar
 {
+    /** Exact number of WPNerve abilities implemented by the v1 catalog. */
+    public const CATALOG_COUNT = 53;
+
     public function registerCategory(): void
     {
         wp_register_ability_category(

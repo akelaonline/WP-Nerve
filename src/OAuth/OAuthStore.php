@@ -17,7 +17,7 @@ use WP_Error;
 
 final class OAuthStore
 {
-    public const SCHEMA_VERSION = 2;
+    public const SCHEMA_VERSION = 3;
 
     /**
      * @param array<string, mixed> $client
@@ -27,19 +27,18 @@ final class OAuthStore
         global $wpdb;
 
         $clientId = self::randomToken(32);
-
-        $wpdb->insert(
+        $inserted = $wpdb->insert(
             self::clientsTable(),
             array(
                 'client_id'     => $clientId,
-                'client_name'   => self::text((string) ($client['client_name'] ?? 'MCP client'), 191),
-                'redirect_uris' => wp_json_encode($this->redirectUris($client)),
+                'client_name'   => sanitize_text_field((string) ($client['client_name'] ?? 'MCP client')),
+                'redirect_uris' => wp_json_encode($client['redirect_uris'] ?? array()),
                 'created_at'    => current_time('mysql', true),
             ),
             array('%s', '%s', '%s', '%s')
         );
 
-        return $clientId;
+        return false === $inserted ? '' : $clientId;
     }
 
     /** @return array<string, mixed>|null */
@@ -48,7 +47,11 @@ final class OAuthStore
         global $wpdb;
 
         $row = $wpdb->get_row(
-            $wpdb->prepare('SELECT * FROM %i WHERE client_id = %s', self::clientsTable(), $clientId),
+            $wpdb->prepare(
+                'SELECT client_id, client_name, redirect_uris FROM %i WHERE client_id = %s LIMIT 1',
+                self::clientsTable(),
+                $clientId
+            ),
             'ARRAY_A'
         );
 
@@ -56,9 +59,39 @@ final class OAuthStore
             return null;
         }
 
-        $row['redirect_uris'] = json_decode((string) ($row['redirect_uris'] ?? '[]'), true);
+        $redirects = json_decode((string) ($row['redirect_uris'] ?? '[]'), true);
 
-        return is_array($row['redirect_uris']) ? $row : null;
+        return array(
+            'client_id'     => (string) $row['client_id'],
+            'client_name'   => (string) $row['client_name'],
+            'redirect_uris' => is_array($redirects) ? array_values($redirects) : array(),
+        );
+    }
+
+    public function countClients(): ?int
+    {
+        global $wpdb;
+
+        $value = $wpdb->get_var(
+            $wpdb->prepare('SELECT COUNT(*) FROM %i', self::clientsTable())
+        );
+
+        return is_numeric($value) ? max(0, (int) $value) : null;
+    }
+
+    public function cleanupExpiredTokens(): bool
+    {
+        global $wpdb;
+
+        $deleted = $wpdb->query(
+            $wpdb->prepare(
+                'DELETE FROM %i WHERE expires_at <= %s LIMIT 200',
+                self::tokensTable(),
+                current_time('mysql', true)
+            )
+        );
+
+        return false !== $deleted;
     }
 
     public function storeAuthorizationCode(
@@ -67,65 +100,117 @@ final class OAuthStore
         int $userId,
         string $challenge,
         string $redirectUri
-    ): void {
+    ): bool {
         global $wpdb;
 
-        $wpdb->insert(
+        $inserted = $wpdb->insert(
             self::tokensTable(),
             array(
                 'token_hash'          => self::hash($code),
                 'token_type'          => 'authorization_code',
                 'client_id'           => $clientId,
                 'user_id'             => $userId,
+                'expires_at'          => gmdate('Y-m-d H:i:s', time() + $this->authorizationCodeTtl()),
                 'auth_code_challenge' => $challenge,
                 'redirect_uri'        => $redirectUri,
-                'expires_at'          => gmdate('Y-m-d H:i:s', time() + 600),
                 'created_at'          => current_time('mysql', true),
             ),
             array('%s', '%s', '%s', '%d', '%s', '%s', '%s', '%s')
         );
+
+        return false !== $inserted;
+    }
+
+    /** @return array<string, mixed>|null */
+    public function consumeAuthorizationCode(string $code): ?array
+    {
+        $hash = self::hash($code);
+        $row  = $this->findToken($hash, 'authorization_code');
+
+        if (null === $row || ! $this->deleteTokenHash($hash, 'authorization_code')) {
+            return null;
+        }
+
+        return $row;
     }
 
     /**
-     * Issues an access token and refresh token pair for a user.
-     *
-     * @return array{access_token: string, refresh_token: string, expires_in: int}
+     * @return array{access_token: string, refresh_token: string, expires_in: int}|WP_Error
      */
-    public function issueTokens(string $clientId, int $userId): array
+    public function issueTokens(string $clientId, int $userId): array|WP_Error
     {
         global $wpdb;
 
-        $accessToken  = self::randomToken(43);
-        $refreshToken = self::randomToken(43);
-        $expiresAt    = gmdate('Y-m-d H:i:s', time() + self::accessTtl());
+        $access      = self::randomToken(32);
+        $refresh     = self::randomToken(48);
+        $accessHash  = self::hash($access);
+        $refreshHash = self::hash($refresh);
+        $accessTtl   = $this->accessTokenTtl();
+        $refreshTtl  = $this->refreshTokenTtl();
+        $now         = current_time('mysql', true);
 
-        foreach (array(array($accessToken, 'access_token'), array($refreshToken, 'refresh_token')) as $entry) {
-            $wpdb->insert(
-                self::tokensTable(),
-                array(
-                    'token_hash' => self::hash($entry[0]),
-                    'token_type' => $entry[1],
-                    'client_id'  => $clientId,
-                    'user_id'    => $userId,
-                    'auth_code_challenge' => '',
-                    'redirect_uri'        => '',
-                    'expires_at'          => $expiresAt,
-                    'created_at'          => current_time('mysql', true),
-                ),
-                array('%s', '%s', '%s', '%d', '%s', '%s', '%s', '%s')
-            );
+        $accessInserted = $wpdb->insert(
+            self::tokensTable(),
+            array(
+                'token_hash' => $accessHash,
+                'token_type' => 'access',
+                'client_id'  => $clientId,
+                'user_id'    => $userId,
+                'expires_at' => gmdate('Y-m-d H:i:s', time() + $accessTtl),
+                'created_at' => $now,
+            ),
+            array('%s', '%s', '%s', '%d', '%s', '%s')
+        );
+
+        if (false === $accessInserted) {
+            return new WP_Error('wp_nerve_oauth_storage_failed', __('OAuth token storage is unavailable.', 'wp-nerve'));
+        }
+
+        $refreshInserted = $wpdb->insert(
+            self::tokensTable(),
+            array(
+                'token_hash' => $refreshHash,
+                'token_type' => 'refresh',
+                'client_id'  => $clientId,
+                'user_id'    => $userId,
+                'expires_at' => gmdate('Y-m-d H:i:s', time() + $refreshTtl),
+                'created_at' => $now,
+            ),
+            array('%s', '%s', '%s', '%d', '%s', '%s')
+        );
+
+        if (false === $refreshInserted) {
+            $this->deleteTokenHash($accessHash, 'access');
+
+            return new WP_Error('wp_nerve_oauth_storage_failed', __('OAuth token storage is unavailable.', 'wp-nerve'));
         }
 
         return array(
-            'access_token'  => $accessToken,
-            'refresh_token' => $refreshToken,
-            'expires_in'    => self::accessTtl(),
+            'access_token'  => $access,
+            'refresh_token' => $refresh,
+            'expires_in'    => $accessTtl,
         );
     }
 
     /**
-     * Validates an access token and returns the user ID it belongs to.
+     * @return array{access_token: string, refresh_token: string, expires_in: int}|WP_Error
      */
+    public function refreshAccessToken(string $refreshToken, string $clientId): array|WP_Error
+    {
+        $hash = self::hash($refreshToken);
+        $row  = $this->findToken($hash, 'refresh');
+
+        if (null === $row || (string) $row['client_id'] !== $clientId) {
+            return new WP_Error('wp_nerve_invalid_refresh_token', __('The refresh token is invalid or expired.', 'wp-nerve'));
+        }
+
+        if (! $this->deleteTokenHash($hash, 'refresh')) {
+            return new WP_Error('wp_nerve_invalid_refresh_token', __('The refresh token is invalid or already consumed.', 'wp-nerve'));
+        }
+
+        return $this->issueTokens($clientId, (int) $row['user_id']);
+    }
+
     public function validateAccessToken(string $token): ?int
     {
         $identity = $this->validateAccessTokenIdentity($token);
@@ -133,72 +218,41 @@ final class OAuthStore
         return null === $identity ? null : $identity['user_id'];
     }
 
-    /**
-     * Returns the authoritative user and OAuth client bound to an access token.
-     *
-     * @return array{user_id: int, client_id: string}|null
-     */
+    /** @return array{user_id: int, client_id: string}|null */
     public function validateAccessTokenIdentity(string $token): ?array
     {
-        $row = $this->findToken($token, 'access_token');
+        $row = $this->findToken(self::hash($token), 'access');
 
-        if (null === $row || ! $this->isActive($row)) {
+        if (null === $row) {
             return null;
         }
 
-        $clientId = $row['client_id'] ?? null;
-
-        return is_string($clientId) && '' !== $clientId
-            ? array('user_id' => (int) $row['user_id'], 'client_id' => $clientId)
-            : null;
+        return array(
+            'user_id'   => (int) $row['user_id'],
+            'client_id' => (string) $row['client_id'],
+        );
     }
 
-    /** @return array<string, mixed>|null */
-    public function consumeAuthorizationCode(string $code): ?array
+    public function revokeToken(string $token, string $clientId): bool
     {
-        global $wpdb;
+        $hash = self::hash($token);
 
-        $row = $this->findToken($code, 'authorization_code');
+        foreach (array('access', 'refresh') as $type) {
+            $row = $this->findToken($hash, $type);
 
-        if (null === $row || ! $this->isActive($row)) {
-            return null;
+            if (null === $row) {
+                continue;
+            }
+
+            if ((string) $row['client_id'] !== $clientId) {
+                return true;
+            }
+
+            return $this->deleteTokenHash($hash, $type);
         }
 
-        $wpdb->delete(
-            self::tokensTable(),
-            array('token_hash' => self::hash($code)),
-            array('%s')
-        );
-
-        return $row;
-    }
-
-    /**
-     * Rotates a refresh token.
-     *
-     * @return array<string, mixed>|WP_Error
-     */
-    public function refreshAccessToken(string $refreshToken, string $clientId): array|WP_Error
-    {
-        global $wpdb;
-
-        $row = $this->findToken($refreshToken, 'refresh_token');
-
-        if (null === $row || ! $this->isActive($row)) {
-            return new WP_Error('wp_nerve_oauth_invalid_grant', 'The refresh token is invalid or expired.');
-        }
-
-        if ($row['client_id'] !== $clientId) {
-            return new WP_Error('wp_nerve_oauth_invalid_client', 'The refresh token does not belong to this client.');
-        }
-
-        $wpdb->delete(
-            self::tokensTable(),
-            array('token_hash' => self::hash($refreshToken)),
-            array('%s')
-        );
-
-        return $this->issueTokens($clientId, (int) $row['user_id']);
+        // RFC-style revocation responses do not disclose whether a token existed.
+        return true;
     }
 
     public static function installSchema(): void
@@ -208,16 +262,15 @@ final class OAuthStore
         require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
         $charset = $wpdb->get_charset_collate();
-
         $clients = self::clientsTable();
         $tokens  = self::tokensTable();
 
         dbDelta(
             "CREATE TABLE {$clients} (
                 id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-                client_id varchar(64) NOT NULL,
+                client_id varchar(128) NOT NULL,
                 client_name varchar(191) NOT NULL DEFAULT '',
-                redirect_uris text NOT NULL,
+                redirect_uris longtext NOT NULL,
                 created_at datetime NOT NULL,
                 PRIMARY KEY  (id),
                 UNIQUE KEY client_id (client_id)
@@ -227,45 +280,35 @@ final class OAuthStore
         dbDelta(
             "CREATE TABLE {$tokens} (
                 id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-                token_hash varchar(64) NOT NULL,
-                token_type varchar(20) NOT NULL DEFAULT '',
-                client_id varchar(64) NOT NULL DEFAULT '',
-                user_id bigint(20) unsigned NOT NULL DEFAULT 0,
-                auth_code_challenge varchar(128) NOT NULL DEFAULT '',
-                redirect_uri varchar(500) NOT NULL DEFAULT '',
+                token_hash char(64) NOT NULL,
+                token_type varchar(32) NOT NULL,
+                client_id varchar(128) NOT NULL,
+                user_id bigint(20) unsigned NOT NULL,
                 expires_at datetime NOT NULL,
+                auth_code_challenge varchar(128) NULL,
+                redirect_uri text NULL,
                 created_at datetime NOT NULL,
                 PRIMARY KEY  (id),
                 UNIQUE KEY token_hash (token_hash),
-                KEY token_type (token_type),
+                KEY client_id (client_id),
+                KEY user_id (user_id),
                 KEY expires_at (expires_at)
             ) {$charset};"
         );
     }
 
-    public static function accessTtl(): int
-    {
-        /**
-         * Filters the access token lifetime in seconds.
-         *
-         * @param int $seconds Token lifetime.
-         */
-        $ttl = apply_filters('wp_nerve_oauth_access_ttl', 3600);
-
-        return is_int($ttl) && $ttl > 0 ? $ttl : 3600;
-    }
-
     /** @return array<string, mixed>|null */
-    private function findToken(string $token, string $type): ?array
+    private function findToken(string $hash, string $type): ?array
     {
         global $wpdb;
 
         $row = $wpdb->get_row(
             $wpdb->prepare(
-                'SELECT * FROM %i WHERE token_hash = %s AND token_type = %s',
+                'SELECT * FROM %i WHERE token_hash = %s AND token_type = %s AND expires_at > %s LIMIT 1',
                 self::tokensTable(),
-                self::hash($token),
-                $type
+                $hash,
+                $type,
+                current_time('mysql', true)
             ),
             'ARRAY_A'
         );
@@ -273,59 +316,38 @@ final class OAuthStore
         return is_array($row) ? $row : null;
     }
 
-    /** @param array<string, mixed> $row */
-    private function isActive(array $row): bool
+    private function deleteTokenHash(string $hash, string $type): bool
     {
-        $expires = strtotime((string) ($row['expires_at'] ?? ''));
+        global $wpdb;
 
-        return false !== $expires && $expires > time();
+        $deleted = $wpdb->delete(
+            self::tokensTable(),
+            array('token_hash' => $hash, 'token_type' => $type),
+            array('%s', '%s')
+        );
+
+        return 1 === $deleted;
     }
 
-    /**
-     * @param array<string, mixed> $client
-     * @return array<int, string>
-     */
-    private function redirectUris(array $client): array
+    private function authorizationCodeTtl(): int
     {
-        $uris = $client['redirect_uris'] ?? array();
+        $ttl = apply_filters('wp_nerve_oauth_authorization_code_ttl', 300);
 
-        if (! is_array($uris)) {
-            return array();
-        }
-
-        $clean = array();
-
-        foreach ($uris as $uri) {
-            if (is_string($uri) && '' !== $uri) {
-                $clean[] = $uri;
-            }
-        }
-
-        return array_values(array_unique($clean));
+        return is_int($ttl) && $ttl >= 60 && $ttl <= 600 ? $ttl : 300;
     }
 
-    private static function hash(string $value): string
+    private function accessTokenTtl(): int
     {
-        return hash('sha256', $value);
+        $ttl = apply_filters('wp_nerve_oauth_access_token_ttl', 3600);
+
+        return is_int($ttl) && $ttl >= 300 && $ttl <= 86400 ? $ttl : 3600;
     }
 
-    /**
-     * @param int<1, max> $bytes
-     */
-    private static function randomToken(int $bytes): string
+    private function refreshTokenTtl(): int
     {
-        return bin2hex(random_bytes($bytes));
-    }
+        $ttl = apply_filters('wp_nerve_oauth_refresh_token_ttl', 2592000);
 
-    private static function text(string $value, int $length): string
-    {
-        $value = sanitize_text_field($value);
-
-        if (function_exists('mb_substr')) {
-            return mb_substr($value, 0, $length);
-        }
-
-        return wp_check_invalid_utf8(substr($value, 0, $length), true);
+        return is_int($ttl) && $ttl >= 3600 && $ttl <= 7776000 ? $ttl : 2592000;
     }
 
     private static function clientsTable(): string
@@ -340,5 +362,15 @@ final class OAuthStore
         global $wpdb;
 
         return $wpdb->prefix . 'wp_nerve_oauth_tokens';
+    }
+
+    private static function hash(string $value): string
+    {
+        return hash('sha256', $value);
+    }
+
+    private static function randomToken(int $bytes): string
+    {
+        return rtrim(strtr(base64_encode(random_bytes($bytes)), '+/', '-_'), '=');
     }
 }

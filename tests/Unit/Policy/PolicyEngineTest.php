@@ -43,6 +43,31 @@ final class PolicyEngineTest extends TestCase
         self::assertFalse($this->engine->isDiscoverable($ability));
     }
 
+    public function testDisabledAbilityCanBeEnabledBySiteOption(): void
+    {
+        WPState::$options['wp_nerve_enabled_abilities'] = array('wp-nerve/site-status');
+
+        $ability = $this->makeAbility('wp-nerve/site-status', array(
+            'meta' => $this->wpNerveMeta(array('enabled_by_default' => false)),
+        ));
+
+        self::assertTrue($this->engine->isDiscoverable($ability));
+    }
+
+    public function testAbilityOptionDoesNotBypassRiskClass(): void
+    {
+        WPState::$options['wp_nerve_enabled_abilities'] = array('wp-nerve/site-status');
+
+        $ability = $this->makeAbility('wp-nerve/site-status', array(
+            'meta' => $this->wpNerveMeta(array(
+                'enabled_by_default' => false,
+                'risk'               => RiskLevel::Privileged->value,
+            )),
+        ));
+
+        self::assertFalse($this->engine->isDiscoverable($ability));
+    }
+
     public function testDiscoverableRequiresCapability(): void
     {
         $ability = $this->makeAbility('wp-nerve/site-status');

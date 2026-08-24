@@ -267,8 +267,11 @@ final class AdminAbilitiesTest extends TestCase
 
     public function testUploadPluginRequiresChecksumAndUnzipsValidPackage(): void
     {
+        $this->requireZipExtension();
         $this->enableAdmin(array('read', 'privileged', 'destructive'));
-        $zip = "PK\x03\x04fake-plugin-package";
+        $zip = $this->zipPackage(array(
+            'plugin/plugin.php' => "<?php\n/* Plugin Name: Fixture Plugin */\n",
+        ));
 
         $result = $this->registry->execute('wp_nerve_upload_plugin', array(
             'filename' => 'plugin.zip',
@@ -280,6 +283,7 @@ final class AdminAbilitiesTest extends TestCase
         self::assertCount(1, WPState::$unzippedFiles);
         self::assertSame('wp-content/plugins', $result['result']['installed_to']);
         self::assertSame(hash('sha256', $zip), $result['result']['sha256']);
+        self::assertSame(array(), WPState::$lastUpload, 'Plugin packages are staged privately, not in public uploads.');
     }
 
     public function testUploadPluginRejectsChecksumMismatch(): void
@@ -312,6 +316,61 @@ final class AdminAbilitiesTest extends TestCase
 
         self::assertInstanceOf(WP_Error::class, $result);
         self::assertSame('wp_nerve_plugin_exists', $result->get_error_code());
+    }
+
+    public function testUploadPluginRejectsTraversalInsideArchive(): void
+    {
+        $this->requireZipExtension();
+        $this->enableAdmin(array('read', 'privileged', 'destructive'));
+        $zip = $this->zipPackage(array('../escape.php' => '<?php echo "escape";'));
+
+        $result = $this->registry->execute('wp_nerve_upload_plugin', array(
+            'filename' => 'innocent.zip',
+            'content'  => base64_encode($zip),
+            'sha256'   => hash('sha256', $zip),
+        ));
+
+        self::assertInstanceOf(WP_Error::class, $result);
+        self::assertSame('wp_nerve_unsafe_archive_path', $result->get_error_code());
+        self::assertCount(0, WPState::$unzippedFiles);
+    }
+
+    public function testUploadPluginRejectsCaseCollidingPaths(): void
+    {
+        $this->requireZipExtension();
+        $this->enableAdmin(array('read', 'privileged', 'destructive'));
+        $zip = $this->zipPackage(array(
+            'plugin/Foo.php' => '<?php echo 1;',
+            'plugin/foo.php' => '<?php echo 2;',
+        ));
+
+        $result = $this->registry->execute('wp_nerve_upload_plugin', array(
+            'filename' => 'case-test.zip',
+            'content'  => base64_encode($zip),
+            'sha256'   => hash('sha256', $zip),
+        ));
+
+        self::assertInstanceOf(WP_Error::class, $result);
+        self::assertSame('wp_nerve_duplicate_archive_path', $result->get_error_code());
+        self::assertCount(0, WPState::$unzippedFiles);
+    }
+
+    public function testUploadPluginRejectsExistingInternalPluginRootEvenWithDifferentFilename(): void
+    {
+        $this->requireZipExtension();
+        $this->enableAdmin(array('read', 'privileged', 'destructive'));
+        WPState::$plugins = array('existing/existing.php' => array('Name' => 'Existing', 'Version' => '1.0'));
+        $zip = $this->zipPackage(array('existing/evil.php' => '<?php echo "overwrite";'));
+
+        $result = $this->registry->execute('wp_nerve_upload_plugin', array(
+            'filename' => 'innocent.zip',
+            'content'  => base64_encode($zip),
+            'sha256'   => hash('sha256', $zip),
+        ));
+
+        self::assertInstanceOf(WP_Error::class, $result);
+        self::assertSame('wp_nerve_plugin_exists', $result->get_error_code());
+        self::assertCount(0, WPState::$unzippedFiles);
     }
 
     public function testGetOptionReturnsAllowlistedValue(): void
@@ -433,5 +492,86 @@ final class AdminAbilitiesTest extends TestCase
         $user->roles        = array($role);
 
         return $user;
+    }
+
+    private function requireZipExtension(): void
+    {
+        if (! class_exists(\ZipArchive::class)) {
+            self::markTestSkipped('The secure plugin-upload path requires the PHP Zip extension.');
+        }
+    }
+
+    /**
+     * Build a small stored ZIP archive without relying on ZipArchive for fixture creation.
+     *
+     * @param array<string, string> $files
+     */
+    private function zipPackage(array $files): string
+    {
+        $body      = '';
+        $directory = '';
+        $offset    = 0;
+        $count     = 0;
+
+        foreach ($files as $name => $data) {
+            $nameLength = strlen($name);
+            $dataLength = strlen($data);
+            $crc        = crc32($data);
+
+            $local = pack(
+                'VvvvvvVVVvv',
+                0x04034b50,
+                20,
+                0,
+                0,
+                0,
+                0,
+                $crc,
+                $dataLength,
+                $dataLength,
+                $nameLength,
+                0
+            ) . $name . $data;
+
+            $central = pack(
+                'VvvvvvvVVVvvvvvVV',
+                0x02014b50,
+                20,
+                20,
+                0,
+                0,
+                0,
+                0,
+                $crc,
+                $dataLength,
+                $dataLength,
+                $nameLength,
+                0,
+                0,
+                0,
+                0,
+                0,
+                $offset
+            ) . $name;
+
+            $body .= $local;
+            $directory .= $central;
+            $offset += strlen($local);
+            ++$count;
+        }
+
+        $end = pack(
+            'VvvvvVVv',
+            0x06054b50,
+            0,
+            0,
+            $count,
+            $count,
+            strlen($directory),
+            strlen($body),
+            0
+        );
+
+        return $body . $directory . $end;
     }
 }

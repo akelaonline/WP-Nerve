@@ -15,7 +15,12 @@ if (! defined('WP_UNINSTALL_PLUGIN')) {
     exit;
 }
 
-if (true !== get_option('wp_nerve_delete_data_on_uninstall', false)) {
+$deleteData = get_option('wp_nerve_delete_data_on_uninstall', false);
+
+// WordPress persists boolean true as the scalar value "1". Accept only the
+// explicit truthy representation produced by update_option/wp option update;
+// every absent, malformed or ambiguous value remains fail-safe and preserves data.
+if (! in_array($deleteData, array(true, 1, '1'), true)) {
     return;
 }
 
@@ -40,4 +45,6 @@ foreach (
 }
 
 delete_option('wp_nerve_schema_version');
+delete_option('wp_nerve_enabled_risk_classes');
+delete_option('wp_nerve_enabled_abilities');
 delete_option('wp_nerve_delete_data_on_uninstall');

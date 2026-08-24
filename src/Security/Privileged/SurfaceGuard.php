@@ -83,6 +83,7 @@ final class SurfaceGuard
         'db_version',
         'initial_db_version',
         'wp_nerve_enabled_risk_classes',
+        'wp_nerve_enabled_abilities',
         'wp_nerve_delete_data_on_uninstall',
         'wp_nerve_schema_version',
     );

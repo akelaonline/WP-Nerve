@@ -21,6 +21,7 @@ final class RateLimiter
         'mcp'             => array('limit' => 120, 'window' => 60),
         'oauth_authorize' => array('limit' => 60, 'window' => 60),
         'oauth_token'     => array('limit' => 30, 'window' => 60),
+        'oauth_revoke'    => array('limit' => 30, 'window' => 60),
         'oauth_register'  => array('limit' => 10, 'window' => 3600),
     );
 
