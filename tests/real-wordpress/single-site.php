@@ -92,7 +92,7 @@ wp_set_current_user($adminId);
 
 wp_nerve_runtime_assert(version_compare((string) get_bloginfo('version'), '6.9', '>='), 'WordPress is 6.9 or newer');
 wp_nerve_runtime_assert(version_compare(PHP_VERSION, '8.1', '>='), 'PHP is 8.1 or newer');
-wp_nerve_runtime_assert('0.1.0-alpha.10' === WP_NERVE_VERSION, 'WPNerve alpha.10 is active', WP_NERVE_VERSION);
+wp_nerve_runtime_assert('0.1.0-alpha.15' === WP_NERVE_VERSION, 'WPNerve alpha.15 is active', WP_NERVE_VERSION);
 wp_nerve_runtime_assert(Activator::SCHEMA_VERSION === (string) get_option('wp_nerve_schema_version'), 'schema contract is current');
 
 foreach (wp_nerve_runtime_tables() as $table) {
