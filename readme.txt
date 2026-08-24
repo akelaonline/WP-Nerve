@@ -85,3 +85,4 @@ No. Privileged and destructive operations are disabled by default and require a 
 
 = 0.1.0-alpha.8 =
 * Added independent fail-closed MCP/OAuth rate limits and bounded cleanup.
+
