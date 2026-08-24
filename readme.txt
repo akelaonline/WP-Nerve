@@ -4,7 +4,7 @@ Tags: mcp, ai, agents, abilities, wordpress
 Requires at least: 6.9
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 0.1.0-alpha.14
+Stable tag: 0.1.0-alpha.15
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -60,18 +60,28 @@ No. Privileged and destructive operations are disabled by default and require a 
 
 == Changelog ==
 
+= 0.1.0-alpha.15 =
+* Completed the professional Diagnostics UI and aligned all operator screens under the WPNerve product system.
+* Synchronized package source, version mirrors, release metadata and translation catalog for the final alpha.15 candidate.
+
 = 0.1.0-alpha.14 =
-* Product-grade WPNerve admin dashboard and navigation.
-* Unified visual system across Dashboard, Diagnostics, HTTP Smoke and Documentation.
-* New in-product operator documentation.
-* GitHub/readme documentation refresh.
-* Preserves the 53-ability runtime contract and security gates validated on staging.
+* Added the product-grade WPNerve Dashboard, top-level navigation and unified visual system.
+* Added in-product Documentation and professionalized operator onboarding.
 
 = 0.1.0-alpha.13 =
 * Added authenticated real-HTTP MCP smoke diagnostics using a temporary Application Password that is revoked automatically.
 
 = 0.1.0-alpha.12 =
-* Added one-click operational MCP smoke covering discovery, tools/list, reads, writes and destructive confirmation.
+* Added one-click operational MCP smoke covering discovery, tools/list, reads, writes and destructive confirmation/trash/restore.
 
 = 0.1.0-alpha.11 =
 * Added live 53-ability runtime diagnostics and explicit full-surface staging controls.
+
+= 0.1.0-alpha.10 =
+* Hardened OAuth PKCE/state/redirect/replay/revocation behavior and advanced the schema to version 6.
+
+= 0.1.0-alpha.9 =
+* Hardened privileged users, plugins, options, transients and diagnostics.
+
+= 0.1.0-alpha.8 =
+* Added independent fail-closed MCP/OAuth rate limits and bounded cleanup.
