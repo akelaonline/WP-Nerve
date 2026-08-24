@@ -10,7 +10,6 @@ declare(strict_types=1);
 
 namespace WPNerve\Admin;
 
-use Throwable;
 use WP_Ability;
 use WP_Error;
 use WP_REST_Request;
@@ -28,6 +27,18 @@ final class DiagnosticsPage
 
     public function registerMenu(): void
     {
+        if (function_exists('add_submenu_page')) {
+            add_submenu_page(
+                'wp-nerve',
+                __('WPNerve Diagnostics', 'wp-nerve'),
+                __('Diagnostics', 'wp-nerve'),
+                'manage_options',
+                'wp-nerve-diagnostics',
+                array($this, 'render')
+            );
+            return;
+        }
+
         add_management_page(
             __('WPNerve Diagnostics', 'wp-nerve'),
             __('WPNerve Diagnostics', 'wp-nerve'),
@@ -123,115 +134,115 @@ final class DiagnosticsPage
         $smoke             = get_transient(self::SMOKE_TRANSIENT_PREFIX . get_current_user_id());
         $smoke             = is_array($smoke) ? $smoke : array();
         $smokeUrl          = wp_nonce_url(
-            admin_url('tools.php?page=wp-nerve-diagnostics&wp_nerve_run_smoke=1'),
+            admin_url('admin.php?page=wp-nerve-diagnostics&wp_nerve_run_smoke=1'),
             self::NONCE_ACTION,
             'wp_nerve_diag_nonce'
         );
         ?>
-        <div class="wrap">
-            <h1><?php echo esc_html__('WPNerve Diagnostics', 'wp-nerve'); ?></h1>
-            <p><?php echo esc_html__('Live WordPress registry and policy status — no documentation estimates.', 'wp-nerve'); ?></p>
+        <div class="wrap wpn-admin">
+            <header class="wpn-hero">
+                <div class="wpn-hero__brand"><span class="wpn-brandmark"><span class="dashicons dashicons-chart-area"></span></span><div><span class="wpn-kicker"><?php echo esc_html__('Runtime diagnostics', 'wp-nerve'); ?></span><h1><?php echo esc_html__('WPNerve Diagnostics', 'wp-nerve'); ?></h1><p><?php echo esc_html__('Live WordPress registry, policy and MCP execution status — no documentation estimates.', 'wp-nerve'); ?></p></div></div>
+                <div class="wpn-hero__actions"><span class="wpn-pill"><?php echo esc_html(WP_NERVE_VERSION); ?></span><a class="button wpn-button" href="<?php echo esc_url(admin_url('admin.php?page=wp-nerve')); ?>"><?php echo esc_html__('Dashboard', 'wp-nerve'); ?></a><a class="button wpn-button" href="<?php echo esc_url(admin_url('admin.php?page=wp-nerve-http-smoke')); ?>"><?php echo esc_html__('HTTP Smoke', 'wp-nerve'); ?></a></div>
+            </header>
 
             <?php $this->renderNotice(); ?>
 
-            <table class="widefat striped" style="max-width:900px">
-                <tbody>
-                    <tr>
-                        <th><?php echo esc_html__('WPNerve version', 'wp-nerve'); ?></th>
-                        <td><code><?php echo esc_html(WP_NERVE_VERSION); ?></code></td>
-                    </tr>
-                    <tr>
-                        <th><?php echo esc_html__('Registered abilities', 'wp-nerve'); ?></th>
-                        <td>
-                            <strong><?php echo esc_html((string) $registeredCount); ?></strong>
-                            / <?php echo esc_html((string) $expectedCount); ?> —
-                            <strong><?php echo esc_html($registeredCount === $expectedCount ? 'PASS' : 'FAIL'); ?></strong>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th><?php echo esc_html__('Discoverable for this administrator', 'wp-nerve'); ?></th>
-                        <td>
-                            <strong><?php echo esc_html((string) $discoverableCount); ?></strong>
-                            / <?php echo esc_html((string) $registeredCount); ?>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th><?php echo esc_html__('REST MCP route', 'wp-nerve'); ?></th>
-                        <td><strong><?php echo esc_html($routeRegistered ? 'PASS' : 'FAIL'); ?></strong></td>
-                    </tr>
-                    <tr>
-                        <th><?php echo esc_html__('Database schema', 'wp-nerve'); ?></th>
-                        <td>
-                            <code><?php echo esc_html($schemaVersion); ?></code> /
-                            <code><?php echo esc_html(Activator::SCHEMA_VERSION); ?></code> —
-                            <strong><?php echo esc_html($schemaVersion === Activator::SCHEMA_VERSION ? 'PASS' : 'FAIL'); ?></strong>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th><?php echo esc_html__('Enabled risk classes', 'wp-nerve'); ?></th>
-                        <td><code><?php echo esc_html(implode(', ', $riskClasses)); ?></code></td>
-                    </tr>
-                    <tr>
-                        <th><?php echo esc_html__('Explicit ability overrides', 'wp-nerve'); ?></th>
-                        <td><?php echo esc_html((string) count($abilityOverrides)); ?></td>
-                    </tr>
-                </tbody>
-            </table>
+            <div class="wpn-stats">
+                <div class="wpn-stat">
+                    <span class="wpn-stat__label"><?php echo esc_html__('Ability catalog', 'wp-nerve'); ?></span>
+                    <strong class="wpn-stat__value"><?php echo esc_html((string) $registeredCount); ?>/<?php echo esc_html((string) $expectedCount); ?></strong>
+                    <span class="wpn-stat__meta"><?php echo esc_html($registeredCount === $expectedCount ? __('Registry contract passed', 'wp-nerve') : __('Registry contract failed', 'wp-nerve')); ?></span>
+                </div>
+                <div class="wpn-stat">
+                    <span class="wpn-stat__label"><?php echo esc_html__('Discoverable', 'wp-nerve'); ?></span>
+                    <strong class="wpn-stat__value"><?php echo esc_html((string) $discoverableCount); ?>/<?php echo esc_html((string) $registeredCount); ?></strong>
+                    <span class="wpn-stat__meta"><?php echo esc_html__('for this administrator', 'wp-nerve'); ?></span>
+                </div>
+                <div class="wpn-stat">
+                    <span class="wpn-stat__label"><?php echo esc_html__('REST MCP route', 'wp-nerve'); ?></span>
+                    <strong class="wpn-stat__value"><?php echo esc_html($routeRegistered ? 'PASS' : 'FAIL'); ?></strong>
+                    <span class="wpn-stat__meta"><?php echo esc_html__('public protocol boundary', 'wp-nerve'); ?></span>
+                </div>
+                <div class="wpn-stat">
+                    <span class="wpn-stat__label"><?php echo esc_html__('Database schema', 'wp-nerve'); ?></span>
+                    <strong class="wpn-stat__value"><?php echo esc_html($schemaVersion); ?>/<?php echo esc_html(Activator::SCHEMA_VERSION); ?></strong>
+                    <span class="wpn-stat__meta"><?php echo esc_html($schemaVersion === Activator::SCHEMA_VERSION ? __('Schema passed', 'wp-nerve') : __('Schema mismatch', 'wp-nerve')); ?></span>
+                </div>
+            </div>
 
-            <h2><?php echo esc_html__('Operational MCP smoke test', 'wp-nerve'); ?></h2>
-            <p>
-                <?php
-                echo esc_html__(
-                    'Runs the real WordPress REST route in-process: discovery, tools/list, site status, an opt-in tool, draft create/update, destructive confirmation, trash and restore. Test content is removed afterwards.',
-                    'wp-nerve'
-                );
-                ?>
-            </p>
-            <p>
-                <a class="button button-primary" href="<?php echo esc_url($smokeUrl); ?>">
-                    <?php echo esc_html__('Run operational MCP smoke', 'wp-nerve'); ?>
-                </a>
-            </p>
-            <?php $this->renderSmoke($smoke); ?>
+            <div class="wpn-layout">
+                <main class="wpn-main">
+                    <section class="wpn-panel">
+                        <div class="wpn-panel__head">
+                            <div>
+                                <h2><?php echo esc_html__('Runtime state', 'wp-nerve'); ?></h2>
+                                <p><?php echo esc_html__('Live values read from this WordPress installation.', 'wp-nerve'); ?></p>
+                            </div>
+                            <span class="wpn-status <?php echo esc_attr($registeredCount === $expectedCount && $routeRegistered && $schemaVersion === Activator::SCHEMA_VERSION ? 'wpn-status--ok' : 'wpn-status--bad'); ?>"><span class="wpn-status__dot"></span><?php echo esc_html($registeredCount === $expectedCount && $routeRegistered && $schemaVersion === Activator::SCHEMA_VERSION ? 'PASS' : 'CHECK'); ?></span>
+                        </div>
+                        <div class="wpn-panel__body wpn-panel__body--flush">
+                            <dl class="wpn-info-grid">
+                                <div><dt><?php echo esc_html__('WPNerve version', 'wp-nerve'); ?></dt><dd><code><?php echo esc_html(WP_NERVE_VERSION); ?></code></dd></div>
+                                <div><dt><?php echo esc_html__('Enabled risk classes', 'wp-nerve'); ?></dt><dd><code><?php echo esc_html(implode(', ', $riskClasses)); ?></code></dd></div>
+                                <div><dt><?php echo esc_html__('Explicit ability overrides', 'wp-nerve'); ?></dt><dd><?php echo esc_html((string) count($abilityOverrides)); ?></dd></div>
+                                <div><dt><?php echo esc_html__('Blocked abilities', 'wp-nerve'); ?></dt><dd><?php echo esc_html((string) count($blocked)); ?></dd></div>
+                            </dl>
+                        </div>
+                    </section>
 
-            <h2><?php echo esc_html__('Operational test mode', 'wp-nerve'); ?></h2>
-            <p>
-                <?php
-                echo esc_html__(
-                    'For disposable staging: expose the complete reviewed catalog. WordPress capabilities, idempotency and high-risk confirmation still apply.',
-                    'wp-nerve'
-                );
-                ?>
-            </p>
-            <form method="post" style="display:inline-block;margin-right:8px">
-                <?php wp_nonce_field(self::NONCE_ACTION, 'wp_nerve_diagnostics'); ?>
-                <input type="hidden" name="wp_nerve_diagnostics_action" value="enable_full_surface" />
-                <button type="submit" class="button button-primary">
-                    <?php echo esc_html__('Enable full 53-ability test surface', 'wp-nerve'); ?>
-                </button>
-            </form>
-            <form method="post" style="display:inline-block">
-                <?php wp_nonce_field(self::NONCE_ACTION, 'wp_nerve_diagnostics'); ?>
-                <input type="hidden" name="wp_nerve_diagnostics_action" value="reset_surface" />
-                <button type="submit" class="button button-secondary">
-                    <?php echo esc_html__('Reset secure defaults', 'wp-nerve'); ?>
-                </button>
-            </form>
+                    <section class="wpn-panel">
+                        <div class="wpn-panel__head">
+                            <div>
+                                <h2><?php echo esc_html__('Operational MCP smoke', 'wp-nerve'); ?></h2>
+                                <p><?php echo esc_html__('Runs the real WordPress REST route in-process and removes its temporary content afterwards.', 'wp-nerve'); ?></p>
+                            </div>
+                        </div>
+                        <div class="wpn-panel__body">
+                            <p class="wpn-section-note"><?php echo esc_html__('Covers discovery, tools/list, site status, an opt-in tool, draft create/update, destructive confirmation, trash and restore.', 'wp-nerve'); ?></p>
+                            <p><a class="button wpn-button wpn-button--primary" href="<?php echo esc_url($smokeUrl); ?>"><?php echo esc_html__('Run operational MCP smoke', 'wp-nerve'); ?></a></p>
+                            <?php $this->renderSmoke($smoke); ?>
+                        </div>
+                    </section>
 
-            <h2><?php echo esc_html__('Blocked abilities for this administrator', 'wp-nerve'); ?></h2>
-            <?php if (array() === $blocked) : ?>
-                <p><strong><?php echo esc_html__('None. The full registered catalog is discoverable.', 'wp-nerve'); ?></strong></p>
-            <?php else : ?>
-                <p class="description">
-                    <?php
-                    echo esc_html__(
-                        'Registered correctly but hidden by an ability flag, risk class, or WordPress capability.',
-                        'wp-nerve'
-                    );
-                    ?>
-                </p>
-                <pre style="max-width:900px;white-space:pre-wrap"><?php echo esc_html(implode("\n", $blocked)); ?></pre>
-            <?php endif; ?>
+                    <section class="wpn-panel">
+                        <div class="wpn-panel__head"><div><h2><?php echo esc_html__('Blocked abilities', 'wp-nerve'); ?></h2><p><?php echo esc_html__('Abilities registered correctly but hidden by policy or WordPress capabilities.', 'wp-nerve'); ?></p></div></div>
+                        <div class="wpn-panel__body">
+                            <?php if (array() === $blocked) : ?>
+                                <div class="wpn-empty"><strong><?php echo esc_html__('None. The full registered catalog is discoverable.', 'wp-nerve'); ?></strong></div>
+                            <?php else : ?>
+                                <pre class="wpn-code"><?php echo esc_html(implode("\n", $blocked)); ?></pre>
+                            <?php endif; ?>
+                        </div>
+                    </section>
+                </main>
+
+                <aside class="wpn-side">
+                    <section class="wpn-card">
+                        <span class="wpn-kicker"><?php echo esc_html__('Disposable staging only', 'wp-nerve'); ?></span>
+                        <h2><?php echo esc_html__('Operational test mode', 'wp-nerve'); ?></h2>
+                        <p><?php echo esc_html__('Expose the complete reviewed catalog for end-to-end testing. WordPress capabilities, idempotency and high-risk confirmation still apply.', 'wp-nerve'); ?></p>
+                        <div class="wpn-actions" style="margin-top:16px">
+                            <form method="post">
+                                <?php wp_nonce_field(self::NONCE_ACTION, 'wp_nerve_diagnostics'); ?>
+                                <input type="hidden" name="wp_nerve_diagnostics_action" value="enable_full_surface" />
+                                <button type="submit" class="button wpn-button wpn-button--primary"><?php echo esc_html__('Enable full 53-ability surface', 'wp-nerve'); ?></button>
+                            </form>
+                            <form method="post">
+                                <?php wp_nonce_field(self::NONCE_ACTION, 'wp_nerve_diagnostics'); ?>
+                                <input type="hidden" name="wp_nerve_diagnostics_action" value="reset_surface" />
+                                <button type="submit" class="button wpn-button"><?php echo esc_html__('Reset secure defaults', 'wp-nerve'); ?></button>
+                            </form>
+                        </div>
+                    </section>
+
+                    <section class="wpn-card">
+                        <span class="wpn-kicker"><?php echo esc_html__('Interpretation', 'wp-nerve'); ?></span>
+                        <h2><?php echo esc_html__('What a green screen means', 'wp-nerve'); ?></h2>
+                        <p><?php echo esc_html__('The catalog is registered, the MCP route exists, the database schema is current and the active administrator can discover the expected surface. Use HTTP Smoke for the external HTTPS path.', 'wp-nerve'); ?></p>
+                        <div class="wpn-card__links"><a href="<?php echo esc_url(admin_url('admin.php?page=wp-nerve-http-smoke')); ?>"><?php echo esc_html__('Run authenticated HTTP smoke →', 'wp-nerve'); ?></a><a href="<?php echo esc_url(admin_url('admin.php?page=wp-nerve-documentation')); ?>"><?php echo esc_html__('Open operator guide →', 'wp-nerve'); ?></a></div>
+                    </section>
+                </aside>
+            </div>
         </div>
         <?php
     }
@@ -250,111 +261,177 @@ final class DiagnosticsPage
         }
 
         $result = $this->runOperationalSmoke();
-        set_transient(self::SMOKE_TRANSIENT_PREFIX . get_current_user_id(), $result, 10 * MINUTE_IN_SECONDS);
+        set_transient(self::SMOKE_TRANSIENT_PREFIX . get_current_user_id(), $result, 15 * MINUTE_IN_SECONDS);
 
+        $passed = true === ($result['passed'] ?? false);
         $this->notice(
-            true === ($result['passed'] ?? false)
+            $passed
                 ? __('Operational MCP smoke passed.', 'wp-nerve')
                 : __('Operational MCP smoke found a failure. Review the step table below.', 'wp-nerve'),
-            true === ($result['passed'] ?? false) ? 'notice-success' : 'notice-error'
+            $passed ? 'notice-success' : 'notice-error'
         );
     }
 
     /** @return array<string, mixed> */
     private function runOperationalSmoke(): array
     {
-        $runId  = substr(hash('sha256', wp_generate_uuid4() . microtime(true)), 0, 16);
         $steps  = array();
         $postId = 0;
+        $runId  = substr(hash('sha256', wp_generate_uuid4()), 0, 16);
 
         try {
-            $abilities = $this->registeredAbilities();
-            $policy    = new PolicyEngine();
-            $available = array_values(
-                array_filter($abilities, static fn (WP_Ability $ability): bool => $policy->isDiscoverable($ability))
+            $this->step(
+                $steps,
+                'registry',
+                AbilityRegistrar::CATALOG_COUNT === count($this->registeredAbilities()),
+                count($this->registeredAbilities()) . ' registered abilities'
             );
 
-            $this->step($steps, 'registry', AbilityRegistrar::CATALOG_COUNT === count($abilities), count($abilities) . ' registered abilities');
-            $this->step($steps, 'policy', AbilityRegistrar::CATALOG_COUNT === count($available), count($available) . ' discoverable abilities');
+            $policy            = new PolicyEngine();
+            $discoverableCount = 0;
+            foreach ($this->registeredAbilities() as $ability) {
+                if ($policy->isDiscoverable($ability)) {
+                    ++$discoverableCount;
+                }
+            }
+            $this->step(
+                $steps,
+                'policy',
+                AbilityRegistrar::CATALOG_COUNT === $discoverableCount,
+                $discoverableCount . ' discoverable abilities'
+            );
 
             $discover = $this->dispatchModern('server/discover');
-            $this->step($steps, 'server/discover', $this->rpcSuccess($discover), $this->rpcDetail($discover));
+            $this->step(
+                $steps,
+                'server/discover',
+                $this->rpcSuccess($discover),
+                $this->rpcDetail($discover)
+            );
 
-            $list      = $this->dispatchModern('tools/list');
-            $listBody  = $this->rpcResult($list);
-            $toolCount = is_array($listBody['tools'] ?? null) ? count($listBody['tools']) : 0;
-            $this->step($steps, 'tools/list', $this->rpcSuccess($list) && AbilityRegistrar::CATALOG_COUNT === $toolCount, $toolCount . ' MCP tools returned');
+            $toolsList = $this->dispatchModern('tools/list');
+            $tools     = $this->rpcResult($toolsList)['tools'] ?? null;
+            $toolCount = is_array($tools) ? count($tools) : 0;
+            $this->step(
+                $steps,
+                'tools/list',
+                $this->rpcSuccess($toolsList) && AbilityRegistrar::CATALOG_COUNT === $toolCount,
+                $toolCount . ' MCP tools returned'
+            );
 
-            $status = $this->dispatchModern('tools/call', array('name' => 'wp_nerve_site_status', 'arguments' => array()), 'wp_nerve_site_status');
-            $this->step($steps, 'site-status', $this->toolSuccess($status), $this->rpcDetail($status));
+            $status = $this->dispatchModern(
+                'tools/call',
+                array('name' => 'wp_nerve_site_status', 'arguments' => array()),
+                'wp_nerve_site_status'
+            );
+            $this->step(
+                $steps,
+                'site-status',
+                $this->toolSuccess($status),
+                $this->rpcDetail($status)
+            );
 
-            $plugins = $this->dispatchModern('tools/call', array('name' => 'wp_nerve_list_plugins', 'arguments' => array()), 'wp_nerve_list_plugins');
-            $this->step($steps, 'opt-in list-plugins', $this->toolSuccess($plugins), $this->rpcDetail($plugins));
+            $plugins = $this->dispatchModern(
+                'tools/call',
+                array('name' => 'wp_nerve_list_plugins', 'arguments' => array()),
+                'wp_nerve_list_plugins'
+            );
+            $this->step(
+                $steps,
+                'opt-in list-plugins',
+                $this->toolSuccess($plugins),
+                $this->rpcDetail($plugins)
+            );
 
-            $create = $this->dispatchModern(
+            $createKey = 'diag-create-' . $runId;
+            $created   = $this->dispatchModern(
                 'tools/call',
                 array(
                     'name'      => 'wp_nerve_create_draft',
                     'arguments' => array(
-                        'title'   => 'WPNerve diagnostic ' . $runId,
-                        'content' => 'Temporary WPNerve operational smoke content.',
+                        'title'   => 'WPNerve operational smoke ' . $runId,
+                        'content' => 'Temporary WPNerve MCP diagnostic content.',
                     ),
                 ),
                 'wp_nerve_create_draft',
-                'diag-create-' . $runId
+                $createKey
             );
-            $created = $this->toolStructuredContent($create);
-            $postId  = (int) ($created['id'] ?? 0);
-            $this->step($steps, 'create-draft', $this->toolSuccess($create) && $postId > 0, $postId > 0 ? 'created post ' . $postId : $this->rpcDetail($create));
+            $createdContent = $this->toolStructuredContent($created);
+            $postId         = is_int($createdContent['id'] ?? null) ? $createdContent['id'] : 0;
+            $this->step(
+                $steps,
+                'create-draft',
+                $this->toolSuccess($created) && $postId > 0,
+                $postId > 0 ? 'created post ' . $postId : $this->rpcDetail($created)
+            );
 
             if ($postId <= 0) {
-                throw new \RuntimeException('Draft creation did not return a post ID.');
+                throw new \RuntimeException('Draft creation did not return a WordPress post ID.');
             }
 
-            $update = $this->dispatchModern(
+            $updated = $this->dispatchModern(
                 'tools/call',
                 array(
                     'name'      => 'wp_nerve_update_content',
                     'arguments' => array(
                         'id'      => $postId,
-                        'excerpt' => 'WPNerve operational smoke updated.',
+                        'excerpt' => 'WPNerve smoke updated through MCP.',
                     ),
                 ),
                 'wp_nerve_update_content',
                 'diag-update-' . $runId
             );
-            $this->step($steps, 'update-content', $this->toolSuccess($update), $this->rpcDetail($update));
+            $this->step(
+                $steps,
+                'update-content',
+                $this->toolSuccess($updated),
+                $this->rpcDetail($updated)
+            );
 
             $trashKey = 'diag-trash-' . $runId;
-            $pending  = $this->dispatchModern(
+            $trash    = $this->dispatchModern(
                 'tools/call',
                 array('name' => 'wp_nerve_trash_content', 'arguments' => array('id' => $postId)),
                 'wp_nerve_trash_content',
                 $trashKey
             );
-            $confirmation = $this->confirmationMetadata($pending);
+            $confirmation = $this->confirmationMetadata($trash);
             $token        = is_string($confirmation['token'] ?? null) ? $confirmation['token'] : '';
             $displayCode  = is_string($confirmation['displayCode'] ?? null) ? $confirmation['displayCode'] : '';
-            $this->step($steps, 'destructive confirmation issued', '' !== $token && '' !== $displayCode, '' !== $displayCode ? 'challenge ' . $displayCode : $this->rpcDetail($pending));
+            $this->step(
+                $steps,
+                'destructive confirmation issued',
+                '' !== $token && '' !== $displayCode,
+                '' !== $displayCode ? 'challenge ' . $displayCode : $this->rpcDetail($trash)
+            );
 
             if ('' === $token || '' === $displayCode) {
-                throw new \RuntimeException('Destructive confirmation metadata was not returned.');
+                throw new \RuntimeException('Destructive call did not return a confirmation challenge.');
             }
 
-            $repository  = new ConfirmationRepository();
-            $challengeId = 0;
-            foreach ($repository->pending() as $challenge) {
-                if ($displayCode === ($challenge['display_code'] ?? null)) {
+            $confirmationRepository = new ConfirmationRepository();
+            $challengeId             = 0;
+            foreach ($confirmationRepository->pending() as $challenge) {
+                if (
+                    ($challenge['display_code'] ?? '') === $displayCode
+                    && ($challenge['tool_name'] ?? '') === 'wp_nerve_trash_content'
+                ) {
                     $challengeId = (int) ($challenge['id'] ?? 0);
                     break;
                 }
             }
 
-            $approved = $challengeId > 0 && $repository->decide($challengeId, get_current_user_id(), true);
-            $this->step($steps, 'admin confirmation approval', $approved, $approved ? 'approved challenge ' . $displayCode : 'approval failed');
+            $approved = $challengeId > 0
+                && $confirmationRepository->decide($challengeId, get_current_user_id(), true);
+            $this->step(
+                $steps,
+                'admin confirmation approval',
+                $approved,
+                $approved ? 'approved challenge ' . $displayCode : 'challenge approval failed'
+            );
 
             if (! $approved) {
-                throw new \RuntimeException('Destructive confirmation could not be approved.');
+                throw new \RuntimeException('The destructive confirmation could not be approved.');
             }
 
             $trashed = $this->dispatchModern(
@@ -364,7 +441,12 @@ final class DiagnosticsPage
                 $trashKey,
                 $token
             );
-            $this->step($steps, 'trash-content after approval', $this->toolSuccess($trashed) && 'trash' === get_post_status($postId), $this->rpcDetail($trashed));
+            $this->step(
+                $steps,
+                'trash-content after approval',
+                $this->toolSuccess($trashed) && 'trash' === get_post_status($postId),
+                $this->rpcDetail($trashed)
+            );
 
             $restored = $this->dispatchModern(
                 'tools/call',
@@ -372,8 +454,13 @@ final class DiagnosticsPage
                 'wp_nerve_restore_content',
                 'diag-restore-' . $runId
             );
-            $this->step($steps, 'restore-content', $this->toolSuccess($restored) && 'trash' !== get_post_status($postId), $this->rpcDetail($restored));
-        } catch (Throwable $throwable) {
+            $this->step(
+                $steps,
+                'restore-content',
+                $this->toolSuccess($restored) && 'trash' !== get_post_status($postId),
+                $this->rpcDetail($restored)
+            );
+        } catch (\Throwable $throwable) {
             $this->step($steps, 'smoke-runner', false, $throwable->getMessage());
         } finally {
             if ($postId > 0) {
@@ -420,6 +507,7 @@ final class DiagnosticsPage
         if ('' !== $idempotencyKey) {
             $meta['wp-nerve/idempotencyKey'] = $idempotencyKey;
         }
+
         if ('' !== $confirmationToken) {
             $meta['wp-nerve/confirmationToken'] = $confirmationToken;
         }
@@ -449,9 +537,8 @@ final class DiagnosticsPage
         $response = rest_do_request($request);
 
         if ($response instanceof WP_Error) {
-            $data = $response->get_error_data();
             return array(
-                'http' => is_array($data) ? (int) ($data['status'] ?? 500) : 500,
+                'http' => (int) ($response->get_error_data()['status'] ?? 500),
                 'body' => array('error' => $response->get_error_message()),
             );
         }
@@ -526,6 +613,7 @@ final class DiagnosticsPage
         if (! is_array($body)) {
             return 'HTTP ' . $response['http'] . ' returned a non-object body';
         }
+
         if (isset($body['error']) && is_array($body['error'])) {
             return 'HTTP ' . $response['http'] . ': ' . (string) ($body['error']['message'] ?? 'protocol error');
         }
@@ -558,29 +646,23 @@ final class DiagnosticsPage
             return;
         }
         ?>
-        <p>
-            <strong><?php echo esc_html(true === ($smoke['passed'] ?? false) ? 'PASS' : 'FAIL'); ?></strong>
-            — <?php echo esc_html((string) ($smoke['time'] ?? '')); ?>
-            — <code><?php echo esc_html((string) ($smoke['run_id'] ?? '')); ?></code>
-        </p>
-        <table class="widefat striped" style="max-width:1000px">
-            <thead>
-                <tr>
-                    <th><?php echo esc_html__('Step', 'wp-nerve'); ?></th>
-                    <th><?php echo esc_html__('Result', 'wp-nerve'); ?></th>
-                    <th><?php echo esc_html__('Detail', 'wp-nerve'); ?></th>
-                </tr>
-            </thead>
+        <div class="wpn-run-meta">
+            <span class="wpn-status <?php echo esc_attr(true === ($smoke['passed'] ?? false) ? 'wpn-status--ok' : 'wpn-status--bad'); ?>"><span class="wpn-status__dot"></span><?php echo esc_html(true === ($smoke['passed'] ?? false) ? 'PASS' : 'FAIL'); ?></span>
+            <span class="wpn-section-note"><?php echo esc_html((string) ($smoke['time'] ?? '')); ?></span>
+            <code><?php echo esc_html((string) ($smoke['run_id'] ?? '')); ?></code>
+        </div>
+        <div class="wpn-table-wrap"><table class="wpn-table">
+            <thead><tr><th><?php echo esc_html__('Step', 'wp-nerve'); ?></th><th><?php echo esc_html__('Result', 'wp-nerve'); ?></th><th><?php echo esc_html__('Detail', 'wp-nerve'); ?></th></tr></thead>
             <tbody>
                 <?php foreach ($steps as $step) : ?>
                     <tr>
                         <td><code><?php echo esc_html((string) ($step['name'] ?? '')); ?></code></td>
-                        <td><strong><?php echo esc_html(true === ($step['passed'] ?? false) ? 'PASS' : 'FAIL'); ?></strong></td>
+                        <td><span class="wpn-status <?php echo esc_attr(true === ($step['passed'] ?? false) ? 'wpn-status--ok' : 'wpn-status--bad'); ?>"><span class="wpn-status__dot"></span><?php echo esc_html(true === ($step['passed'] ?? false) ? 'PASS' : 'FAIL'); ?></span></td>
                         <td><?php echo esc_html((string) ($step['detail'] ?? '')); ?></td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>
-        </table>
+        </table></div>
         <?php
     }
 
