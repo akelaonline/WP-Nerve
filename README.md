@@ -4,7 +4,7 @@
 
 [![WordPress](https://img.shields.io/badge/WordPress-6.9%2B-21759b)](https://wordpress.org/)
 [![PHP](https://img.shields.io/badge/PHP-8.1%2B-777bb3)](https://www.php.net/)
-[![Version](https://img.shields.io/badge/version-0.1.0--alpha.14-4f46e5)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.1.0--alpha.15-4f46e5)](CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-GPL--2.0-orange)](LICENSE)
 
 WPNerve is a self-hosted WordPress plugin that exposes a curated set of native **WordPress Abilities** as **Model Context Protocol (MCP)** tools. It runs inside the WordPress installation: no relay, no SaaS control plane, no Firebase, and no external credential store.
@@ -29,14 +29,14 @@ WPNerve is a self-hosted WordPress plugin that exposes a curated set of native *
 
 ## Professional WordPress admin
 
-Alpha.14 introduces a complete product-grade admin shell:
+Alpha.15 completes the product-grade admin shell:
 
 - **WPNerve → Dashboard** — connection status, credentials, confirmations, risk classes and client setup.
 - **WPNerve → Diagnostics** — live 53/53 registry and policy checks plus operational MCP smoke.
 - **WPNerve → HTTP Smoke** — authenticated public HTTPS MCP validation with a temporary credential that is revoked automatically.
 - **WPNerve → Documentation** — in-product operator guide, security model, risk classes and client setup.
 
-The interface follows the same restrained Akela product language used across the WordPress portfolio: clear hierarchy, compact cards, operational status at a glance, and native WordPress behavior underneath.
+The interface follows the same restrained Akela product language used across the commercial WordPress portfolio: clear hierarchy, compact cards, operational status at a glance, and native WordPress behavior underneath.
 
 ## Quick start
 
@@ -133,14 +133,14 @@ New abilities must be:
 
 ## Current release candidate
 
-- Release notes: [`docs/releases/0.1.0-alpha.14.md`](docs/releases/0.1.0-alpha.14.md)
-- SHA-256: [`docs/releases/0.1.0-alpha.14.sha256`](docs/releases/0.1.0-alpha.14.sha256)
-- Package: `wp-nerve-0.1.0-alpha.14.zip`
+- Release notes: [`docs/releases/0.1.0-alpha.15.md`](docs/releases/0.1.0-alpha.15.md)
+- SHA-256: [`docs/releases/0.1.0-alpha.15.sha256`](docs/releases/0.1.0-alpha.15.sha256)
+- Package: `wp-nerve-0.1.0-alpha.15.zip`
 
 ## Documentation
 
-- [`SECURITY.md`](SECURITY.md) — security policy and architecture notes
-- [`docs/security/`](docs/security/) — threat model, OAuth and privileged-surface documentation
+- `SECURITY.md` — security policy and architecture notes
+- `docs/security/` — threat model, OAuth and privileged-surface documentation
 - [`docs/roadmap/beta-readiness.md`](docs/roadmap/beta-readiness.md) — evidence gates and beta-readiness roadmap
 - **WPNerve → Documentation** — operator guide installed with the plugin
 
